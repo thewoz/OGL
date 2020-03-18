@@ -13,6 +13,5 @@ OGL is minimal OpenGL library based on header files written in C++
 * OpenGL
 
 ## TODO
-* Fare cleanInGpu() per glModel.hpp
 * Sistemare glPrint 
 

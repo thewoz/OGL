@@ -171,7 +171,9 @@ namespace ogl {
         
         glDeleteBuffers(1, &vbo);
         glDeleteVertexArrays(1, &vao);
-                
+              
+        isInitedInGpu = false;
+
       }
       
     }

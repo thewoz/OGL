@@ -72,7 +72,7 @@ namespace ogl {
     GLuint id;
     
     /* Render data */
-    GLuint VAO, VBO, EBO;
+    GLuint vao, vbo, ebo;
     
     /* Mesh Data */
     std::vector<glVertex> vertices;
@@ -89,9 +89,9 @@ namespace ogl {
     /* mesh name */
     std::string name;
 
-    /*****************************************************************************/
+    /* ****************************************************************************/
     // glMesh - Constructor
-    /*****************************************************************************/
+    /* ****************************************************************************/
     glMesh(const aiMesh * mesh, const aiScene * scene, const std::string & path) : isInitedInGpu(false) {
       
       name = mesh->mName.C_Str();
@@ -160,9 +160,16 @@ namespace ogl {
       
     }
     
-    /*****************************************************************************/
+     
+    /* ****************************************************************************/
+    // ~glMesh -
+    /* ****************************************************************************/
+    ~glMesh() { cleanInGpu(); }
+    
+    
+    /* ****************************************************************************/
     // render
-    /*****************************************************************************/
+    /* ****************************************************************************/
     void render(const glShader & shader, bool withMaterials = true) {
             
       //fprintf(stderr, "DEBUG DRAW MESH (%d) VAO: %d %s\n", id, VAO, (withMaterials) ? "with materials" : "without materials");
@@ -172,14 +179,14 @@ namespace ogl {
         abort();
       }
       
-      if(!isInitedInGpu) initInGpu();
+      if(!isInitedInGpu) setInGpu();
       
       if(withMaterials) {
         material.setInShader(shader);
         material.bindTextures(shader);
       }
             
-      glBindVertexArray(VAO);
+      glBindVertexArray(vao);
       
       glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, 0);
       
@@ -249,9 +256,9 @@ namespace ogl {
     void setInShader(const ogl::glShader & program) const { material.setInShader(program); }
     
     /*****************************************************************************/
-    // initInGpu - Initializes all the buffer objects/arrays
+    // setInGpu - Initializes all the buffer objects/arrays
     /*****************************************************************************/
-    void initInGpu() {
+    void setInGpu() {
       
       if(!isInited){
         fprintf(stderr, "model must be inited before set in gpu\n");
@@ -259,24 +266,24 @@ namespace ogl {
       }
       
       // Create buffers/arrays
-      glGenVertexArrays(1, &VAO);
+      glGenVertexArrays(1, &vao);
       
-      glGenBuffers(1, &VBO);
-      glGenBuffers(1, &EBO);
+      glGenBuffers(1, &vbo);
+      glGenBuffers(1, &ebo);
       
       //fprintf(stderr, "DEBUG MESH (%d) VAO: %d VBO: %d EBO: %d\n", id, VAO, VBO, EBO);
       
-      glBindVertexArray(VAO);
+      glBindVertexArray(vao);
       
       // Load data into vertex buffers
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
       
       // A great thing about structs is that their memory layout is sequential for all its items.
       // The effect is that we can siogly pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
       // again translates to 3/2 floats which translates to a byte array.
       glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(ogl::glVertex), &vertices[0], GL_STATIC_DRAW);
       
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
       
       std::size_t offset = 0;
@@ -320,10 +327,30 @@ namespace ogl {
 
     }
     
-    /*****************************************************************************/
+    /* ****************************************************************************/
     // getVertices
-    /*****************************************************************************/
+    /* ****************************************************************************/
     const std::vector<glVertex> & getVertices() { return vertices; }
+    
+    /* ****************************************************************************/
+    // cleanInGpu() -
+    /* ****************************************************************************/
+    void cleanInGpu() {
+      
+      if(isInitedInGpu) {
+        
+        glDeleteBuffers(1, &vbo);
+        glDeleteBuffers(1, &ebo);
+
+        glDeleteVertexArrays(1, &vao);
+
+        material.cleanInGpu();
+        
+        isInitedInGpu = false;
+
+      }
+      
+    }
     
   };
   

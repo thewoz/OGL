@@ -180,46 +180,76 @@ int main(int argc, char * const argv []) {
   
 #if(0)
   
-    ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0));
+  ogl::glAxes axes;
+  ogl::glModel model("/usr/local/include/ogl/model/Trex/Trex.fbx");
+
+  ogl::glWindow window;
+    
+  window.create(800, 600, "ModelView");
   
-    ogl::glWindow window;
-    
-    window.create(800, 600, "ModelView");
-    
-    window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-    
-    window.makeContextCurrent();
-
-    while(!window.shouldClose()) {
-      
-      window.renderBegin();
-      
-      grid.render(window.getProjection(), window.getView());
-
-      window.renderEnd();
-      
-    }
+  window.makeContextCurrent();
   
-    window.destroy();
+  window.addCamera(45.0, 0.1, 10.0, glm::vec3(1.1, 1.3, 1.4), ogl::glCamera::MODE::TARGET, glm::vec3(0.01, 0.01, 0.01));
+  
+  window.changeCamera();
+  
+  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
+  
+  uint32_t frame = 0;
+  
+  while(!window.shouldClose()) {
+    
+    window.renderBegin();
+    
+    axes.render(window.getProjection(), window.getView());
+    
+    model.rotate(glm::vec3(glm::sin(glm::radians((float)frame)),
+                           glm::sin(glm::radians((float)frame)),
+                           glm::cos(glm::radians((float)frame))));
+    
+    model.render(window.getProjection(), window.getView());
+    
+    window.renderEnd();
+    
+    ++frame;
+    
+  }
+  
+  window.destroy();
 
-    ogl::glWindow window1;
+  ogl::glWindow window1;
+  
+  window1.create(800, 600, "ModelView");
+  
+  window1.makeContextCurrent();
+  
+  window1.addCamera(45.0, 0.1, 10.0, glm::vec3(1.1, 1.3, 1.4), ogl::glCamera::MODE::TARGET, glm::vec3(0.01, 0.01, 0.01));
+  
+  window1.changeCamera();
+  
+  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
+  
+  frame = 0;
+  
+  while(!window1.shouldClose()) {
     
-    window1.create(800, 600, "ModelView");
+    window1.renderBegin();
     
-    window1.setCursorInputMode(GLFW_CURSOR_DISABLED);
+    axes.render(window1.getProjection(), window1.getView());
     
-    window1.makeContextCurrent();
+    model.rotate(glm::vec3(glm::sin(glm::radians((float)frame)),
+                           glm::sin(glm::radians((float)frame)),
+                           glm::cos(glm::radians((float)frame))));
     
-    while(!window1.shouldClose()) {
-      
-      window1.renderBegin();
-      
-      grid.render(window1.getProjection(), window1.getView());
-      
-      window1.renderEnd();
-      
-    }
+    model.render(window1.getProjection(), window1.getView());
     
+    window1.renderEnd();
+    
+    ++frame;
+    
+  }
+  
+  window1.destroy();
   
 #endif
 

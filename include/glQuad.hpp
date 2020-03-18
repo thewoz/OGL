@@ -122,6 +122,8 @@ namespace ogl {
       if(vbo != -1) glDeleteBuffers(1, &vbo);
       if(vao != -1) glDeleteVertexArrays(1, &vao);
       
+      //isInitedInGpu = false;
+
     }
     
   };

@@ -53,17 +53,41 @@ namespace ogl {
     
   protected:
     
+    /* texture name */
+    std::string name;
+    
+    /* texture init flags */
+    bool isInited;
+    bool isInitedInGpu;
+    
     /* texture id */
     GLuint id;
     
     /*****************************************************************************/
     // glTexture - Empty constructor
     /*****************************************************************************/
-    glTexture(){}
+    glTexture() : isInited(false), isInitedInGpu(false) { }
     
   public:
     
     inline GLuint getId() const { return id; }
+    
+    /* ****************************************************************************/
+    // cleanInGpu() -
+    /* ****************************************************************************/
+    void cleanInGpu() {
+      
+      if(isInitedInGpu) {
+        
+        DEBUG_LOG("glTexture::cleanInGpu(" + name + ")");
+
+        glDeleteTextures(1, &id);
+        
+        isInitedInGpu = false;
+        
+      }
+      
+    }
     
   protected:
     
@@ -89,18 +113,11 @@ namespace ogl {
     
   private:
     
-    /* texture init flags */
-    bool isInitialized;
-    bool isInitializedInGpu;
-    
     /* texture type */
     std::string type;
     
     /* texture path */
     std::string path;
-    
-    /* texture name */
-    std::string name;
     
     /* texture size */
     int width, height;
@@ -113,14 +130,19 @@ namespace ogl {
     /*****************************************************************************/
     // glTexture2D
     /*****************************************************************************/
-    glTexture2D() : isInitialized(false), isInitializedInGpu(false) { }
+    glTexture2D() { }
     
     /*****************************************************************************/
     // glTexture2D
     /*****************************************************************************/
-    glTexture2D(const std::string & _type, const std::string & filename, const std::string & directory) : isInitializedInGpu(false) {
+    glTexture2D(const std::string & _type, const std::string & filename, const std::string & directory) {
       init(_type, filename, directory);
     }
+    
+    /*****************************************************************************/
+    // ~glTexture2D
+    /*****************************************************************************/
+    ~glTexture2D() { cleanInGpu(); }
     
     /*****************************************************************************/
     // init
@@ -148,7 +170,7 @@ namespace ogl {
       
       //fprintf(stderr, "DEBUG TEXTURE create %s texture '%s' id %d\n", type.c_str(), name.c_str(), id);
       
-      isInitialized = true;
+      isInited = true;
       
     }
     
@@ -157,7 +179,7 @@ namespace ogl {
     /*****************************************************************************/
     void initInGpu() {
       
-      if(!isInitialized){
+      if(!isInited){
          fprintf(stderr, "Error glTexture: the texture must be initialized before being set into the GPU\n");
          abort();
        }
@@ -185,7 +207,7 @@ namespace ogl {
       
       glBindTexture(GL_TEXTURE_2D, 0);
      
-      isInitializedInGpu = true;
+      isInitedInGpu = true;
       
     }
     
@@ -194,7 +216,7 @@ namespace ogl {
     /*****************************************************************************/
     inline void activate(GLenum unit) const {
       
-      if(!isInitializedInGpu) {
+      if(!isInitedInGpu) {
         fprintf(stderr, "Error glTexture: the texture must be initialized in the GPU before being used\n");
         abort();
       }
@@ -222,20 +244,23 @@ namespace ogl {
     
     GLuint width;
     GLuint height;
-    
-    bool isInitialized;
-    
+        
   public:
     
     /*****************************************************************************/
     // glTextureDepthMap
     /*****************************************************************************/
-    glTextureDepthMap() : isInitialized(false) { }
+    glTextureDepthMap() { }
     
     /*****************************************************************************/
     // TextureDepthMap
     /*****************************************************************************/
     glTextureDepthMap(GLuint _width, GLuint _height) { init(_width, _height); }
+    
+    /*****************************************************************************/
+    // ~glTextureDepthMap
+    /*****************************************************************************/
+    ~glTextureDepthMap() { cleanInGpu(); }
     
     /*****************************************************************************/
     // init
@@ -285,7 +310,7 @@ namespace ogl {
 //
 //      glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
       
-      isInitialized = true;
+      isInited = true;
       
     }
     
@@ -294,7 +319,7 @@ namespace ogl {
     /*****************************************************************************/
     inline void activate(GLenum unit) const {
       
-      if(!isInitialized) {
+      if(!isInited) {
         fprintf(stderr, "error: the TextureDepthMap must initialize before use it\n");
         abort();
       }
@@ -304,7 +329,6 @@ namespace ogl {
       //fprintf(stderr, "DEBUG TEXTURE activate GL_TEXTURE_2D id %d on unit %d\n", id, unit);
       
     }
-    
     
   };
 
@@ -320,15 +344,13 @@ namespace ogl {
     
     GLuint width;
     GLuint height;
-    
-    bool isInitialized;
-    
+        
   public:
     
     /*****************************************************************************/
     // glTextureCubeMap
     /*****************************************************************************/
-    glTextureCubeMap() : isInitialized(false) { }
+    glTextureCubeMap() { }
     
     /*****************************************************************************/
     // glTextureCubeMap
@@ -336,10 +358,14 @@ namespace ogl {
     glTextureCubeMap(GLuint _width, GLuint _height) { init(_width, _height); }
     
     /*****************************************************************************/
+    // ~glTextureCubeMap
+    /*****************************************************************************/
+    ~glTextureCubeMap() { cleanInGpu(); }
+    
+    /*****************************************************************************/
     // init
     /*****************************************************************************/
     void init(GLuint _width, GLuint _height) {
-      
       
       width  = _width;
       height = _height;
@@ -359,7 +385,7 @@ namespace ogl {
       
       //fprintf(stderr, "DEBUG TEXTURE create GL_TEXTURE_CUBE_MAP texture id %d\n", id);
       
-      isInitialized = true;
+      isInited = true;
       
     }
     
@@ -368,7 +394,7 @@ namespace ogl {
     /*****************************************************************************/
     inline void activate(GLenum unit) const {
       
-      if(!isInitialized) {
+      if(!isInited) {
         fprintf(stderr, "error: the TextureCubeMap must initialize before use it\n");
         abort();
       }
