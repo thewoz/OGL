@@ -153,14 +153,14 @@ namespace ogl {
       
       glfwMakeContextCurrent(window);
       
-      glfwGetFramebufferSize(window, &width, &height);
-      
 #ifdef GLFW_WITH_GLAD
       if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
 #endif
+      
+      glfwGetFramebufferSize(window, &width, &height);
       
 #ifdef GLFW_WITH_GLEW
       // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
@@ -289,7 +289,14 @@ namespace ogl {
     // destroy() -
     /*****************************************************************************/
     void destroy() {
-      if(window != NULL) { glfwDestroyWindow(window); window = NULL; }
+      
+      DEBUG_LOG("glWindow::destroy() windowID " + std::to_string(id));
+      
+      if(window != NULL) {
+        glfwDestroyWindow(window);
+        window = NULL;
+      }
+      
     }
     
     //****************************************************************************//
@@ -500,8 +507,7 @@ namespace ogl {
     inline void  makeContextCurrent() {
       
        glfwMakeContextCurrent(window);
-      
-       gladLoadGLLoader((GLADloadproc) glfwGetProcAddress);
+       gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); //NOTE: non sono sicuro che serva
 
     }
     
@@ -535,7 +541,7 @@ namespace ogl {
     /*****************************************************************************/
     inline void renderEnd() {
       
-      if(id==0 && !inputDisable) glfwPollEvents();
+      glfwPollEvents();
 
       glfwSwapBuffers(window);
       
