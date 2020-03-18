@@ -64,6 +64,8 @@ namespace glfw {
     
     if(!inited) {
       
+      DEBUG_LOG("glfw::init(true)");
+
       // Set GLFW error callback
       glfwSetErrorCallback(glfwErrorCallback);
       
@@ -101,7 +103,7 @@ namespace glfw {
       
       inited = true;
       
-    }
+    } else { DEBUG_LOG("glfw::init(false)"); }
     
   }
   
@@ -110,6 +112,8 @@ namespace glfw {
 /*****************************************************************************/
   void close() {
     
+    DEBUG_LOG("glfw::close()");
+
     inited = false;
       
     glfwTerminate();

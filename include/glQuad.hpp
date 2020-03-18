@@ -64,12 +64,7 @@ namespace ogl {
     /*****************************************************************************/
     glQuad() : isInited(false) {  }
     
-    ~glQuad() {
-        
-        if(vbo != -1) glDeleteBuffers(1, &vbo);
-        if(vao != -1) glDeleteVertexArrays(1, &vao);
-        
-      }
+    ~glQuad() { cleanInGpu(); }
       
     
     /*****************************************************************************/
@@ -114,6 +109,18 @@ namespace ogl {
       glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
       
       glBindVertexArray(0);
+      
+    }
+    
+  private:
+    
+    /* ****************************************************************************/
+    // cleanInGpu() -
+    /* ****************************************************************************/
+    void cleanInGpu() {
+      
+      if(vbo != -1) glDeleteBuffers(1, &vbo);
+      if(vao != -1) glDeleteVertexArrays(1, &vao);
       
     }
     

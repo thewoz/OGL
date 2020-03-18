@@ -61,16 +61,7 @@ namespace ogl {
     /*****************************************************************************/
     // ~glCube
     /*****************************************************************************/
-    ~glCube() {
-      
-      if(isInitedInGpu) {
-
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-        
-      }
-      
-    }
+    ~glCube() { cleanInGpu(); }
     
     /*****************************************************************************/
     // init
@@ -184,6 +175,22 @@ namespace ogl {
       
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
+      
+    }
+    
+  private:
+    
+    /* ****************************************************************************/
+    // cleanInGpu() -
+    /* ****************************************************************************/
+    void cleanInGpu() {
+      
+      if(isInitedInGpu) {
+        
+        glDeleteBuffers(1, &vbo);
+        glDeleteVertexArrays(1, &vao);
+        
+      }
       
     }
     

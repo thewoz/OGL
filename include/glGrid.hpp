@@ -61,17 +61,7 @@ namespace ogl {
     /*****************************************************************************/
     // ~glGrid
     /*****************************************************************************/
-    ~glGrid() {
-      
-      if(isInitedInGpu) {
-
-        glDeleteBuffers(1, &vbo);
-        glDeleteBuffers(1, &ibo);
-        glDeleteVertexArrays(1, &vao);
-        
-      }
-      
-    }
+    ~glGrid() { cleanInGpu(); }
  
     /*****************************************************************************/
     // init
@@ -160,6 +150,23 @@ namespace ogl {
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       
       lenght = (GLuint)indices.size()*4;
+      
+    }
+    
+  private:
+    
+    /* ****************************************************************************/
+    // cleanInGpu() -
+    /* ****************************************************************************/
+    void cleanInGpu() {
+      
+      if(isInitedInGpu) {
+        
+        glDeleteBuffers(1, &vbo);
+        glDeleteBuffers(1, &ibo);
+        glDeleteVertexArrays(1, &vao);
+        
+      }
       
     }
     

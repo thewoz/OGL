@@ -63,16 +63,7 @@ namespace ogl {
     /*****************************************************************************/
     // ~glLine() -
     /*****************************************************************************/
-    ~glLine() {
-      
-      if(isInitedInGpu) {
-
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-
-      }
-        
-    }
+    ~glLine() { cleanInGpu(); }
 
     /*****************************************************************************/
     // init() -
@@ -117,6 +108,8 @@ namespace ogl {
     /*****************************************************************************/
     void setInGpu()  {
       
+      DEBUG_LOG("glLine::setInGpu(" + name + ")");
+
       if(isToUpdateInGpu && vao != -1) {
 
         DEBUG_LOG("glLine::updateInGpu(" + name + ")");
@@ -125,7 +118,7 @@ namespace ogl {
         glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), glm::value_ptr(vertices[0]));
                 
         glBindBuffer(GL_ARRAY_BUFFER,0);
-                
+        
         isToUpdateInGpu = false;
         
       } else {
@@ -162,6 +155,24 @@ namespace ogl {
       
       isToUpdateInGpu = true;
       isInitedInGpu   = false;
+      
+    }
+    
+  private:
+    
+    /* ****************************************************************************/
+    // cleanInGpu() -
+    /* ****************************************************************************/
+    void cleanInGpu() {
+      
+      DEBUG_LOG("glLine::cleanInGpu(" + name + ")");
+
+      if(isInitedInGpu) {
+        
+        glDeleteBuffers(1, &vbo);
+        glDeleteVertexArrays(1, &vao);
+                
+      }
       
     }
     

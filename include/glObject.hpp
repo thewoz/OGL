@@ -264,6 +264,11 @@ namespace ogl {
     virtual void setInGpu() = 0;
     
     /* ****************************************************************************/
+    // cleanInGpu
+    /* ****************************************************************************/
+    virtual void cleanInGpu() = 0;
+    
+    /* ****************************************************************************/
     // _setInGpu
     /* ****************************************************************************/
     void _setInGpu() {
@@ -279,7 +284,12 @@ namespace ogl {
       
       DEBUG_LOG("glObject::isToInitInGpu(" + name + ")");
       
-      if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) { return true; }
+      if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) {
+        cleanInGpu();
+        isInitedInGpu   = false;
+        isToUpdateInGpu = false;
+        return true;
+      }
       
       return false;
       

@@ -180,12 +180,8 @@ namespace ogl {
 
       if(isToInitInGpu()) initInGpu();
                  
-      glCheckError();
-
       glUseProgram(program);
-      
-      glCheckError();
-      
+            
     }
     
     /*****************************************************************************/
@@ -250,9 +246,7 @@ namespace ogl {
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
         abort();
       }
-      
-      glCheckError();
-      
+            
       // Fragment Shader
       fragment = glCreateShader(GL_FRAGMENT_SHADER);
       glShaderSource(fragment, 1, &fShaderCode, NULL);
@@ -266,63 +260,53 @@ namespace ogl {
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
         abort();
       }
-      
-      glCheckError();
-      
-       // if geometry shader is given, compile geometry shader
-       GLuint geometry = 0;
-       if(!geometryCode.empty()) {
+            
+      // if geometry shader is given, compile geometry shader
+      GLuint geometry = 0;
+      if(!geometryCode.empty()) {
 
-         const GLchar * gShaderCode = geometryCode.c_str();
+        const GLchar * gShaderCode = geometryCode.c_str();
 
-         geometry = glCreateShader(GL_GEOMETRY_SHADER);
-         glShaderSource(geometry, 1, &gShaderCode, NULL);
-         glCompileShader(geometry);
-         glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
+        geometry = glCreateShader(GL_GEOMETRY_SHADER);
+        glShaderSource(geometry, 1, &gShaderCode, NULL);
+        glCompileShader(geometry);
+        glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
          
-         if(!success) {
-           glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-           std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
-           abort();
-         }
-         
-         glCheckError();
-         
-       }
+        if(!success) {
+          glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+          std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+          abort();
+        }
+                  
+      }
        
-       // Shader Program
-       program = glCreateProgram();
+      // Shader Program
+      program = glCreateProgram();
+             
+      glAttachShader(program, vertex);
+      glAttachShader(program, fragment);
        
-       glCheckError();
-      
-       glAttachShader(program, vertex);
-       glAttachShader(program, fragment);
+      if(!geometryCode.empty()) glAttachShader(program, geometry);
        
-       if(!geometryCode.empty()) glAttachShader(program, geometry);
+      glLinkProgram(program);
+             
+      // Print linking errors if any
+      glGetProgramiv(program, GL_LINK_STATUS, &success);
        
-       glLinkProgram(program);
+      if(!success) {
+        glGetProgramInfoLog(program, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        abort();
+      }
        
-       glCheckError();
-      
-       // Print linking errors if any
-       glGetProgramiv(program, GL_LINK_STATUS, &success);
-       
-       if(!success) {
-         glGetProgramInfoLog(program, 512, NULL, infoLog);
-         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-         abort();
-       }
-       
-       // Delete the shaders as they're linked into our program now and no longer necessery
-       glDeleteShader(vertex);
-       glDeleteShader(fragment);
+      // Delete the shaders as they're linked into our program now and no longer necessery
+      glDeleteShader(vertex);
+      glDeleteShader(fragment);
               
-       if(!geometryCode.empty()) glDeleteShader(geometry);
+      if(!geometryCode.empty()) glDeleteShader(geometry);
       
-       isInitedInGpu = true;
-      
-       glCheckError();
-      
+      isInitedInGpu = true;
+            
     }
     
     /* ****************************************************************************/

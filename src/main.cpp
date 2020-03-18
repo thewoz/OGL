@@ -153,14 +153,8 @@ int main(int argc, char * const argv []) {
   window.addCamera(45.0, 0.1, 10.0, glm::vec3(1.1, 1.3, 1.4), ogl::glCamera::MODE::TARGET, glm::vec3(0.01, 0.01, 0.01));
 
   window.changeCamera();
-    
-  //ogl::glModel model("/Users/thewoz/Research/MPL/include/opengl/model/Trex/Trex.fbx");
-
-  //model.initInGpu();
-  
+      
   model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-
-  //axes.initInGpu();
 
   uint32_t frame = 0;
 
@@ -182,6 +176,51 @@ int main(int argc, char * const argv []) {
       
   }
       
+#endif
+  
+#if(0)
+  
+    ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0));
+  
+    ogl::glWindow window;
+    
+    window.create(800, 600, "ModelView");
+    
+    window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+    
+    window.makeContextCurrent();
+
+    while(!window.shouldClose()) {
+      
+      window.renderBegin();
+      
+      grid.render(window.getProjection(), window.getView());
+
+      window.renderEnd();
+      
+    }
+  
+    window.destroy();
+
+    ogl::glWindow window1;
+    
+    window1.create(800, 600, "ModelView");
+    
+    window1.setCursorInputMode(GLFW_CURSOR_DISABLED);
+    
+    window1.makeContextCurrent();
+    
+    while(!window1.shouldClose()) {
+      
+      window1.renderBegin();
+      
+      grid.render(window1.getProjection(), window1.getView());
+      
+      window1.renderEnd();
+      
+    }
+    
+  
 #endif
 
   return 0;

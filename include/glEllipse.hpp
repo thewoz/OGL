@@ -119,14 +119,7 @@ namespace ogl {
     /*****************************************************************************/
     // ~glEllipse
     /*****************************************************************************/
-    ~glEllipse() {
-      
-      if(isInitedInGpu) {
-        glDeleteBuffers(4, vbo);
-        glDeleteVertexArrays(1, &vao);
-      }
-      
-    }
+    ~glEllipse() { cleanInGpu(); }
     
     /*****************************************************************************/
     // init
@@ -274,6 +267,22 @@ namespace ogl {
       }
       
       isInitedInGpu = true;
+      
+    }
+    
+  private:
+    
+    /* ****************************************************************************/
+    // cleanInGpu() -
+    /* ****************************************************************************/
+    void cleanInGpu() {
+      
+      if(isInitedInGpu) {
+        
+        glDeleteBuffers(4, vbo);
+        glDeleteVertexArrays(1, &vao);
+        
+      }
       
     }
     
