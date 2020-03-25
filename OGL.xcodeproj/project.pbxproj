@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3A8F6C2924224F760086380C /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A3B498D241F9BA700084872 /* main.cpp */; };
+		3A91D24E2423CB6A00A86587 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A3B498D241F9BA700084872 /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -170,10 +170,10 @@
 				3A3B4978241F9BA200084872 /* model.fs */,
 				3A3B4979241F9BA200084872 /* shadow */,
 				3A3B4980241F9BA200084872 /* depth.fs */,
+				3A3B4984241F9BA200084872 /* depth.vs */,
 				3A3B4981241F9BA200084872 /* plain.fs */,
 				3A3B4982241F9BA200084872 /* model.vs */,
 				3A3B4983241F9BA200084872 /* plain.vs */,
-				3A3B4984241F9BA200084872 /* depth.vs */,
 				3A3B4985241F9BA200084872 /* sphere.vs */,
 			);
 			path = shader;
@@ -273,7 +273,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3A8F6C2924224F760086380C /* main.cpp in Sources */,
+				3A91D24E2423CB6A00A86587 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

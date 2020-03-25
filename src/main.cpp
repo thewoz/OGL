@@ -159,14 +159,14 @@ int main(int argc, char * const argv []) {
   uint32_t frame = 0;
 
   while(!window.shouldClose()) {
-        
+    
     window.renderBegin();
     
     axes.render(window.getProjection(), window.getView());
     
     model.rotate(glm::vec3(glm::sin(glm::radians((float)frame)),
-                                     glm::sin(glm::radians((float)frame)),
-                                     glm::cos(glm::radians((float)frame))));
+                                    glm::sin(glm::radians((float)frame)),
+                                    glm::cos(glm::radians((float)frame))));
 
     model.render(window.getProjection(), window.getView());
     
@@ -177,6 +177,50 @@ int main(int argc, char * const argv []) {
   }
       
 #endif
+  
+  
+#if(0)
+  
+  ogl::glAxes axes;
+  
+  ogl::glModel model("/usr/local/include/ogl/model/Trex/Trex.fbx");
+  
+  ogl::glWindow window;
+  
+  window.create(800, 600, "ModelView");
+  
+  window.makeContextCurrent();
+  
+  window.addCamera(45.0, 0.1, 10.0, glm::vec3(1.1, 1.3, 1.4), ogl::glCamera::MODE::TARGET, glm::vec3(0.01, 0.01, 0.01));
+  
+  window.changeCamera();
+  
+  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
+  
+  uint32_t frame = 0;
+  
+  while(!window.shouldClose()) {
+    
+    window.renderBegin();
+    
+    axes.render(window.getProjection(), window.getView());
+    
+    model.rotate(glm::vec3(glm::sin(glm::radians((float)frame)),
+                           glm::sin(glm::radians((float)frame)),
+                           glm::cos(glm::radians((float)frame))));
+    
+    model.render(window.getProjection(), window.getView());
+    
+    window.renderEnd();
+    
+    ++frame;
+    
+  }
+  
+#endif
+  
+  
+  
   
 #if(0)
   

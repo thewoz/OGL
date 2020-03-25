@@ -58,7 +58,7 @@ namespace ogl {
     
     glQuad quad;
     
-    GLuint FBO;
+    GLuint fbo;
     
     GLuint width;
     GLuint height;
@@ -75,26 +75,26 @@ namespace ogl {
     /*****************************************************************************/
     // init
     /*****************************************************************************/
-    void init(GLuint _width, GLuint _height) {
+    void init(GLuint _width = 1024, GLuint _height = 1024) {
       
       width  = _width;
       height = _height;
 
       // load and compile the shadow shader
-      shader.load("/usr/local/include/ogl/opengl/shader/shadow/shadowMap.vs", "/usr/local/include/ogl/opengl/shader/shadow/shadowMap.fs");
+      shader.init("/usr/local/include/ogl/opengl/shader/shadow/shadowMap.vs", "/usr/local/include/ogl/opengl/shader/shadow/shadowMap.fs");
       
-      quad.init();
+      //quad.init();
       
-      shaderDepth.load("/usr/local/include/ogl/opengl/shader/depth.vs", "/usr/local/include/ogl/opengl/shader/depth.fs");
+      shaderDepth.init("/usr/local/include/ogl/opengl/shader/depth.vs", "/usr/local/include/ogl/opengl/shader/depth.fs");
       
       // configure depth map FBO
-      glGenFramebuffers(1, &FBO);
+      glGenFramebuffers(1, &fbo);
       
       // create depth cubemap texture
       depthMap.init(width,height);
       
       // attach depth texture as FBO's depth buffer
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
       
       //glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthMap.getId(), 0);
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap.getId(), 0);
@@ -115,9 +115,62 @@ namespace ogl {
     
     
     /*****************************************************************************/
-    // compute
+    // renderBegin
     /*****************************************************************************/
-    void compute(const glm::vec3 & lightPosition) {//, const glModel & model) {
+    void renderBegin(const glm::vec3 & lightDir) {
+      
+      glViewport(0,0,width,height); // Render on the whole framebuffer, complete from the lower left corner to the upper right
+      
+      // We don't use bias in the shader, but instead we draw back faces,
+      // which are already separated from the front faces by a small distance
+      // (if your geometry is made this way)
+      glEnable(GL_CULL_FACE);
+      
+      // Cull back-facing triangles -> draw only front-facing triangles
+      glCullFace(GL_BACK);
+      
+      // Clear the screen
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      
+      // Use our shader
+      shaderDepth.use();
+
+      // Render to our framebuffer
+      glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+      
+      // Compute the MVP matrix from the light's point of view
+      glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
+      glm::mat4 depthViewMatrix = glm::lookAt(lightDir, glm::vec3(0,0,0), glm::vec3(0,1,0));
+      
+      glm::mat4 depthModelMatrix = glm::mat4(1.0);
+      glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+      
+     // shaderDepth.setUniform(<#const std::string &name#>, depthMVP);
+      
+      
+      
+    }
+      
+    /*****************************************************************************/
+    // renderEnd
+    /*****************************************************************************/
+    void renderBegin() {
+      
+      
+    }
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      /*****************************************************************************/
+      // compute
+      /*****************************************************************************/
+      void compute(const glm::vec3 & lightPosition) {
       
       GLint viewport[4];
       
@@ -140,7 +193,7 @@ namespace ogl {
       
       glViewport(0, 0, width, height);
       
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
       
       glClearDepth(1.0);
       
@@ -170,7 +223,7 @@ namespace ogl {
     /*****************************************************************************/
     // render
     /*****************************************************************************/
-    void render() const {
+    void render() {
       
       GLint viewport[4];
       

@@ -31,10 +31,13 @@
 
 #include <string>
 
-#include "glfw.hpp"
-
 #include <glm/glm.hpp>
 
+#include <mpl/debug.hpp>
+
+#include "glfw.hpp"
+
+#include "glWindow.hpp"
 #include "glShader.hpp"
 
 
