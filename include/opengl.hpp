@@ -136,6 +136,47 @@ namespace opengl {
     
   }
   
+#if(0)
+  
+  //****************************************************************************//
+  // gl
+  //****************************************************************************//
+  namespace gl {
+    
+    //****************************************************************************//
+    // LookAt
+    //****************************************************************************//
+    void lookAt(const cv::Vec3f & eye, const cv::Vec3f & center, const cv::Vec3f & up) {
+      
+      cv::Vec3f f; cv::normalize(eye-center,  f, 1.0, 0.0, cv::NORM_L2);
+      
+      cv::Vec3f s; cv::normalize(f.cross(up), s, 1.0, 0.0, cv::NORM_L2);
+      
+      cv::Vec3f u = s.cross(f);
+      
+      // in openGL la matrice modelview in memoria e' salvata per colonne
+      float result[16] = {         s[0],        u[0],      -f[0], 0.0,
+        s[1],        u[1],      -f[1], 0.0,
+        s[2],        u[2],      -f[2], 0.0,
+        -s.dot(eye), -u.dot(eye), f.dot(eye), 1.0 };
+      
+      glMultMatrixf(&result[0]);
+      
+    }
+    
+    //****************************************************************************//
+    // perspective
+    //****************************************************************************//
+    void perspective(float angleFOV, float aspect, float zNear, float zFar) {
+      
+      float fH = tan( angleFOV / 360.0 * M_PI ) * zNear;
+      float fW = fH * aspect;
+      
+      glFrustum(-fW, fW, -fH, fH, zNear, zFar);
+      
+    }
+  
+#endif
   
 } /* namespace opengl */
 
