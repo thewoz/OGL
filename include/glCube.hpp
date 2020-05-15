@@ -44,8 +44,8 @@ namespace ogl {
   private:
     
     GLuint vao = -1;
-    GLuint vbo = -1;
-    
+    GLuint vbo[2];
+
   public:
         
     /*****************************************************************************/
@@ -89,12 +89,17 @@ namespace ogl {
 
       glObject::renderBegin(projection, view);
       
+      glDisable(GL_CULL_FACE); //NOTE: non sono sicuro che serva
+
       glBindVertexArray(vao);
       
       //glEnableVertexAttribArray(0);
+      if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
-      if(style == glObject::STYLE::WIREFRAME) glDrawArrays(GL_LINE_LOOP, 0, 36);
-      if(style == glObject::STYLE::SOLID)     glDrawArrays(GL_TRIANGLE_STRIP, 0, 36);
+      //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
+      glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, nullptr);
+
       
       glBindVertexArray(0);
       
@@ -110,71 +115,52 @@ namespace ogl {
     void setInGpu() {
       
       DEBUG_LOG("glCube::setInGpu(" + name + ")");
-
-      static const float vertices[] = {
-        // back face
-        -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-        1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-        1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
-        1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-        -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-        -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
-        // front face
-        -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-        1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
-        1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-        1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
-        -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
-        -1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
-        // left face
-        -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-        -1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
-        -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-        -1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
-        -1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-        -1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
-        // right face
-        1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-        1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-        1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right
-        1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-        1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-        1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left
-        // bottom face
-        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-        1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
-        1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-        1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
-        -1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
-        -1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
-        // top face
-        -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-        1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-        1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right
-        1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-        -1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-        -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
+      
+      static const GLfloat vertices[] = {
+        // front
+        -1.0,  1.0,  1.0,
+         1.0,  1.0,  1.0,
+         1.0, -1.0,  1.0,
+        -1.0, -1.0,  1.0,
+        // back
+        -1.0,  1.0,  -1.0,
+        1.0,  1.0,  -1.0,
+        1.0, -1.0,  -1.0,
+        -1.0, -1.0, -1.0,
+      };
+      
+      static const GLushort indicies[] = {
+        // front
+        0, 1,
+        1, 2,
+        2, 3,
+        3, 0,
+        0, 4,
+        7, 4,
+        4, 5,
+        5, 6,
+        6, 7,
+        1, 5,
+        2, 6,
+        3, 7
       };
       
       glGenVertexArrays(1, &vao);
-            
-      glGenBuffers(1, &vbo);
-      
-      // fill buffer
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      
-      // link vertex attributes
       glBindVertexArray(vao);
-      glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-      glEnableVertexAttribArray(1);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-      glEnableVertexAttribArray(2);
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
       
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glGenBuffers(2, vbo);
+
+      glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+      glEnableVertexAttribArray(0);
+      
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
+
       glBindVertexArray(0);
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       
     }
     
@@ -187,7 +173,7 @@ namespace ogl {
       
       if(isInitedInGpu) {
         
-        glDeleteBuffers(1, &vbo);
+        glDeleteBuffers(2, vbo);
         glDeleteVertexArrays(1, &vao);
         
         isInitedInGpu = false;
