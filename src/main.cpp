@@ -32,7 +32,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "ogl.hpp"
+#include <ogl/ogl.hpp>
 //#include "hull.hpp"
 
 

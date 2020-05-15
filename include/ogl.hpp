@@ -86,6 +86,7 @@ GLenum glCheckError_(const char *file, int line) {
 #include "glGrid.hpp"
 #include "glQuad.hpp"
 #include "glCube.hpp"
+#include "glCuboid.hpp"
 #include "glAxes.hpp"
 #include "glPoints.hpp"
 

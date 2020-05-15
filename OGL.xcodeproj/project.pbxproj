@@ -73,6 +73,7 @@
 		3A3B498B241F9BA200084872 /* glPoints.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPoints.hpp; sourceTree = "<group>"; };
 		3A3B498C241F9BA200084872 /* glShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glShader.hpp; sourceTree = "<group>"; };
 		3A3B498D241F9BA700084872 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		3A79C011246EFBEB004B0206 /* glCuboid.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glCuboid.hpp; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -104,6 +105,7 @@
 				3A3B4972241F9BA200084872 /* glGrid.hpp */,
 				3A3B4961241F9BA200084872 /* glSphere.hpp */,
 				3A3B4989241F9BA200084872 /* glCube.hpp */,
+				3A79C011246EFBEB004B0206 /* glCuboid.hpp */,
 				3A3B4963241F9BA200084872 /* glQuad.hpp */,
 				3A3B498B241F9BA200084872 /* glPoints.hpp */,
 				3A3B4974241F9BA200084872 /* glPrint.hpp */,
