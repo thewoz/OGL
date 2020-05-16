@@ -36,11 +36,39 @@
 //#include "hull.hpp"
 
 
+#include "glPrint.hpp"
+
 /* ****************************************************************************/
 // main
 /* ****************************************************************************/
 int main(int argc, char * const argv []) {
       
+#if(1)
+  
+  ogl::glWindow window;
+  
+  window.create(800, 600, "ModelView");
+  
+  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+  
+  window.makeContextCurrent();
+  
+  ogl::glPrint text("testo");
+  
+  text.init();
+  
+  while(!window.shouldClose()) {
+    
+    window.renderBegin();
+    
+    text.print(window.getOrthoProjection(), "leo", 50, 05, glm::vec3(1.0));
+
+    window.renderEnd();
+    
+  }
+  
+#endif
+  
 #if(0)
   
   ogl::glWindow window;
@@ -81,7 +109,7 @@ int main(int argc, char * const argv []) {
 #endif
   
   
-#if(1)
+#if(0)
   
   ogl::glWindow window;
 
@@ -120,21 +148,21 @@ int main(int argc, char * const argv []) {
   
       axes.render(window.getProjection(), window.getView());
 
-      sphere.render(window.getProjection(), window.getView());
+      //sphere.render(window.getProjection(), window.getView());
 
-      grid.render(window.getProjection(), window.getView());
+      //grid.render(window.getProjection(), window.getView());
 
-      line.render(window.getProjection(), window.getView());
+      //line.render(window.getProjection(), window.getView());
 
-      cube.render(window.getProjection(), window.getView());
+      //cube.render(window.getProjection(), window.getView());
     
-      box.render(window.getProjection(), window.getView());
+      //box.render(window.getProjection(), window.getView());
 
-      ellipse.render(window.getProjection(), window.getView());
+      //ellipse.render(window.getProjection(), window.getView());
 
-      points.render(window.getProjection(), window.getView());
+      //points.render(window.getProjection(), window.getView());
     
-      ogl::glPrint("prova", 1.0, 1.0, 1.0f);
+      //ogl::glPrint("prova", 1.0, 1.0, 1.0f);
       
     window.renderEnd();
       

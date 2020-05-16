@@ -23,6 +23,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3A26A06124705BA7000571F3 /* glPrint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPrint.hpp; sourceTree = "<group>"; };
+		3A26A06224706314000571F3 /* text.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.fs; sourceTree = "<group>"; };
+		3A26A06324706314000571F3 /* text.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.vs; sourceTree = "<group>"; };
 		3A3B4955241F9BA200084872 /* glMesh.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glMesh.hpp; sourceTree = "<group>"; };
 		3A3B4956241F9BA200084872 /* glLine.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glLine.hpp; sourceTree = "<group>"; };
 		3A3B4957241F9BA200084872 /* glMaterial.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glMaterial.hpp; sourceTree = "<group>"; };
@@ -50,7 +53,6 @@
 		3A3B4971241F9BA200084872 /* TrexBump012714.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = TrexBump012714.jpg; sourceTree = "<group>"; };
 		3A3B4972241F9BA200084872 /* glGrid.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glGrid.hpp; sourceTree = "<group>"; };
 		3A3B4973241F9BA200084872 /* glLight.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glLight.hpp; sourceTree = "<group>"; };
-		3A3B4974241F9BA200084872 /* glPrint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPrint.hpp; sourceTree = "<group>"; };
 		3A3B4975241F9BA200084872 /* ogl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ogl.hpp; sourceTree = "<group>"; };
 		3A3B4977241F9BA200084872 /* sphere.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.fs; sourceTree = "<group>"; };
 		3A3B4978241F9BA200084872 /* model.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.fs; sourceTree = "<group>"; };
@@ -105,10 +107,10 @@
 				3A3B4972241F9BA200084872 /* glGrid.hpp */,
 				3A3B4961241F9BA200084872 /* glSphere.hpp */,
 				3A79C011246EFBEB004B0206 /* glCuboid.hpp */,
+				3A26A06124705BA7000571F3 /* glPrint.hpp */,
 				3A946994247021D200ED52D0 /* glBox.hpp */,
 				3A3B4963241F9BA200084872 /* glQuad.hpp */,
 				3A3B498B241F9BA200084872 /* glPoints.hpp */,
-				3A3B4974241F9BA200084872 /* glPrint.hpp */,
 				3A3B4959241F9BA200084872 /* freeglut */,
 				3A3B4976241F9BA200084872 /* shader */,
 				3A3B498C241F9BA200084872 /* glShader.hpp */,
@@ -168,6 +170,8 @@
 		3A3B4976241F9BA200084872 /* shader */ = {
 			isa = PBXGroup;
 			children = (
+				3A26A06224706314000571F3 /* text.fs */,
+				3A26A06324706314000571F3 /* text.vs */,
 				3A3B4977241F9BA200084872 /* sphere.fs */,
 				3A3B4978241F9BA200084872 /* model.fs */,
 				3A3B4979241F9BA200084872 /* shadow */,
@@ -439,6 +443,29 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					/usr/local/include/opencv4,
+					/usr/local/include/freetype2/,
+				);
+				OTHER_LDFLAGS = (
+					"-lfreetype",
+					"-lassimp",
+					"-ltiff",
+					"-lSOIL2",
+					"-lglad",
+					"-lglfw3",
+					"-framework",
+					Cocoa,
+					"-framework",
+					IOKit,
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					CoreVideo,
+					"-framework",
+					OpenGL,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -447,6 +474,29 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/,
+					/usr/local/include/opencv4,
+					/usr/local/include/freetype2/,
+				);
+				OTHER_LDFLAGS = (
+					"-lfreetype",
+					"-lassimp",
+					"-ltiff",
+					"-lSOIL2",
+					"-lglad",
+					"-lglfw3",
+					"-framework",
+					Cocoa,
+					"-framework",
+					IOKit,
+					"-framework",
+					CoreFoundation,
+					"-framework",
+					CoreVideo,
+					"-framework",
+					OpenGL,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

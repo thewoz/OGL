@@ -120,6 +120,24 @@ namespace ogl {
         
       }
     
+    /* ****************************************************************************/
+    // initText() -
+    /* ****************************************************************************/
+    void initText(const std::string & _name = "") {
+      
+      if(name.empty()) name = _name;
+      
+      DEBUG_LOG("glObject::init(" + name + ")");
+      
+      shader.setName(name);
+      
+      shader.initText();
+      
+      _init();
+      
+    }
+    
+    
       /* ****************************************************************************/
       // initSphere() -
       /* ****************************************************************************/
@@ -162,6 +180,29 @@ namespace ogl {
         glEnable(GL_DEPTH_TEST);
         
       }
+    
+    /* ****************************************************************************/
+    // renderBegin() -
+    /* ****************************************************************************/
+    void renderBegin(const glm::mat4 & projection) {
+      
+      DEBUG_LOG("glObject::renderBegin(" + name + ")");
+      
+      if(!isInited){
+        fprintf(stderr, "line must be inited before render\n");
+        abort();
+      }
+      
+      if(isToInitInGpu()) initInGpu();
+      
+      shader.use();
+      
+      shader.setUniform("projection", projection);
+      shader.setUniform("color", color);
+      
+      glEnable(GL_DEPTH_TEST);
+      
+    }
       
       /* ****************************************************************************/
       // renderEnd() -

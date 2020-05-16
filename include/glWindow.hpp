@@ -504,7 +504,13 @@ namespace ogl {
     // get projection and view matrix
     /*****************************************************************************/
     inline glm::mat4 getProjection() const { return currentCamera->getProjection(); }
-    inline glm::mat4 getView()       const { return currentCamera->getView();       }
+    
+    inline glm::mat4 getOrthoProjection() const {
+      return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+      
+    }
+        
+    inline glm::mat4 getView() const { return currentCamera->getView(); }
 
     /*****************************************************************************/
     // makeContextCurrent()

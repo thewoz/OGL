@@ -68,7 +68,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { PLAIN, MODEL, SPHERE, CUSTOM };
+    enum STYLE { PLAIN, MODEL, SPHERE, TEXT, CUSTOM };
 
     int style;
     
@@ -106,6 +106,14 @@ namespace ogl {
     void initSphere() {
       init("/usr/local/include/ogl/shader/sphere.vs", "/usr/local/include/ogl/shader/sphere.fs");
       style = STYLE::SPHERE;
+    }
+    
+    /*****************************************************************************/
+    // initText -
+    /*****************************************************************************/
+    void initText() {
+      init("/usr/local/include/ogl/shader/text.vs", "/usr/local/include/ogl/shader/text.fs");
+      style = STYLE::TEXT;
     }
     
     /*****************************************************************************/
