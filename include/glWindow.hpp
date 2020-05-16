@@ -532,7 +532,7 @@ namespace ogl {
       
       deltaTime = currentTime - lastTime;
       lastTime  = currentTime;
-            
+                  
       glClearColor(background.r, background.g, background.b, 1.0f);
 
       glViewport(0, 0, currentCamera->getWidth(), currentCamera->getHeight());

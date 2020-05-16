@@ -54,7 +54,7 @@ namespace ogl {
     glCuboid(const std::string & _name = "") : glObject(_name) { }
     
     /*****************************************************************************/
-    // glCube
+    // glCuboid
     /*****************************************************************************/
     glCuboid(const glm::vec3 & scale, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(0.0), const std::string & _name = "") : glObject(_name) { init(scale, _style, _color); }
     
@@ -68,7 +68,7 @@ namespace ogl {
     /*****************************************************************************/
     void init(const glm::vec3 & scale, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(0.0)) {
 
-      DEBUG_LOG("glCube::init(" + name + ")");
+      DEBUG_LOG("glCuboid::init(" + name + ")");
 
       glObject::initPlain(glm::vec3(0.0), glm::vec3(0.0), scale);
 
@@ -85,7 +85,7 @@ namespace ogl {
     /*****************************************************************************/
     void render(const glm::mat4 & projection, const glm::mat4 & view) {
             
-      DEBUG_LOG("glCube::render(" + name + ")");
+      DEBUG_LOG("glCuboid::render(" + name + ")");
 
       glObject::renderBegin(projection, view);
       
@@ -93,13 +93,19 @@ namespace ogl {
 
       glBindVertexArray(vao);
       
+      //glDisable(GL_POLYGON_OFFSET_LINE);
+      
+      //glEnable(GL_DEPTH_TEST);
+      
+      //glLineWidth(1);
+
       //glEnableVertexAttribArray(0);
       if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
-      //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
-      glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, nullptr);
-
+      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
+      
+      //glEnable(GL_POLYGON_OFFSET_LINE);
       
       glBindVertexArray(0);
       
@@ -114,7 +120,7 @@ namespace ogl {
     /*****************************************************************************/
     void setInGpu() {
       
-      DEBUG_LOG("glCube::setInGpu(" + name + ")");
+      DEBUG_LOG("glCuboid::setInGpu(" + name + ")");
       
       static const GLfloat vertices[] = {
         // front
@@ -130,19 +136,25 @@ namespace ogl {
       };
       
       static const GLushort indicies[] = {
-        // front
-        0, 1,
-        1, 2,
-        2, 3,
-        3, 0,
-        0, 4,
-        7, 4,
-        4, 5,
-        5, 6,
-        6, 7,
-        1, 5,
-        2, 6,
-        3, 7
+
+        0, 1, 3,
+        1, 2, 3,
+        
+        2, 3, 7,
+        2, 7, 6,
+        
+        1, 5, 2,
+        2, 5, 6,
+        
+        0, 7, 3,
+        0, 4, 7,
+        
+        5, 7, 6,
+        5, 4, 7,
+        
+        0, 4, 1,
+        4, 5, 2
+        
       };
       
       glGenVertexArrays(1, &vao);

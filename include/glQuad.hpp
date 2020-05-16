@@ -74,7 +74,6 @@ namespace ogl {
       
       glGenVertexArrays(1, &vao);
       
-      
       glGenBuffers(1, &vbo);
       
       glBindVertexArray(vao);

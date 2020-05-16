@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_CUBE_H_
-#define _H_MPL_OPENGL_CUBE_H_
+#ifndef _H_MPL_OPENGL_BOX_H_
+#define _H_MPL_OPENGL_BOX_H_
 
 #include <cstdio>
 #include <cstdlib>
@@ -37,9 +37,9 @@
 namespace ogl {
   
   /*****************************************************************************/
-  // Class glCube
+  // Class glBox
   /*****************************************************************************/
-  class glCube : public glObject {
+  class glBox: public glObject {
     
   private:
     
@@ -49,30 +49,30 @@ namespace ogl {
   public:
         
     /*****************************************************************************/
-    // glCube
+    // glBox
     /*****************************************************************************/
-    glCube(const std::string & _name = "") : glObject(_name) { }
+    glBox(const std::string & _name = "") : glObject(_name) { }
     
     /*****************************************************************************/
-    // glCube
+    // glBox
     /*****************************************************************************/
-    glCube(GLfloat scale, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(0.0), const std::string & _name = "") : glObject(_name) { init(scale, _style, _color); }
+    glBox(const glm::vec3 & scale, const glm::vec3 & _color = glm::vec3(0.0), const std::string & _name = "") : glObject(_name) { init(scale, _color); }
     
     /*****************************************************************************/
-    // ~glCube
+    // ~glBox
     /*****************************************************************************/
-    ~glCube() { cleanInGpu(); }
+    ~glBox() { cleanInGpu(); }
     
     /*****************************************************************************/
     // init
     /*****************************************************************************/
-    void init(GLfloat scale, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(0.0)) {
+    void init(const glm::vec3 & scale, const glm::vec3 & _color = glm::vec3(0.0)) {
 
-      DEBUG_LOG("glCube::init(" + name + ")");
+      DEBUG_LOG("glBox::init(" + name + ")");
 
       glObject::initPlain(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(scale));
 
-      style = _style;
+      style = glObject::STYLE::WIREFRAME;
       
       color = _color;
       
@@ -85,22 +85,18 @@ namespace ogl {
     /*****************************************************************************/
     void render(const glm::mat4 & projection, const glm::mat4 & view) {
             
-      DEBUG_LOG("glCube::render(" + name + ")");
+      DEBUG_LOG("glBox::render(" + name + ")");
 
       glObject::renderBegin(projection, view);
       
       glDisable(GL_CULL_FACE); //NOTE: non sono sicuro che serva
 
       glBindVertexArray(vao);
+        
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       
-      //glEnableVertexAttribArray(0);
-      if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      
-      //glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
       glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, nullptr);
-
-      
+     
       glBindVertexArray(0);
       
       glObject::renderEnd();
@@ -114,7 +110,7 @@ namespace ogl {
     /*****************************************************************************/
     void setInGpu() {
       
-      DEBUG_LOG("glCube::setInGpu(" + name + ")");
+      DEBUG_LOG("glBox::setInGpu(" + name + ")");
       
       static const GLfloat vertices[] = {
         // front
@@ -130,7 +126,6 @@ namespace ogl {
       };
       
       static const GLushort indicies[] = {
-        // front
         0, 1,
         1, 2,
         2, 3,
@@ -186,6 +181,6 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_OPENGL_CUBE_H_ */
+#endif /* _H_MPL_OPENGL_BOX_H_ */
 
 

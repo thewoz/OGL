@@ -81,7 +81,7 @@ int main(int argc, char * const argv []) {
 #endif
   
   
-#if(0)
+#if(1)
   
   ogl::glWindow window;
 
@@ -109,7 +109,9 @@ int main(int argc, char * const argv []) {
   ogl::glSphere sphere(1.0, 10, 10, ogl::glObject::STYLE::WIREFRAME, glm::vec3(0.0,0.0,1.0), "sfera");
   ogl::glEllipse ellipse(0.1, 0.1, 0.3, 10, 20, ogl::glObject::STYLE::WIREFRAME, glm::vec3(2.0,0.0,1.0), "ellipse");
   ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0), "linea");
-  ogl::glCube cube(0.01, ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0), "cubo"); cube.translate(glm::vec3(0.5));
+  ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0), "cubo"); cube.translate(glm::vec3(0.5));
+  ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0), "box"); box.translate(glm::vec3(-0.5));
+
   ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0), "griglia");
 
   while(!window.shouldClose()) {
@@ -125,12 +127,14 @@ int main(int argc, char * const argv []) {
       line.render(window.getProjection(), window.getView());
 
       cube.render(window.getProjection(), window.getView());
+    
+      box.render(window.getProjection(), window.getView());
 
       ellipse.render(window.getProjection(), window.getView());
 
       points.render(window.getProjection(), window.getView());
     
-      //ogl::glPrint("prova", 1.0, 1.0, 1.0f);
+      ogl::glPrint("prova", 1.0, 1.0, 1.0f);
       
     window.renderEnd();
       
@@ -138,7 +142,7 @@ int main(int argc, char * const argv []) {
 
 #endif
   
-#if(1)
+#if(0)
   
   ogl::glAxes axes;
 

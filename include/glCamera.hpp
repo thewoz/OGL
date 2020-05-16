@@ -82,6 +82,11 @@ namespace ogl {
     GLsizei width;
     GLsizei height;
     
+    
+    GLfloat fov;
+    GLfloat zNear;
+    GLfloat zFar;
+    
   public:
     
     
@@ -100,8 +105,8 @@ namespace ogl {
     /*****************************************************************************/
     // glCamera() - Constructor of a full camera
     /*****************************************************************************/
-    glCamera(GLsizei _width, GLsizei _height, float fov, float zNear, float zFar, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
-      init(_width, _height, fov, zNear, zFar, _position, _mode, _target);
+    glCamera(GLsizei _width, GLsizei _height, float _fov, float _zNear, float _zFar, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
+      init(_width, _height, _fov, _zNear, _zFar, _position, _mode, _target);
     }
     
     /*****************************************************************************/
@@ -112,7 +117,7 @@ namespace ogl {
     /*****************************************************************************/
     // init() - Inizializatore di una camera
     /*****************************************************************************/
-    void init(GLsizei _width, GLsizei _height, float fov, float zNear, float zFar, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
+    void init(GLsizei _width, GLsizei _height, float _fov, float _zNear, float _zFar, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
       
       //printf("%d %d %f %f %f\n", _width, _height, fov, zNear, zFar);
       
@@ -129,6 +134,11 @@ namespace ogl {
       pitch = 0;
       
       mode = _mode;
+      
+      fov = _fov;
+      
+      zNear = _zNear;
+      zFar  = _zFar;
       
       projection = glm::perspective(glm::radians(fov), width/(float)height, zNear, zFar);
       
@@ -226,6 +236,24 @@ namespace ogl {
     // getMode() - Camera mode
     /*****************************************************************************/
     inline MODE getMode() const { return mode; }
+    
+    
+    /*****************************************************************************/
+    // setSpeed() -
+    /*****************************************************************************/
+    inline void setSpeed(GLfloat speed) { SPEED = speed; }
+    
+    //****************************************************************************/
+    // setzNearFar() -
+    //****************************************************************************/
+    inline void setzNearFar(float _zNear, float _zFar) {
+      
+      zNear = _zNear;
+      zFar  = _zFar;
+      
+      projection = glm::perspective(glm::radians(fov), width/(float)height, zNear, zFar);
+
+    }
     
   private:
     
