@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		3A91D24E2423CB6A00A86587 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A3B498D241F9BA700084872 /* main.cpp */; };
+		3AFE7F32247171FB000E8463 /* imgui_demo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE7F26247171FA000E8463 /* imgui_demo.cpp */; };
+		3AFE7F33247171FB000E8463 /* imgui_impl_opengl3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE7F27247171FB000E8463 /* imgui_impl_opengl3.cpp */; };
+		3AFE7F34247171FB000E8463 /* imgui_draw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE7F28247171FB000E8463 /* imgui_draw.cpp */; };
+		3AFE7F35247171FB000E8463 /* imgui_widgets.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE7F2C247171FB000E8463 /* imgui_widgets.cpp */; };
+		3AFE7F36247171FB000E8463 /* imgui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE7F2E247171FB000E8463 /* imgui.cpp */; };
+		3AFE7F37247171FB000E8463 /* imgui_impl_glfw.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AFE7F2F247171FB000E8463 /* imgui_impl_glfw.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -80,6 +86,20 @@
 		3AFE7F17247164C8000E8463 /* glfw.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glfw.hpp; sourceTree = "<group>"; };
 		3AFE7F1824716691000E8463 /* ogl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ogl.hpp; sourceTree = "<group>"; };
 		3AFE7F192471681F000E8463 /* error.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
+		3AFE7F24247171FA000E8463 /* imgui.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui.h; sourceTree = "<group>"; };
+		3AFE7F25247171FA000E8463 /* imconfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imconfig.h; sourceTree = "<group>"; };
+		3AFE7F26247171FA000E8463 /* imgui_demo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_demo.cpp; sourceTree = "<group>"; };
+		3AFE7F27247171FB000E8463 /* imgui_impl_opengl3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_impl_opengl3.cpp; sourceTree = "<group>"; };
+		3AFE7F28247171FB000E8463 /* imgui_draw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_draw.cpp; sourceTree = "<group>"; };
+		3AFE7F29247171FB000E8463 /* imgui_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_internal.h; sourceTree = "<group>"; };
+		3AFE7F2A247171FB000E8463 /* imstb_textedit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imstb_textedit.h; sourceTree = "<group>"; };
+		3AFE7F2B247171FB000E8463 /* imstb_truetype.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imstb_truetype.h; sourceTree = "<group>"; };
+		3AFE7F2C247171FB000E8463 /* imgui_widgets.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_widgets.cpp; sourceTree = "<group>"; };
+		3AFE7F2D247171FB000E8463 /* imgui_impl_glfw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_impl_glfw.h; sourceTree = "<group>"; };
+		3AFE7F2E247171FB000E8463 /* imgui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui.cpp; sourceTree = "<group>"; };
+		3AFE7F2F247171FB000E8463 /* imgui_impl_glfw.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = imgui_impl_glfw.cpp; sourceTree = "<group>"; };
+		3AFE7F30247171FB000E8463 /* imgui_impl_opengl3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imgui_impl_opengl3.h; sourceTree = "<group>"; };
+		3AFE7F31247171FB000E8463 /* imstb_rectpack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = imstb_rectpack.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +116,7 @@
 		3A3B4954241F9BA200084872 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				3AFE7F1A24716FC4000E8463 /* imgui */,
 				3AFE7EE6247164C8000E8463 /* OpenGL2.1 */,
 				3AFE7ED4247164C7000E8463 /* shader */,
 				3AFE7EED247164C8000E8463 /* data */,
@@ -284,6 +305,27 @@
 			path = utils;
 			sourceTree = "<group>";
 		};
+		3AFE7F1A24716FC4000E8463 /* imgui */ = {
+			isa = PBXGroup;
+			children = (
+				3AFE7F25247171FA000E8463 /* imconfig.h */,
+				3AFE7F26247171FA000E8463 /* imgui_demo.cpp */,
+				3AFE7F28247171FB000E8463 /* imgui_draw.cpp */,
+				3AFE7F2F247171FB000E8463 /* imgui_impl_glfw.cpp */,
+				3AFE7F2D247171FB000E8463 /* imgui_impl_glfw.h */,
+				3AFE7F27247171FB000E8463 /* imgui_impl_opengl3.cpp */,
+				3AFE7F30247171FB000E8463 /* imgui_impl_opengl3.h */,
+				3AFE7F29247171FB000E8463 /* imgui_internal.h */,
+				3AFE7F2C247171FB000E8463 /* imgui_widgets.cpp */,
+				3AFE7F2E247171FB000E8463 /* imgui.cpp */,
+				3AFE7F24247171FA000E8463 /* imgui.h */,
+				3AFE7F31247171FB000E8463 /* imstb_rectpack.h */,
+				3AFE7F2A247171FB000E8463 /* imstb_textedit.h */,
+				3AFE7F2B247171FB000E8463 /* imstb_truetype.h */,
+			);
+			path = imgui;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -341,6 +383,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3AFE7F37247171FB000E8463 /* imgui_impl_glfw.cpp in Sources */,
+				3AFE7F33247171FB000E8463 /* imgui_impl_opengl3.cpp in Sources */,
+				3AFE7F32247171FB000E8463 /* imgui_demo.cpp in Sources */,
+				3AFE7F35247171FB000E8463 /* imgui_widgets.cpp in Sources */,
+				3AFE7F34247171FB000E8463 /* imgui_draw.cpp in Sources */,
+				3AFE7F36247171FB000E8463 /* imgui.cpp in Sources */,
 				3A91D24E2423CB6A00A86587 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -505,6 +553,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					IMGUI_IMPL_OPENGL_LOADER_GLAD,
+					"DEBUG=1",
+					"$(inherited)",
+				);
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
 					/usr/local/include/opencv4,

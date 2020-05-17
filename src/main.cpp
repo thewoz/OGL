@@ -34,11 +34,68 @@
 
 #include <ogl/ogl.hpp>
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 /* ****************************************************************************/
 // main
 /* ****************************************************************************/
 int main(int argc, char * const argv []) {
-      
+  
+  
+#if(1)
+  
+  ogl::glWindow window;
+  
+  window.create(800, 600, "ModelView");
+  
+  //window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+  
+  window.makeContextCurrent();
+  
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+  
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  //ImGui::StyleColorsClassic();
+  
+  const char* glsl_version = "#version 150";
+
+  // Setup Platform/Renderer bindings
+  ImGui_ImplGlfw_InitForOpenGL(window.window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+  
+  bool show_demo_window = true;
+
+  while(!window.shouldClose()) {
+    
+    window.renderBegin();
+    
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+    
+    // 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+    ImGui::ShowDemoWindow(&show_demo_window);
+    
+    // Rendering
+    ImGui::Render();
+   
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    
+    window.renderEnd();
+    
+  }
+  
+#endif
+  
   
 #if(0)
   

@@ -52,9 +52,6 @@ namespace ogl {
     // Indice della camera corrente
     unsigned int currentCameraIndex;
     
-    // Puntatore della finestra GLFW
-    GLFWwindow * window;
-    
     // Ultima posizione del mouse nella finestra
     GLfloat lastX; GLfloat lastY;
     
@@ -100,6 +97,9 @@ namespace ogl {
     // mettere un controllo su offscreen
     
   public:
+    
+    // Puntatore della finestra GLFW
+    GLFWwindow * window;
     
     // Id univoco della finestra
     uint32_t id;
