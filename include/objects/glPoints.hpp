@@ -23,13 +23,18 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_GRID_H_
-#define _H_MPL_OPENGL_GRID_H_
+#ifndef _H_OGL_POINTS_H_
+#define _H_OGL_POINTS_H_
 
 #include <cstdio>
 #include <cstdlib>
 
-#include "glObject.hpp"
+#include <vector>
+#include <string>
+
+#include <opencv2/opencv.hpp>
+
+//#include <ogl/core/glObject.hpp>
 
 /*****************************************************************************/
 // namespace ogl
@@ -37,47 +42,46 @@
 namespace ogl {
 
   /*****************************************************************************/
-  // Class glGrid
+  // Class glPoints
   /*****************************************************************************/
-  class glGrid : public glObject {
+  class glPoints : public glObject {
     
   private:
         
     GLuint vao = -1;
-    GLuint vbo = -1;
-    GLuint ibo = -1;
+    GLuint vbo[2];
     
-    GLuint slices;
-    GLuint lenght;
-    
+    std::vector<cv::Point3f> points;
+    std::vector<glm::vec4> colors;
+
   public:
     
     /*****************************************************************************/
-    // glGrid
+    // glPoints
     /*****************************************************************************/
-    glGrid(const std::string & _name = "") : glObject(_name) { }
-    glGrid(GLuint _slices, const glm::vec3 & _color = glm::vec3(0.0), const std::string & _name = "") : glObject(_name) { init(_slices, _color); }
+    glPoints(const std::string & _name = "") : glObject(_name) { }
+    glPoints(const std::vector<cv::Point3f> & _points, const glm::vec4 & color = glm::vec4(0.0), const std::string & _name = "") : glObject(_name) { init(_points, color); }
     
     /*****************************************************************************/
-    // ~glGrid
+    // ~glPoints
     /*****************************************************************************/
-    ~glGrid() { cleanInGpu(); }
+    ~glPoints() { cleanInGpu(); }
  
-    /*****************************************************************************/
+    /* ****************************************************************************/
     // init
-    /*****************************************************************************/
-    void init(GLuint _slices, const glm::vec3 & _color = glm::vec3(0.0)) {
+    /* ****************************************************************************/
+    void init(const std::vector<cv::Point3f> & _points, const glm::vec4 & color = glm::vec4(0.0)) {
       
-      DEBUG_LOG("glGrid::init(" + name + ")");
+      DEBUG_LOG("glPoints::init(" + name + ")");
+         
+      glObject::initSphere();
 
-      glObject::initPlain();
-    
-      slices = _slices;
+      points = _points;
 
-      color = _color;
+      colors.resize(points.size(), color);
               
       isInited = true;
-      
+
     }
    
     /*****************************************************************************/
@@ -85,18 +89,27 @@ namespace ogl {
     /*****************************************************************************/
     void render(const glm::mat4 & projection, const glm::mat4 & view) {
       
-      DEBUG_LOG("glGrid::setInGpu(" + name + ")");
+      DEBUG_LOG("glPoints::render(" + name + ")");
 
       glObject::renderBegin(projection, view);
-          
+ 
+      glEnable(GL_PROGRAM_POINT_SIZE);
+   
+      //glEnable(GL_BLEND);
+
       glBindVertexArray(vao);
-          
-      glDrawElements(GL_LINES, lenght, GL_UNSIGNED_INT, nullptr);
 
-      glBindVertexArray(0);
-            
+      glEnableVertexAttribArray(0);
+      glEnableVertexAttribArray(1);
+
+      glDrawArrays(GL_POINTS, 0, (int)points.size());
+      
+      //glDisable(GL_BLEND);
+
+      glDisable(GL_PROGRAM_POINT_SIZE);
+
       glObject::renderEnd();
-
+      
     }
     
   private:
@@ -106,51 +119,29 @@ namespace ogl {
     /*****************************************************************************/
     void setInGpu() {
       
-      DEBUG_LOG("glGrid::setInGpu(" + name + ")");
+      DEBUG_LOG("glPoints::setInGpu(" + name + ")");
 
-      std::vector<glm::vec3> vertices;
-      std::vector<glm::uvec4> indices;
-         
-      for(int j=0; j<=slices; ++j) {
-        for(int i=0; i<=slices; ++i) {
-          float x = (float)i/(float)slices;
-          float y = 0;
-          float z = (float)j/(float)slices;
-          vertices.push_back(glm::vec3(x, y, z));
-        }
-      }
-           
-      for(int j=0; j<slices; ++j) {
-        for(int i=0; i<slices; ++i) {
-          
-          int row1 =  j    * (slices+1);
-          int row2 = (j+1) * (slices+1);
-          
-          indices.push_back(glm::uvec4(row1+i, row1+i+1, row1+i+1, row2+i+1));
-          indices.push_back(glm::uvec4(row2+i+1, row2+i, row2+i, row1+i));
-
-        }
-      }
-
-      glGenVertexArrays(1, &vao);
-      glBindVertexArray(vao);
-
-      glGenBuffers(1, &vbo);
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec3), glm::value_ptr(vertices[0]), GL_STATIC_DRAW);
-      glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-         
-      glGenBuffers(1, &ibo);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(glm::uvec4), glm::value_ptr(indices[0]), GL_STATIC_DRAW);
-
-      glBindVertexArray(0);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      if(!isInitedInGpu) {
+              
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
+        
+        glGenBuffers(2, vbo);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+        glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(cv::Point3f), points.data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(0);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+        glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec4), colors.data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(1);
       
-      lenght = (GLuint)indices.size()*4;
-      
+      }
+    
+      isInitedInGpu = true;
+          
     }
     
   private:
@@ -162,8 +153,7 @@ namespace ogl {
       
       if(isInitedInGpu) {
         
-        glDeleteBuffers(1, &vbo);
-        glDeleteBuffers(1, &ibo);
+        glDeleteBuffers(2, vbo);
         glDeleteVertexArrays(1, &vao);
         
         isInitedInGpu = false;
@@ -172,8 +162,9 @@ namespace ogl {
       
     }
     
+    
   };
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_OPENGL_GRID_H_ */
+#endif /* _H_OGL_POINTS_H_ */

@@ -23,15 +23,15 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_GLLIGHT_H_
-#define _H_MPL_GLLIGHT_H_
+#ifndef _H_OGL_GLLIGHT_H_
+#define _H_OGL_GLLIGHT_H_
 
 #include <cstdio>
 #include <cstdlib>
 
 #include <glm/glm.hpp>
 
-#include "glShader.hpp"
+//#include <ogl/core/glShader.hpp>
 
 
 /*****************************************************************************/
@@ -108,4 +108,4 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_GLLIGHT_H_ */
+#endif /* _H_OGL_GLLIGHT_H_ */

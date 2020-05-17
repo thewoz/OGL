@@ -23,13 +23,13 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_SPHERE_H_
-#define _H_MPL_OPENGL_SPHERE_H_
+#ifndef _H_OGL_SPHERE_H_
+#define _H_OGL_SPHERE_H_
 
 #include <cstdio>
 #include <cstdlib>
 
-#include "glObject.hpp"
+//#include <ogl/core/glObject.hpp>
 
 
 /*****************************************************************************/
@@ -237,4 +237,4 @@ namespace ogl {
 
 } /* namespace ogl */
 
-#endif /* _H_MPL_OPENGL_SPHERE_H_ */
+#endif /* _H_OGL_SPHERE_H_ */

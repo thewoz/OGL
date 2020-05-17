@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_GLMATERIAL_H_
-#define _H_MPL_OPENGL_GLMATERIAL_H_
+#ifndef _H_OGL_GLMATERIAL_H_
+#define _H_OGL_GLMATERIAL_H_
 
 #include <cstdlib>
 #include <cstdio>
@@ -36,8 +36,8 @@
 
 #include <assimp/scene.h>
 
-#include "glTexture.hpp"
-#include "glShader.hpp"
+//#include "glTexture.hpp"
+//#include "glShader.hpp"
 
 /*****************************************************************************/
 // namespace ogl
@@ -339,4 +339,4 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_OPENGL_GLMATERIAL_H_ */
+#endif /* _H_OGL_GLMATERIAL_H_ */

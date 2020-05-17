@@ -23,25 +23,18 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_GLWINDOW_H_
-#define _H_MPL_GLWINDOW_H_
+#ifndef _H_OGL_GLWINDOW_H_
+#define _H_OGL_GLWINDOW_H_
 
 #include <cstdlib>
 #include <cstdio>
 
 #include <vector>
 
-#include "glfw.hpp"
-#include "tiff.hpp"
+//#include <ogl/utils/glfw.hpp>
+//#include <ogl/utils/tiff.hpp>
 
-#include "glCamera.hpp"
-
-
-void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam) {
-  fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-           ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
-            type, severity, message );
-}
+//#include <ogl/core/glCamera.hpp>
 
 
 /*****************************************************************************/
@@ -153,25 +146,12 @@ namespace ogl {
       
       glfwMakeContextCurrent(window);
       
-#ifdef GLFW_WITH_GLAD
       if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
-#endif
       
       glfwGetFramebufferSize(window, &width, &height);
-      
-#ifdef GLFW_WITH_GLEW
-      // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
-      glewExperimental = GL_TRUE;
-      
-      // Initialize GLEW to setup the OpenGL Function pointers
-      if(GLEW_OK != glewInit()) {
-        fprintf(stderr, "Failed to initialize GLEW\n");
-        abort();
-      }
-#endif
       
       glfwSetWindowUserPointer(window, this);
 
@@ -633,4 +613,4 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_GLWINDOW_H_ */
+#endif /* _H_OGL_GLWINDOW_H_ */

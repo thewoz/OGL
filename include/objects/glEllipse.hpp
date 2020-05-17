@@ -23,63 +23,13 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_ELLIPSE_H_
-#define _H_MPL_OPENGL_ELLIPSE_H_
+#ifndef _H_OGL_ELLIPSE_H_
+#define _H_OGL_ELLIPSE_H_
 
 #include <cstdio>
 #include <cstdlib>
 
-#include "glObject.hpp"
-
-#if(0)
-
- void glDraw(unsigned int uiStacks = 5, unsigned int uiSlices = 5) const {
-    
-    
-    glMatrixMode(GL_MODELVIEW);
-    
-    glPushMatrix();
-    
-    double matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,1,0,0,1};
-    
-    //matrix[0] = rotation.at<double>(0,0); matrix[4] = rotation.at<double>(0,1); matrix[8]  = rotation.at<double>(0,2); matrix[12] = center.x;
-    //matrix[1] = rotation.at<double>(1,0); matrix[5] = rotation.at<double>(1,1); matrix[9]  = rotation.at<double>(1,2); matrix[13] = center.y;
-    //matrix[2] = rotation.at<double>(2,0); matrix[6] = rotation.at<double>(2,1); matrix[10] = rotation.at<double>(2,2); matrix[14] = center.z;
-    
-    matrix[0] = rotation.at<double>(0,0); matrix[4] = rotation.at<double>(1,0); matrix[8]  = rotation.at<double>(2,0); matrix[12] = center.x;
-    matrix[1] = rotation.at<double>(0,1); matrix[5] = rotation.at<double>(1,1); matrix[9]  = rotation.at<double>(2,1); matrix[13] = center.y;
-    matrix[2] = rotation.at<double>(0,2); matrix[6] = rotation.at<double>(1,2); matrix[10] = rotation.at<double>(2,2); matrix[14] = center.z;
-    
-    glMultMatrixd(matrix);
-    
-    glColor3f(0, 0, 0);
-    
-    glLineWidth(1.0);
-    
-    glEnable(GL_LINE_SMOOTH);
-    
-    float tStep = (M_PI) / (float)uiSlices;
-    float sStep = (M_PI) / (float)uiStacks;
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    for(float t = -M_PI/2; t <= (M_PI/2)+.0001; t += tStep)
-    {
-      glBegin(GL_TRIANGLE_STRIP);
-      for(float s = -M_PI; s <= M_PI+.0001; s += sStep)
-      {
-        glVertex3f(a * cos(t) * cos(s), b * cos(t) * sin(s), c * sin(t));
-        glVertex3f(a * cos(t+tStep) * cos(s), b * cos(t+tStep) * sin(s), c * sin(t+tStep));
-      }
-      glEnd();
-    }
-    
-    glDisable(GL_LINE_SMOOTH);
-    
-    glPopMatrix();
-    
-  }
-  
-#endif
-
+//#include <ogl/core/glObject.hpp>
 
 
 /*****************************************************************************/
@@ -292,6 +242,6 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_OPENGL_ELLIPSE_H_ */
+#endif /* _H_OGL_ELLIPSE_H_ */
 
 

@@ -33,17 +33,51 @@
 #include <opencv2/opencv.hpp>
 
 #include <ogl/ogl.hpp>
-//#include "hull.hpp"
 
-
-#include "glPrint.hpp"
 
 /* ****************************************************************************/
 // main
 /* ****************************************************************************/
 int main(int argc, char * const argv []) {
       
-#if(1)
+  
+#if(0)
+  
+  ogl::glWindow window;
+  
+  window.create(800, 600, "ModelView");
+  
+  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+  
+  window.makeContextCurrent();
+  
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+  
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  //ImGui::StyleColorsClassic();
+  
+  // Setup Platform/Renderer bindings
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+  
+  while(!window.shouldClose()) {
+    
+    window.renderBegin();
+    
+    
+    window.renderEnd();
+    
+  }
+  
+#endif
+  
+#if(0)
   
   ogl::glWindow window;
   
@@ -54,14 +88,12 @@ int main(int argc, char * const argv []) {
   window.makeContextCurrent();
   
   ogl::glPrint text("testo");
-  
-  text.init();
-  
+    
   while(!window.shouldClose()) {
     
     window.renderBegin();
     
-    text.print(window.getOrthoProjection(), "leo", 50, 05, glm::vec3(1.0));
+    text.print(window.getOrthoProjection(), "leo", 0, 0, glm::vec3(255.0));
 
     window.renderEnd();
     
@@ -108,7 +140,6 @@ int main(int argc, char * const argv []) {
 
 #endif
   
-  
 #if(0)
   
   ogl::glWindow window;
@@ -139,7 +170,7 @@ int main(int argc, char * const argv []) {
   ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0), "linea");
   ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0), "cubo"); cube.translate(glm::vec3(0.5));
   ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0), "box"); box.translate(glm::vec3(-0.5));
-
+  ogl::glPrint text("testo");
   ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0), "griglia");
 
   while(!window.shouldClose()) {
@@ -148,21 +179,21 @@ int main(int argc, char * const argv []) {
   
       axes.render(window.getProjection(), window.getView());
 
-      //sphere.render(window.getProjection(), window.getView());
+      sphere.render(window.getProjection(), window.getView());
 
-      //grid.render(window.getProjection(), window.getView());
+      grid.render(window.getProjection(), window.getView());
 
-      //line.render(window.getProjection(), window.getView());
+      line.render(window.getProjection(), window.getView());
 
-      //cube.render(window.getProjection(), window.getView());
+      cube.render(window.getProjection(), window.getView());
     
-      //box.render(window.getProjection(), window.getView());
+      box.render(window.getProjection(), window.getView());
 
-      //ellipse.render(window.getProjection(), window.getView());
+      ellipse.render(window.getProjection(), window.getView());
 
-      //points.render(window.getProjection(), window.getView());
+      points.render(window.getProjection(), window.getView());
     
-      //ogl::glPrint("prova", 1.0, 1.0, 1.0f);
+    text.print(window.getOrthoProjection(), "OGL", 0, 0, glm::vec3(255.0));
       
     window.renderEnd();
       
@@ -174,7 +205,7 @@ int main(int argc, char * const argv []) {
   
   ogl::glAxes axes;
 
-  ogl::glModel model("/usr/local/include/ogl/model/Trex/Trex.fbx");
+  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
 
   ogl::glWindow window;
 
@@ -210,12 +241,11 @@ int main(int argc, char * const argv []) {
       
 #endif
   
-  
 #if(0)
   
   ogl::glAxes axes;
   
-  ogl::glModel model("/usr/local/include/ogl/model/Trex/Trex.fbx");
+  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
   
   ogl::glWindow window;
   
@@ -251,13 +281,10 @@ int main(int argc, char * const argv []) {
   
 #endif
   
-  
-  
-  
 #if(0)
   
   ogl::glAxes axes;
-  ogl::glModel model("/usr/local/include/ogl/model/Trex/Trex.fbx");
+  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
 
   ogl::glWindow window;
     

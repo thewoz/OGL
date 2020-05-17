@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_PRINT_H_
-#define _H_MPL_OPENGL_PRINT_H_
+#ifndef _H_OGL_PRINT_H_
+#define _H_OGL_PRINT_H_
 
 #include <cstdlib>
 #include <cstdio>
@@ -128,4 +128,4 @@ namespace ogl {
 
 } /* namespace ogl */
 
-#endif /* _H_MPL_OPENGL_PRINT_H_ */
+#endif /* _H_OGL_PRINT_H_ */

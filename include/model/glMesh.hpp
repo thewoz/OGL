@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_GLMESH_H_
-#define _H_MPL_GLMESH_H_
+#ifndef _H_OGL_GLMESH_H_
+#define _H_OGL_GLMESH_H_
 
 #include <cstdlib>
 #include <cstdio>
@@ -38,8 +38,8 @@
 
 #include <glm/glm.hpp>
 
-#include "glShader.hpp"
-#include "glMaterial.hpp"
+//#include <ogl/core/glShader.hpp>
+//#include <ogl/model/glMaterial.hpp>
 
 /*****************************************************************************/
 // namespace ogl
@@ -358,5 +358,5 @@ namespace ogl {
   
 } /* namspace ogl */
 
-#endif /* _H_MPL_GLMESH_H_ */
+#endif /* _H_OGL_GLMESH_H_ */
 

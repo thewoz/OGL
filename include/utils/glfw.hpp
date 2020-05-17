@@ -23,21 +23,13 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_GLFW_H_
-#define _H_MPL_GLFW_H_
-
-#define GLFW_WITH_GLAD
+#ifndef _H_OGL_GLFW_H_
+#define _H_OGL_GLFW_H_
 
 #include <cstdlib>
 #include <cstdio>
 
-#ifdef GLFW_WITH_GLAD
-  #include <glad/glad.h>
-#endif
-
-#ifdef GLFW_WITH_GLEW
-  #include <GL/glew.h>
-#endif
+#include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
 
@@ -122,4 +114,4 @@ namespace glfw {
   
 } /* namespace glfw */
 
-#endif /* _H_MPL_GLFW_H_ */
+#endif /* _H_OGL_GLFW_H_ */

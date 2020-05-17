@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_OBJECT_H_
-#define _H_MPL_OPENGL_OBJECT_H_
+#ifndef _H_OGL_OBJECT_H_
+#define _H_OGL_OBJECT_H_
 
 #include <cstdio>
 #include <cstdlib>
@@ -33,12 +33,10 @@
 
 #include <glm/glm.hpp>
 
-#include <mpl/debug.hpp>
+//#include <ogl/utils/glfw.hpp>
 
-#include "glfw.hpp"
-
-#include "glWindow.hpp"
-#include "glShader.hpp"
+//#include <ogl/core/glWindow.hpp>
+//#include <ogl/core/glShader.hpp>
 
 
 /* ****************************************************************************/
@@ -366,4 +364,4 @@ namespace ogl {
 
 } /* namespace ogl */
 
-#endif /* _H_MPL_OPENGL_OBJECT_H_ */
+#endif /* _H_OGL_OBJECT_H_ */

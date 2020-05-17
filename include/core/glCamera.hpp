@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_GLCAMERA_H_
-#define _H_MPL_GLCAMERA_H_
+#ifndef _H_OGL_GLCAMERA_H_
+#define _H_OGL_GLCAMERA_H_
 
 #include <cstdlib>
 #include <cstdio>
@@ -284,5 +284,5 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_GLWINDOW_H_ */
+#endif /* _H_OGL_GLCAMERA_H_ */
 

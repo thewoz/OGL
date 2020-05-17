@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_GLMODEL_H_
-#define _H_MPL_GLMODEL_H_
+#ifndef _H_OGL_GLMODEL_H_
+#define _H_OGL_GLMODEL_H_
 
 #include <cstdio>
 #include <cstdlib>
@@ -39,11 +39,12 @@
 
 #include <mpl/stdio.hpp>
 
-#include "glMesh.hpp"
-#include "glShader.hpp"
-#include "glLight.hpp"
+//#include <ogl/core/glShader.hpp>
+//#include <ogl/core/glObject.hpp>
+//
+//#include <ogl/model/glMesh.hpp>
+//#include <ogl/model/glLight.hpp>
 
-#include "glObject.hpp"
 
 /*****************************************************************************/
 // namespace ogl

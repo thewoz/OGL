@@ -23,84 +23,43 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_H_
-#define _H_MPL_OPENGL_H_
+#ifndef _H_OGL_H_
+#define _H_OGL_H_
 
-#include <string>
-#include <iostream>
-
+// Degug from MPL
 #include <mpl/debug.hpp>
-//#include <glm/glm.hpp>
 
-#include "glfw.hpp"
+// Utils
+#include <ogl/utils/glfw.hpp>
+#include <ogl/utils/tiff.hpp>
+#include <ogl/utils/error.hpp>
 
-/*****************************************************************************/
-// glCheckError() -
-/*****************************************************************************/
-GLenum glCheckError_(const char *file, int line) {
-  
-    GLenum errorCode = GL_NO_ERROR;
-  
-  bool getError = false;
-  
-    while ((errorCode = glGetError()) != GL_NO_ERROR) {
-      
-        std::string error;
-      
-        switch (errorCode)
-        {
-            case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; getError = true; break;
-            case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; getError = true; break;
-            case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; getError = true; break;
-            case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; getError = true; break;
-            case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; getError = true; break;
-            case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; getError = true; break;
-            case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; getError = true; break;
-        }
-      
-        std::cout << error << " | " << file << " (" << line << ")" << std::endl;
-      
-    }
-  
-    if(getError) { fflush(stdout); abort(); }
-  
-    return errorCode;
-  
-}
-
-#define glCheckError() glCheckError_(__FILE__, __LINE__)
-
-//inline glm::vec3 operator = (const glm::quat & quat) const { return glm::eulerAngles(quat); }
-
-
-#include "tiff.hpp"
-
-#include "glCamera.hpp"
-#include "glWindow.hpp"
-
-#include "glShader.hpp"
-
-#include "glLine.hpp"
-#include "glSphere.hpp"
-#include "glEllipse.hpp"
-#include "glGrid.hpp"
-#include "glQuad.hpp"
-#include "glBox.hpp"
-#include "glCuboid.hpp"
-#include "glAxes.hpp"
-#include "glPoints.hpp"
-
-#include "glMesh.hpp"
-#include "glMaterial.hpp"
-#include "glTexture.hpp"
-
-#include "glLight.hpp"
+// Core
+#include <ogl/core/glCamera.hpp>
+#include <ogl/core/glWindow.hpp>
+#include <ogl/core/glShader.hpp>
+#include <ogl/core/glQuad.hpp>
+#include <ogl/core/glTexture.hpp>
+#include <ogl/core/glObject.hpp>
 //#include "glShadow.hpp"
 
-#include "glModel.hpp"
+// Model
+#include <ogl/model/glLight.hpp>
+#include <ogl/model/glMaterial.hpp>
+#include <ogl/model/glMesh.hpp>
+#include <ogl/model/glModel.hpp>
 
-//#include "glPrint.hpp"
+// Objects
+#include <ogl/objects/glLine.hpp>
+#include <ogl/objects/glSphere.hpp>
+#include <ogl/objects/glEllipse.hpp>
+#include <ogl/objects/glGrid.hpp>
+#include <ogl/objects/glBox.hpp>
+#include <ogl/objects/glCuboid.hpp>
+#include <ogl/objects/glAxes.hpp>
+#include <ogl/objects/glPoints.hpp>
+#include <ogl/objects/glPrint.hpp>
 
-#endif /* _H_MPL_OPENGL_H_ */
+#endif /* _H_OGL_H_ */
 
 

@@ -23,13 +23,13 @@
  * SOFTWARE.
  */
 
-#ifndef _H_MPL_OPENGL_LINE_H_
-#define _H_MPL_OPENGL_LINE_H_
+#ifndef _H_OGL_LINE_H_
+#define _H_OGL_LINE_H_
 
 #include <cstdlib>
 #include <cstdio>
 
-#include "glObject.hpp"
+//#include <ogl/core/glObject.hpp>
 
 /*****************************************************************************/
 // namespace ogl
@@ -182,4 +182,4 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_OPENGL_LINE_H_ */
+#endif /* _H_OGL_LINE_H_ */
