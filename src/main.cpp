@@ -34,48 +34,11 @@
 
 #include <ogl/ogl.hpp>
 
-
 /* ****************************************************************************/
 // main
 /* ****************************************************************************/
 int main(int argc, char * const argv []) {
       
-  
-#if(0)
-  
-  ogl::glWindow window;
-  
-  window.create(800, 600, "ModelView");
-  
-  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-  
-  window.makeContextCurrent();
-  
-  // Setup Dear ImGui context
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
-  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-  
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  //ImGui::StyleColorsClassic();
-  
-  // Setup Platform/Renderer bindings
-  ImGui_ImplGlfw_InitForOpenGL(window, true);
-  ImGui_ImplOpenGL3_Init(glsl_version);
-  
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-    
-    
-    window.renderEnd();
-    
-  }
-  
-#endif
   
 #if(0)
   
