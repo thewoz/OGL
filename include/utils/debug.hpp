@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright © 2017
+ * Copyright © 2019
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,45 +23,15 @@
  * SOFTWARE.
  */
 
-#ifndef _H_OGL_H_
-#define _H_OGL_H_
+#ifndef _H_OGL_DEBUG_H_
+#define _H_OGL_DEBUG_H_
 
-// Debug
-#include <ogl/utils/debug.hpp>
-//#define DEBUG_OGL
+#include <iostream>
 
-// Utils
-#include <ogl/utils/glfw.hpp>
-#include <ogl/utils/tiff.hpp>
-#include <ogl/utils/error.hpp>
+#ifdef DEBUG_OGL
+  #define DEBUG_LOG(x) (std::cout << x << std::endl)
+#else
+  #define DEBUG_LOG(x)
+#endif
 
-// Core
-#include <ogl/core/glCamera.hpp>
-#include <ogl/core/glWindow.hpp>
-#include <ogl/core/glShader.hpp>
-#include <ogl/core/glQuad.hpp>
-#include <ogl/core/glTexture.hpp>
-#include <ogl/core/glObject.hpp>
-#include <ogl/core/glColors.hpp>
-//#include "glShadow.hpp"
-
-// Model
-#include <ogl/model/glLight.hpp>
-#include <ogl/model/glMaterial.hpp>
-#include <ogl/model/glMesh.hpp>
-#include <ogl/model/glModel.hpp>
-
-// Objects
-#include <ogl/objects/glLine.hpp>
-#include <ogl/objects/glSphere.hpp>
-#include <ogl/objects/glEllipse.hpp>
-#include <ogl/objects/glGrid.hpp>
-#include <ogl/objects/glBox.hpp>
-#include <ogl/objects/glCuboid.hpp>
-#include <ogl/objects/glAxes.hpp>
-#include <ogl/objects/glPoints.hpp>
-#include <ogl/objects/glPrint.hpp>
-
-#endif /* _H_OGL_H_ */
-
-
+#endif /* _H_MPL_DEBUG_H_ */

@@ -30,8 +30,6 @@
 #include <algorithm>
 #include <random>
 
-#include <opencv2/opencv.hpp>
-
 #include <ogl/ogl.hpp>
 
 /* ****************************************************************************/
@@ -103,7 +101,7 @@ int main(int argc, char * const argv []) {
 
 #endif
   
-#if(0)
+#if(1)
   
   ogl::glWindow window;
 
@@ -117,7 +115,7 @@ int main(int argc, char * const argv []) {
   std::mt19937 gen = std::mt19937(rd());
   std::normal_distribution<float> gaussRandom = std::normal_distribution<float>(-0.2, 0.2);
   
-  std::vector<cv::Point3f> coords(1000);
+  std::vector<glm::vec3> coords(1000);
   
   for(size_t i=0; i<1000; ++i) {
     coords[i].x = gaussRandom(gen);
@@ -125,7 +123,7 @@ int main(int argc, char * const argv []) {
     coords[i].z = gaussRandom(gen);
   }
   
-  ogl::glPoints points(coords, glm::vec4(1.0), "punti");
+  ogl::glPoints points(coords, glm::vec4(1.0), 10, "punti");
   
   ogl::glAxes axes(1.0, "assi");
   ogl::glSphere sphere(1.0, 10, 10, ogl::glObject::STYLE::WIREFRAME, glm::vec3(0.0,0.0,1.0), "sfera");

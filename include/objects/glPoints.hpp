@@ -32,7 +32,7 @@
 #include <vector>
 #include <string>
 
-#include <opencv2/opencv.hpp>
+//#include <opencv2/opencv.hpp>
 
 //#include <ogl/core/glObject.hpp>
 
@@ -51,16 +51,20 @@ namespace ogl {
     GLuint vao = -1;
     GLuint vbo[2];
     
-    std::vector<cv::Point3f> points;
+    std::vector<glm::vec3> points;
     std::vector<glm::vec4> colors;
 
+    float radius;
+    
   public:
     
     /*****************************************************************************/
     // glPoints
     /*****************************************************************************/
     glPoints(const std::string & _name = "") : glObject(_name) { }
-    glPoints(const std::vector<cv::Point3f> & _points, const glm::vec4 & color = glm::vec4(0.0), const std::string & _name = "") : glObject(_name) { init(_points, color); }
+    glPoints(const std::vector<glm::vec3> & _points, const glm::vec4 & color = glm::vec4(0.0), float _radius = 1, const std::string & _name = "") : glObject(_name) { init(_points, color, _radius); }
+    glPoints(const std::vector<glm::vec3> & _points, const std::vector<glm::vec4> & _color, float _radius = 1, const std::string & _name = "") : glObject(_name) { init(_points, _color, _radius); }
+
     
     /*****************************************************************************/
     // ~glPoints
@@ -70,7 +74,7 @@ namespace ogl {
     /* ****************************************************************************/
     // init
     /* ****************************************************************************/
-    void init(const std::vector<cv::Point3f> & _points, const glm::vec4 & color = glm::vec4(0.0)) {
+    void init(const std::vector<glm::vec3> & _points, const glm::vec4 & color = glm::vec4(0.0), float _radius = 1) {
       
       DEBUG_LOG("glPoints::init(" + name + ")");
          
@@ -80,30 +84,62 @@ namespace ogl {
 
       colors.resize(points.size(), color);
               
-      isInited = true;
+      radius = _radius;
 
+      isInited = true;
+      
     }
    
-    /*****************************************************************************/
+    /* ****************************************************************************/
+    // init
+    /* ****************************************************************************/
+    void init(const std::vector<glm::vec3> & _points, const std::vector<glm::vec4> & _color, float _radius = 1) {
+      
+      DEBUG_LOG("glPoints::init(" + name + ")");
+      
+      glObject::initSphere();
+      
+      points = _points;
+      
+      colors = _color;
+      
+      radius = _radius;
+      
+      isInited = true;
+      
+    }
+    
+    //****************************************************************************/
+    // setRadius
+    //****************************************************************************/
+    void setRadius(float _radius) { radius = _radius; }
+    
+    //****************************************************************************/
     // render
-    /*****************************************************************************/
-    void render(const glm::mat4 & projection, const glm::mat4 & view) {
+    //****************************************************************************/
+    void render(const glm::mat4 & projection, const glm::mat4 & view, int from = 0, int to = -1) {
+      
+      if(to == -1) to = (int) points.size();
       
       DEBUG_LOG("glPoints::render(" + name + ")");
 
-      glObject::renderBegin(projection, view);
- 
       glEnable(GL_PROGRAM_POINT_SIZE);
-   
+
+      glObject::renderBegin(projection, view);
+      
+      shader.setUniform("pointSize", radius);
+
+      printf("radius %f\n", radius);
+
       //glEnable(GL_BLEND);
 
       glBindVertexArray(vao);
 
       glEnableVertexAttribArray(0);
       glEnableVertexAttribArray(1);
-
-      glDrawArrays(GL_POINTS, 0, (int)points.size());
       
+      glDrawArrays(GL_POINTS, from, to);
+
       //glDisable(GL_BLEND);
 
       glDisable(GL_PROGRAM_POINT_SIZE);
@@ -111,6 +147,7 @@ namespace ogl {
       glObject::renderEnd();
       
     }
+    
     
   private:
     
@@ -129,7 +166,7 @@ namespace ogl {
         glGenBuffers(2, vbo);
         
         glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(cv::Point3f), points.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), points.data(), GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(0);
         
