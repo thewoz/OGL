@@ -24,6 +24,9 @@
 
 /* Begin PBXFileReference section */
 		3A3B498D241F9BA700084872 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		3A4DA33C24745DAA00714407 /* glLines.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glLines.hpp; sourceTree = "<group>"; };
+		3A4DA33D247464F600714407 /* advanced.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = advanced.vs; sourceTree = "<group>"; };
+		3A4DA33E247464F800714407 /* advanced.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = advanced.fs; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AF045942472DBB100DBCC91 /* glColors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glColors.hpp; sourceTree = "<group>"; };
 		3AFE1E9624742880006C81D8 /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
@@ -135,6 +138,8 @@
 				3AFE7EE3247164C7000E8463 /* depth.vs */,
 				3AFE7EE0247164C7000E8463 /* plain.fs */,
 				3AFE7EE2247164C7000E8463 /* plain.vs */,
+				3A4DA33E247464F800714407 /* advanced.fs */,
+				3A4DA33D247464F600714407 /* advanced.vs */,
 				3AFE7ED6247164C7000E8463 /* model.fs */,
 				3AFE7EE1247164C7000E8463 /* model.vs */,
 				3AFE7EDF247164C7000E8463 /* text.fs */,
@@ -240,6 +245,7 @@
 			children = (
 				3AFE7EFD247164C8000E8463 /* glCuboid.hpp */,
 				3AFE7EFE247164C8000E8463 /* glLine.hpp */,
+				3A4DA33C24745DAA00714407 /* glLines.hpp */,
 				3AFE7EFF247164C8000E8463 /* glAxes.hpp */,
 				3AFE7F00247164C8000E8463 /* glEllipse.hpp */,
 				3AFE7F01247164C8000E8463 /* glSphere.hpp */,

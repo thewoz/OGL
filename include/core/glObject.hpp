@@ -119,6 +119,23 @@ namespace ogl {
       }
     
     /* ****************************************************************************/
+    // initAdvanced() -
+    /* ****************************************************************************/
+    void initAdvanced(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
+      
+      if(name.empty()) name = _name;
+      
+      DEBUG_LOG("glObject::init(" + name + ")");
+      
+      shader.setName(name);
+      
+      shader.initAdvanced();
+      
+      _init(_center, _angles, _size);
+      
+    }
+    
+    /* ****************************************************************************/
     // initText() -
     /* ****************************************************************************/
     void initText(const std::string & _name = "") {

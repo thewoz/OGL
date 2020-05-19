@@ -53,6 +53,7 @@
 
 // Objects
 #include <ogl/objects/glLine.hpp>
+#include <ogl/objects/glLines.hpp>
 #include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glEllipse.hpp>
 #include <ogl/objects/glGrid.hpp>

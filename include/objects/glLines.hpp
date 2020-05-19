@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_OGL_POINTS_H_
-#define _H_OGL_POINTS_H_
+#ifndef _H_OGL_LINES_H_
+#define _H_OGL_LINES_H_
 
 #include <cstdio>
 #include <cstdlib>
@@ -40,110 +40,113 @@
 // namespace ogl
 /*****************************************************************************/
 namespace ogl {
-
+  
   /*****************************************************************************/
-  // Class glPoints
+  // Class glLines
   /*****************************************************************************/
-  class glPoints : public glObject {
+  class glLines : public glObject {
     
   private:
-        
+    
     GLuint vao = -1;
     GLuint vbo[2];
     
-    std::vector<glm::vec3> points;
+    std::vector<glm::vec3> vertices;
     std::vector<glm::vec4> colors;
-
-    float radius;
-    
+        
   public:
     
-    /*****************************************************************************/
-    // glPoints
-    /*****************************************************************************/
-    glPoints(const std::string & _name = "") : glObject(_name) { }
-    glPoints(const std::vector<glm::vec3> & _points, const glm::vec4 & color = glm::vec4(0.0), float _radius = 1, const std::string & _name = "") : glObject(_name) { init(_points, color, _radius); }
-    glPoints(const std::vector<glm::vec3> & _points, const std::vector<glm::vec4> & _color, float _radius = 1, const std::string & _name = "") : glObject(_name) { init(_points, _color, _radius); }
-
+    //****************************************************************************/
+    // glLines
+    //****************************************************************************/
+    glLines(const std::string & _name = "") : glObject(_name) { }
+    glLines(const std::vector<glm::vec3> & _vertices, const glm::vec4 & color = glm::vec4(0.0), const std::string & _name = "") : glObject(_name) { init(_vertices, color); }
+    glLines(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, const std::string & _name = "") : glObject(_name) { init(_vertices, _color); }
     
-    /*****************************************************************************/
-    // ~glPoints
-    /*****************************************************************************/
-    ~glPoints() { cleanInGpu(); }
- 
-    /* ****************************************************************************/
+    
+    //****************************************************************************/
+    // ~glLines
+    //****************************************************************************/
+    ~glLines() { cleanInGpu(); }
+    
+    //****************************************************************************/
     // init
-    /* ****************************************************************************/
-    void init(const std::vector<glm::vec3> & _points, const glm::vec4 & color = glm::vec4(0.0), float _radius = 1) {
+    //****************************************************************************/
+    void init(const std::vector<glm::vec3> & _vertices, const glm::vec4 & color = glm::vec4(0.0)) {
       
-      DEBUG_LOG("glPoints::init(" + name + ")");
-         
-      glObject::initSphere();
-
-      points = _points;
-
-      colors.resize(points.size(), color);
-              
-      radius = _radius;
-
+      DEBUG_LOG("glLines::init(" + name + ")");
+      
+      glObject::initAdvanced();
+      
+      vertices = _vertices;
+      
+      colors.resize(vertices.size(), color);
+            
       isInited = true;
       
     }
-   
+    
     /* ****************************************************************************/
     // init
     /* ****************************************************************************/
-    void init(const std::vector<glm::vec3> & _points, const std::vector<glm::vec4> & _color, float _radius = 1) {
+    void init(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color) {
       
-      DEBUG_LOG("glPoints::init(" + name + ")");
+      DEBUG_LOG("glLines::init(" + name + ")");
       
-      glObject::initSphere();
+      glObject::initAdvanced();
       
-      points = _points;
+      vertices = _vertices;
       
       colors = _color;
-      
-      radius = _radius;
-      
+            
       isInited = true;
       
     }
     
-    //****************************************************************************/
-    // setRadius
-    //****************************************************************************/
-    void setRadius(float _radius) { radius = _radius; }
-    
+  
     //****************************************************************************/
     // render
     //****************************************************************************/
-    void render(const glm::mat4 & projection, const glm::mat4 & view, int from = 0, int to = -1) {
+    void render(const glm::mat4 & projection, const glm::mat4 & view, int from = 0, int to = -1, int strip = -1, int stripOffset = -1) {
       
-      if(to == -1) to = (int) points.size();
+      if(to == -1) to = (int) vertices.size();
       
-      DEBUG_LOG("glPoints::render(" + name + ")");
-
-      glEnable(GL_PROGRAM_POINT_SIZE);
-
+      DEBUG_LOG("glLines::render(" + name + ")");
+          
       glObject::renderBegin(projection, view);
-      
-      shader.setUniform("pointSize", radius);
-
+                  
       //glEnable(GL_BLEND);
-
+      
+      //glEnable(GL_LINE_SMOOTH);
+      
+      //glShadeModel(GL_SMOOTH);
+      
+      //glLineWidth(2);
+      
       glBindVertexArray(vao);
-
+      
       glEnableVertexAttribArray(0);
       glEnableVertexAttribArray(1);
       
-      glDrawArrays(GL_POINTS, from, to);
+      if(strip == -1) {
+        
+        glDrawArrays(GL_LINE_STRIP, from, to);
+
+      } else {
+        
+        for(int i=0; i<=strip; ++i)
+          glDrawArrays(GL_LINE_STRIP, (i*stripOffset)+from, to);
+
+      }
+      
+      
 
       //glDisable(GL_BLEND);
-
-      glDisable(GL_PROGRAM_POINT_SIZE);
+            
+      //glDisable(GL_LINE_SMOOTH);
 
       glBindVertexArray(0);
-
+      
       glObject::renderEnd();
       
     }
@@ -151,22 +154,22 @@ namespace ogl {
     
   private:
     
-    /*****************************************************************************/
+    //****************************************************************************/
     // setInGpu
-    /*****************************************************************************/
+    //****************************************************************************/
     void setInGpu() {
       
-      DEBUG_LOG("glPoints::setInGpu(" + name + ")");
-
+      DEBUG_LOG("glLines::setInGpu(" + name + ")");
+      
       if(!isInitedInGpu) {
-              
+        
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
         
         glGenBuffers(2, vbo);
         
         glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), points.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(0);
         
@@ -174,15 +177,15 @@ namespace ogl {
         glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec4), colors.data(), GL_STATIC_DRAW);
         glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(1);
-      
+        
         glBindBuffer(GL_ARRAY_BUFFER,0);
         
         glBindVertexArray(0);
         
       }
-    
+      
       isInitedInGpu = true;
-          
+      
     }
     
   private:
@@ -198,7 +201,7 @@ namespace ogl {
         glDeleteVertexArrays(1, &vao);
         
         isInitedInGpu = false;
-
+        
       }
       
     }
@@ -208,4 +211,4 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_OGL_POINTS_H_ */
+#endif /* _H_OGL_LINES_H_ */
