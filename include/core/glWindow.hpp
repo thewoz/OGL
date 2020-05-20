@@ -74,7 +74,9 @@ namespace ogl {
     // Background color
     glm::vec3 background;
     
-    bool inputDisable;
+    //bool inputDisable;
+    
+    bool isProcessMouseMovement = true;
     
   public:
     
@@ -181,7 +183,7 @@ namespace ogl {
 
       currentCamera = &cameras[currentCameraIndex];
 
-      inputDisable = false;
+      //inputDisable = false;
         
       // Funziona con OpenGL >= 4.3
       // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
@@ -261,7 +263,7 @@ namespace ogl {
       
       currentCamera = &cameras[currentCameraIndex];
       
-      inputDisable = false;
+      //inputDisable = false;
       
     }
     
@@ -294,6 +296,7 @@ namespace ogl {
     //****************************************************************************//
     ogl::glCamera * getCurrentCamera() { return currentCamera; }
       
+    
   private:
     
     //****************************************************************************//
@@ -408,7 +411,7 @@ namespace ogl {
         lastX = xPos;
         lastY = yPos;
         
-        currentCamera->processMouseMovement(xOffset, yOffset);
+        if(isProcessMouseMovement) currentCamera->processMouseMovement(xOffset, yOffset);
         
         cursorPos(lastX, lastY, xOffset, yOffset);
       
@@ -424,7 +427,6 @@ namespace ogl {
       //      else if(button==GLFW_MOUSE_BUTTON_1 && mods==GLFW_MOD_SHIFT)   buttonMouse = GLFW_MOUSE_BUTTON_3;
       //    } else if(action == GLFW_RELEASE){ buttonMouse = -1; }
     }
-    
     
     
   public:
@@ -466,9 +468,17 @@ namespace ogl {
       background = _background;
     }
     
-    inline void disableInput() { inputDisable = true; }
-    inline void enableInput() { inputDisable = false; }
+    //inline void disableInput() { inputDisable = true; }
+    //inline void enableInput() { inputDisable = false; }
 
+    
+    /*****************************************************************************/
+    // disable/enable mouseOnCamera() -
+    /*****************************************************************************/
+    void disableMouseOnCamera() { isProcessMouseMovement = false; }
+    void enableMouseOnCamera()  { isProcessMouseMovement = true;  }
+    
+    
     inline void hide() { glfwHideWindow(window); }
     inline void show() { glfwShowWindow(window); }
     inline void iconify() { glfwIconifyWindow(window); }
