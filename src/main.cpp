@@ -69,8 +69,6 @@ int main(int argc, char * const argv []) {
   ImGui_ImplGlfw_InitForOpenGL(window.window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
   
-  bool show_demo_window = true;
-
   while(!window.shouldClose()) {
     
     window.renderBegin();
@@ -183,7 +181,7 @@ int main(int argc, char * const argv []) {
 
 #endif
   
-#if(1)
+#if(0)
   
   ogl::glWindow window;
 
