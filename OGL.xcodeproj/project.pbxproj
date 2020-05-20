@@ -30,7 +30,12 @@
 
 /* Begin PBXFileReference section */
 		3A3B498D241F9BA700084872 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		3A4DA33C24745DAA00714407 /* glLines.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glLines.hpp; sourceTree = "<group>"; };
+		3A4DA33D247464F600714407 /* advanced.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = advanced.vs; sourceTree = "<group>"; };
+		3A4DA33E247464F800714407 /* advanced.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = advanced.fs; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AF045942472DBB100DBCC91 /* glColors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glColors.hpp; sourceTree = "<group>"; };
+		3AFE1E9624742880006C81D8 /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		3AFE7ED5247164C7000E8463 /* sphere.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.fs; sourceTree = "<group>"; };
 		3AFE7ED6247164C7000E8463 /* model.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.fs; sourceTree = "<group>"; };
 		3AFE7ED9247164C7000E8463 /* PCF.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = PCF.vs; sourceTree = "<group>"; };
@@ -149,16 +154,18 @@
 		3AFE7ED4247164C7000E8463 /* shader */ = {
 			isa = PBXGroup;
 			children = (
-				3AFE7ED5247164C7000E8463 /* sphere.fs */,
-				3AFE7ED6247164C7000E8463 /* model.fs */,
 				3AFE7ED7247164C7000E8463 /* shadow */,
 				3AFE7EDE247164C7000E8463 /* depth.fs */,
-				3AFE7EDF247164C7000E8463 /* text.fs */,
-				3AFE7EE0247164C7000E8463 /* plain.fs */,
-				3AFE7EE1247164C7000E8463 /* model.vs */,
-				3AFE7EE2247164C7000E8463 /* plain.vs */,
 				3AFE7EE3247164C7000E8463 /* depth.vs */,
+				3AFE7EE0247164C7000E8463 /* plain.fs */,
+				3AFE7EE2247164C7000E8463 /* plain.vs */,
+				3A4DA33E247464F800714407 /* advanced.fs */,
+				3A4DA33D247464F600714407 /* advanced.vs */,
+				3AFE7ED6247164C7000E8463 /* model.fs */,
+				3AFE7EE1247164C7000E8463 /* model.vs */,
+				3AFE7EDF247164C7000E8463 /* text.fs */,
 				3AFE7EE4247164C7000E8463 /* text.vs */,
+				3AFE7ED5247164C7000E8463 /* sphere.fs */,
 				3AFE7EE5247164C7000E8463 /* sphere.vs */,
 			);
 			path = shader;
@@ -259,6 +266,7 @@
 			children = (
 				3AFE7EFD247164C8000E8463 /* glCuboid.hpp */,
 				3AFE7EFE247164C8000E8463 /* glLine.hpp */,
+				3A4DA33C24745DAA00714407 /* glLines.hpp */,
 				3AFE7EFF247164C8000E8463 /* glAxes.hpp */,
 				3AFE7F00247164C8000E8463 /* glEllipse.hpp */,
 				3AFE7F01247164C8000E8463 /* glSphere.hpp */,
@@ -277,6 +285,7 @@
 				3AFE7F08247164C8000E8463 /* glShadow.hpp */,
 				3AFE7F09247164C8000E8463 /* glCamera.hpp */,
 				3AFE7F0B247164C8000E8463 /* glObject.hpp */,
+				3AF045942472DBB100DBCC91 /* glColors.hpp */,
 				3AFE7F0C247164C8000E8463 /* glTexture.hpp */,
 				3AFE7F0D247164C8000E8463 /* glWindow.hpp */,
 				3AFE7F0E247164C8000E8463 /* glShader.hpp */,
@@ -298,6 +307,7 @@
 		3AFE7F14247164C8000E8463 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				3AFE1E9624742880006C81D8 /* debug.hpp */,
 				3AFE7F16247164C8000E8463 /* tiff.hpp */,
 				3AFE7F17247164C8000E8463 /* glfw.hpp */,
 				3AFE7F192471681F000E8463 /* error.hpp */,

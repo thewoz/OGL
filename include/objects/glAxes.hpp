@@ -102,6 +102,8 @@ namespace ogl {
           //glDrawArrays(GL_LINE_STRIP, 0, 2);
           glDrawArrays(GL_LINES, 0, 2); // AGGIUNTA
 
+          glBindVertexArray(0);
+
           
         }
         

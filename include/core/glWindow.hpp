@@ -30,6 +30,7 @@
 #include <cstdio>
 
 #include <vector>
+#include  <string>
 
 //#include <ogl/utils/glfw.hpp>
 //#include <ogl/utils/tiff.hpp>
@@ -435,8 +436,8 @@ namespace ogl {
       glfwSetWindowPos(window, xPos, yPos);
     }
     
-    inline void setTitle(const char * title){
-      glfwSetWindowTitle(window, title);
+    inline void setTitle(const std::string & title){
+      glfwSetWindowTitle(window, title.c_str());
     }
     
     inline bool shouldClose(){
