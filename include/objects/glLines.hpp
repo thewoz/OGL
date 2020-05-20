@@ -51,6 +51,8 @@ namespace ogl {
     GLuint vao = -1;
     GLuint vbo[2];
     
+    float lineWidth = 1;
+    
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec4> colors;
         
@@ -60,8 +62,8 @@ namespace ogl {
     // glLines
     //****************************************************************************/
     glLines(const std::string & _name = "") : glObject(_name) { }
-    glLines(const std::vector<glm::vec3> & _vertices, const glm::vec4 & color = glm::vec4(0.0), const std::string & _name = "") : glObject(_name) { init(_vertices, color); }
-    glLines(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, const std::string & _name = "") : glObject(_name) { init(_vertices, _color); }
+    glLines(const std::vector<glm::vec3> & _vertices, const glm::vec4 & color = glm::vec4(0.0), float _lineWidth = 1, const std::string & _name = "") : glObject(_name) { init(_vertices, color, _lineWidth); }
+    glLines(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, float _lineWidth = 1, const std::string & _name = "") : glObject(_name) { init(_vertices, _color, _lineWidth); }
     
     
     //****************************************************************************/
@@ -72,13 +74,15 @@ namespace ogl {
     //****************************************************************************/
     // init
     //****************************************************************************/
-    void init(const std::vector<glm::vec3> & _vertices, const glm::vec4 & color = glm::vec4(0.0)) {
+    void init(const std::vector<glm::vec3> & _vertices, const glm::vec4 & color = glm::vec4(0.0), float _lineWidth = 1) {
       
       DEBUG_LOG("glLines::init(" + name + ")");
       
       glObject::initAdvanced();
       
       vertices = _vertices;
+      
+      lineWidth = _lineWidth;
       
       colors.resize(vertices.size(), color);
             
@@ -89,7 +93,7 @@ namespace ogl {
     /* ****************************************************************************/
     // init
     /* ****************************************************************************/
-    void init(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color) {
+    void init(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, float _lineWidth = 1) {
       
       DEBUG_LOG("glLines::init(" + name + ")");
       
@@ -97,12 +101,18 @@ namespace ogl {
       
       vertices = _vertices;
       
+      lineWidth = _lineWidth;
+
       colors = _color;
             
       isInited = true;
       
     }
     
+    //****************************************************************************/
+    // setLineWidth
+    //****************************************************************************/
+    //void setLineWidth(float _lineWidth) { lineWidth = _lineWidth; }
   
     //****************************************************************************/
     // render
@@ -117,11 +127,12 @@ namespace ogl {
                   
       //glEnable(GL_BLEND);
       
-      //glEnable(GL_LINE_SMOOTH);
+      glEnable(GL_LINE_SMOOTH);
       
-      //glShadeModel(GL_SMOOTH);
+      glShadeModel(GL_SMOOTH);
       
-      //glLineWidth(2);
+      // https://vitaliburkov.wordpress.com/2016/09/17/simple-and-fast-high-quality-antialiased-lines-with-opengl/
+      //glLineWidth(lineWidth);
       
       glBindVertexArray(vao);
       
@@ -138,12 +149,11 @@ namespace ogl {
           glDrawArrays(GL_LINE_STRIP, (i*stripOffset)+from, to);
 
       }
-      
-      
+
 
       //glDisable(GL_BLEND);
             
-      //glDisable(GL_LINE_SMOOTH);
+      glDisable(GL_LINE_SMOOTH);
 
       glBindVertexArray(0);
       

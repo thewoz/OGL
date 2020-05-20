@@ -161,7 +161,7 @@ namespace ogl {
         if(direction == BACKWARD) position -= front * velocity;
         if(direction == LEFT)     position -= right * velocity;
         if(direction == RIGHT)    position += right * velocity;
-        
+      
       }
       
     }
@@ -184,7 +184,7 @@ namespace ogl {
           if(pitch >  89.0f) pitch = 89.0f;
           if(pitch < -89.0f) pitch = -89.0f;
         }
-        
+                
         // Update Front, Right and Up Vectors using the updated Eular angles
         updateCameraVectors();
         
@@ -211,16 +211,18 @@ namespace ogl {
     /*****************************************************************************/
     // setPosition() - Aggiorno la posizione della camera
     /*****************************************************************************/
-    void setPosition(const glm::vec3 & _position) { if(mode!=FREE) position = _position; }
-    void initPosition(const glm::vec3 & _position) { position = _position; }
+    void setPosition(const glm::vec3 & _position) { /*if(mode!=FREE)*/ position = _position; }
+    //void initPosition(const glm::vec3 & _position) { position = _position; }
 
-    inline void setPitch(float _pitch) { pitch = _pitch; }
-    inline void setYaw(float _yaw) { yaw = _yaw; }
+    inline void setPitch(float _pitch) { pitch = _pitch; updateCameraVectors(); }
+    inline void setYaw(float _yaw) { yaw = _yaw; updateCameraVectors(); }
 
     /*****************************************************************************/
     // setTarget() - Aggiorno la posizione del target
     /*****************************************************************************/
     void setTarget(const glm::vec3 & _target) { if(mode!=FREE) target = _target; }
+    
+    void setFront(const glm::vec3 & _front) { if(mode==FREE) front = _front; }
     
     /*****************************************************************************/
     // Get projection and view matrixs
