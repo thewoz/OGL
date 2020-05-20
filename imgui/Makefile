@@ -8,6 +8,7 @@ all: compile
 compile:
 	@mkdir -p ./build/lib
 	@mkdir -p ./build/include
+	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_draw.cpp -o ./build/imgui_draw.o
 	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_widgets.cpp -o ./build/imgui_widgets.o
 	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_impl_opengl3.cpp -o ./build/imgui_impl_opengl3.o
 	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_impl_glfw.cpp -o ./build/imgui_impl_glfw.o
@@ -17,14 +18,15 @@ compile:
 	@cp ./code/imconfig.h ./build/include
 	@cp ./code/imgui_impl_opengl3.h ./build/include
 	@cp ./code/imgui_impl_glfw.h ./build/include
-	
+	@cp imgui.hpp ./build/include
+
 clear:
 	@rm -rf ./build
 	
 install: compile
 	@mkdir -p $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)/
 	@mkdir -p $(LIBRARY_INSTALL_PATH)
-	@cp ./build/include/*.h $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)/
+	@cp ./build/include/*.h* $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)/
 	@cp ./build/lib/libimgui.a $(LIBRARY_INSTALL_PATH)
 
 uninstall:
