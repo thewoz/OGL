@@ -104,16 +104,22 @@ namespace ogl {
 
       glObject::renderBegin(projection, view);
       
-      glDisable(GL_CULL_FACE); //NOTE: non sono sicuro che serva
+      glDisable(GL_CULL_FACE);
 
       glBindVertexArray(vao);
       
-      //glEnableVertexAttribArray(0);
-      
+      glEnableVertexAttribArray(0);
+      glEnableVertexAttribArray(1);
+      glEnableVertexAttribArray(2);
+
       if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         
       glDrawElements(GL_TRIANGLES, (slices * stacks + slices) * 6, GL_UNSIGNED_INT, nullptr);
+      
+      glDisableVertexAttribArray(2);
+      glDisableVertexAttribArray(1);
+      glDisableVertexAttribArray(0);
       
       glBindVertexArray(0);
       
@@ -199,13 +205,13 @@ namespace ogl {
         
         glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
         glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
-        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
+        glEnableVertexAttribArray(1);
         
         glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
         glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(glm::vec2), textureCoords.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(8, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(8);
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(2);
         
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(GLuint), indicies.data(), GL_STATIC_DRAW);

@@ -101,20 +101,26 @@ namespace ogl {
         DEBUG_LOG("gSphere::setInGpu(" + name + ")");
 
         glObject::renderBegin(projection, view);
-        
-        glDisable(GL_CULL_FACE); //NOTE: non sono sicuro che serva
+       
+        glDisable(GL_CULL_FACE);
 
         glBindVertexArray(vao);
         
-        //glEnableVertexAttribArray(0);
-
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+        
         if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         
         glDrawElements(GL_TRIANGLES, (slices * stacks + slices) * 6, GL_UNSIGNED_INT, nullptr);
         
-        glBindVertexArray(0);
+        glDisableVertexAttribArray(2);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(0);
         
+        glBindVertexArray(0);
+                
         glObject::renderEnd();
         
       }

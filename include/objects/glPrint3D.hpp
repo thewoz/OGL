@@ -22,8 +22,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_OGL_PRINT_H_
-#define _H_OGL_PRINT_H_
+#ifndef _H_OGL_PRINT3D_H_
+#define _H_OGL_PRINT3D_H_
 
 #include <cstdio>
 #include <cstdlib>
@@ -42,7 +42,7 @@
 //****************************************************************************/
 namespace ogl {
 
-  class glPrint : public glObject {
+  class glPrint3D : public glObject {
     
   private:
     
@@ -53,7 +53,8 @@ namespace ogl {
 
     float x;
     float y;
-    
+    float z;
+
     float scale;
     
     std::string text;
@@ -70,36 +71,37 @@ namespace ogl {
   public:
     
     //****************************************************************************/
-    // glPrint
+    // glPrint3D
     //****************************************************************************/
-    glPrint(const std::string & _name = "") : glObject(_name) { glObject::initText();  isInited = true; }
+    glPrint3D(const std::string & _name = "") : glObject(_name) { glObject::initText();  isInited = true; }
   
     
     //****************************************************************************/
-    // glPrint
+    // glPrint3D
     //****************************************************************************/
-    glPrint(const std::string & _text, float _x, float _y, glm::vec3 & _color, float _scale = 1, const std::string & _name = "") : glObject(_name) {
+    glPrint3D(const std::string & _text, float _x, float _y, float _z, glm::vec3 & _color, float _scale = 1, const std::string & _name = "") : glObject(_name) {
       
-      init(_text, _x, _y, _color, _scale);
+      init(_text, _x, _y, _z, _color, _scale);
       
     }
     
     //****************************************************************************/
-    // ~glPrint
+    // ~glPrint3D
     //****************************************************************************/
-    ~glPrint() { cleanInGpu(); }
+    ~glPrint3D() { cleanInGpu(); }
     
     //****************************************************************************/
     // init
     //****************************************************************************/
-    void init(const std::string & _text, float _x, float _y, glm::vec3 & _color, float _scale = 1) {
+    void init(const std::string & _text, float _x, float _y, float _z, glm::vec3 & _color, float _scale = 1) {
       
-      DEBUG_LOG("glPrint::init(" + name + ")");
+      DEBUG_LOG("glPrint3D::init(" + name + ")");
       
       text = _text;
       
       x = _x;
       y = _y;
+      z = _z;
       
       color = _color;
       
@@ -112,36 +114,37 @@ namespace ogl {
     //****************************************************************************/
     // print
     //****************************************************************************/
-    void print(const glm::mat4 & projection, const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1) {
+    void print(const glm::mat4 & projection, const glm::mat4 & view, const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1) {
       
       text = _text;
       
       x = _x;
       y = _y;
+      z = _z;
       
       color = _color;
       
       scale = _scale;
       
-      print(projection);
+      print(projection, view);
 
     }
     
     //****************************************************************************/
     // print
     //****************************************************************************/
-    void print(const glm::mat4 & projection, const std::string & _text) {
+    void print(const glm::mat4 & projection, const glm::mat4 & view, const std::string & _text) {
      
       text = _text;
       
-      print(projection);
+      print(projection, view);
       
     }
     
     //****************************************************************************/
     // print
     //****************************************************************************/
-    void print(const glm::mat4 & projection) {
+    void print(const glm::mat4 & projection, const glm::mat4 & view) {
       
       glEnable(GL_CULL_FACE);
       
@@ -149,7 +152,7 @@ namespace ogl {
       
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             
-      glObject::renderBegin(projection);
+      glObject::renderBegin(projection, view);
       
       glActiveTexture(GL_TEXTURE0);
       
@@ -167,16 +170,16 @@ namespace ogl {
         
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
-        
+                
         // update VBO for each character
         float vertices[6][4] = {
-          { xpos,     ypos + h,   0.0f, 0.0f },
-          { xpos,     ypos,       0.0f, 1.0f },
-          { xpos + w, ypos,       1.0f, 1.0f },
+          { xpos,     ypos + h,   z, 0.0f },
+          { xpos,     ypos,       z, 1.0f },
+          { xpos + w, ypos,       z, 2.0f },
           
-          { xpos,     ypos + h,   0.0f, 0.0f },
-          { xpos + w, ypos,       1.0f, 1.0f },
-          { xpos + w, ypos + h,   1.0f, 0.0f }
+          { xpos,     ypos + h,   z, 0.0f },
+          { xpos + w, ypos,       z, 2.0f },
+          { xpos + w, ypos + h,   z, 3.0f }
         };
         
         // render glyph texture over quad
@@ -213,7 +216,7 @@ namespace ogl {
     //****************************************************************************/
     void setInGpu() {
       
-      DEBUG_LOG("glPrint::setInGpu(" + name + ")");
+      DEBUG_LOG("glPrint3D::setInGpu(" + name + ")");
       
       FT_Library ft;
       
@@ -325,4 +328,4 @@ namespace ogl {
 
 } /* namespace ogl */
 
-#endif /* _H_OGL_PRINT_H_ */
+#endif /* _H_OGL_PRINT3D_H_ */

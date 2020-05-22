@@ -88,25 +88,20 @@ namespace ogl {
       DEBUG_LOG("glCuboid::render(" + name + ")");
 
       glObject::renderBegin(projection, view);
-      
-      glDisable(GL_CULL_FACE); //NOTE: non sono sicuro che serva
+
+      glDisable(GL_CULL_FACE);
 
       glBindVertexArray(vao);
-      
-      //glDisable(GL_POLYGON_OFFSET_LINE);
-      
-      //glEnable(GL_DEPTH_TEST);
-      
-      //glLineWidth(1);
 
-      //glEnableVertexAttribArray(0);
+      glEnableVertexAttribArray(0);
+      
       if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
       glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
-      
-      //glEnable(GL_POLYGON_OFFSET_LINE);
-      
+            
+      glDisableVertexAttribArray(0);
+
       glBindVertexArray(0);
       
       glObject::renderEnd();

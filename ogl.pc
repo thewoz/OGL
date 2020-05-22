@@ -1,9 +1,6 @@
-includeOpenCV=${-I/usr/local/Cellar/opencv/2.4.13.2/include/opencv -I/usr/local/Cellar/opencv/2.4.13.2/include}
-libraryOpenCV=${-L/usr/local/Cellar/opencv/2.4.13.2/lib -lopencv_calib3d -lopencv_contrib -lopencv_core -lopencv_features2d -lopencv_flann -lopencv_gpu -lopencv_highgui -lopencv_imgproc -lopencv_legacy -lopencv_ml -lopencv_nonfree -lopencv_objdetect -lopencv_ocl -lopencv_photo -lopencv_stitching -lopencv_superres -lopencv_ts -lopencv_video -lopencv_videostab}
-
 Name: olg
 Description:
 Version: 0.1beta
-Cflags: -I/usr/local/include ${includeOpenCV}
-Libs: ${libraryOpenCV}
+Cflags: -I/usr/local/include -I/usr/local/include/opencv4 -I/usr/local/include/freetype2
+Libs: -lopencv_dnn -lopencv_gapi -lopencv_highgui -lopencv_ml -lopencv_objdetect -lopencv_photo -lopencv_stitching -lopencv_video -lopencv_calib3d -lopencv_features2d -lopencv_flann -lopencv_videoio -lopencv_imgcodecs -lopencv_imgproc -lopencv_core -lfreetype -lglad -lsoil2 -lglfw3 -framework Cocoa -framework IOKit -framework CoreFoundation -framework OpenGL -lassimp -lSOIL2 -ltiff
 

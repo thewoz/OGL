@@ -40,7 +40,7 @@
 int main(int argc, char * const argv []) {
   
   
-#if(1)
+#if(0)
   
   ogl::glWindow window;
   
@@ -179,7 +179,7 @@ int main(int argc, char * const argv []) {
 
 #endif
   
-#if(0)
+#if(1)
   
   ogl::glWindow window;
 
@@ -211,29 +211,23 @@ int main(int argc, char * const argv []) {
   ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0), "box"); box.translate(glm::vec3(-0.5));
   ogl::glPrint text("testo");
   ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0), "griglia");
+  ogl::glPrint3D text3D("testo3D");
 
   while(!window.shouldClose()) {
     
     window.renderBegin();
   
       axes.render(window.getProjection(), window.getView());
-
-      sphere.render(window.getProjection(), window.getView());
-
-      grid.render(window.getProjection(), window.getView());
-
+//      sphere.render(window.getProjection(), window.getView());
+//      grid.render(window.getProjection(), window.getView());
       line.render(window.getProjection(), window.getView());
-
       cube.render(window.getProjection(), window.getView());
-    
-      box.render(window.getProjection(), window.getView());
+//      box.render(window.getProjection(), window.getView());
+//      ellipse.render(window.getProjection(), window.getView());
+//      points.render(window.getProjection(), window.getView());
+      text.print(window.getOrthoProjection(), "OGL", 0, 0, glm::vec3(255.0));
+      text3D.print(window.getProjection(), window.getView(), "OGL 3D", 0, 0, 0, glm::vec3(255.0), 10);
 
-      ellipse.render(window.getProjection(), window.getView());
-
-      points.render(window.getProjection(), window.getView());
-    
-    text.print(window.getOrthoProjection(), "OGL", 0, 0, glm::vec3(255.0));
-      
     window.renderEnd();
       
   }

@@ -97,6 +97,8 @@ namespace ogl {
       
       glDrawArrays(GL_LINE_STRIP, 0, (GLuint)vertices.size());
       
+      glDisableVertexAttribArray(0);
+      
       glBindVertexArray(0);
             
       glObject::renderEnd();
