@@ -60,6 +60,7 @@
 #include <ogl/objects/glBox.hpp>
 #include <ogl/objects/glCuboid.hpp>
 #include <ogl/objects/glAxes.hpp>
+#include <ogl/objects/glSmallAxes.hpp>
 #include <ogl/objects/glPoints.hpp>
 #include <ogl/objects/glPrint.hpp>
 #include <ogl/objects/glPrint3D.hpp>

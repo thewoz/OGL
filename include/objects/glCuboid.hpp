@@ -131,25 +131,18 @@ namespace ogl {
       };
       
       static const GLushort indicies[] = {
-
         0, 1, 3,
         1, 2, 3,
-        
         2, 3, 7,
         2, 7, 6,
-        
         1, 5, 2,
         2, 5, 6,
-        
         0, 7, 3,
         0, 4, 7,
-        
         5, 7, 6,
         5, 4, 7,
-        
         0, 4, 1,
         4, 5, 2
-        
       };
       
       glGenVertexArrays(1, &vao);

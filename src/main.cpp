@@ -39,6 +39,47 @@
 /* ****************************************************************************/
 int main(int argc, char * const argv []) {
   
+#if(1)
+  
+  ogl::glWindow window;
+  
+  window.create(800, 600, "ModelView");
+  
+  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+  
+  window.makeContextCurrent();
+  
+  ogl::glAxes axes(1.0);
+  ogl::glSmallAxes axesSmall(1.0);
+
+  ogl::glPrint3D text3D("OGL", 1, 1, 1, glm::vec3(255.0));
+  ogl::glPrint   text2D("testo");
+  
+  ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0));
+  ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0)); cube.translate(glm::vec3(0.5));
+  
+  while(!window.shouldClose()) {
+    
+    window.renderBegin();
+    
+    axes.render(window.getProjection(), window.getView());
+    axesSmall.render(window.getOrthoProjection(), window.getCurrentCamera()->getLookAt(glm::vec3(0)));
+   
+    line.render(window.getProjection(), window.getView());
+    cube.render(window.getProjection(), window.getView());
+    //cube.render(window.getOrthoProjection(), window.getView());
+    
+    text2D.print(window.getOrthoProjectionText(), "leo", 0, 0, glm::vec3(255.0));
+
+    text3D.print(window.getProjection(), window.getCurrentCamera());
+
+    window.renderEnd();
+    
+  }
+  
+#endif
+  
+  
   
 #if(0)
   
@@ -179,7 +220,7 @@ int main(int argc, char * const argv []) {
 
 #endif
   
-#if(1)
+#if(0)
   
   ogl::glWindow window;
 
@@ -226,7 +267,7 @@ int main(int argc, char * const argv []) {
 //      ellipse.render(window.getProjection(), window.getView());
 //      points.render(window.getProjection(), window.getView());
       text.print(window.getOrthoProjection(), "OGL", 0, 0, glm::vec3(255.0));
-      text3D.print(window.getProjection(), window.getView(), "OGL 3D", 0, 0, 0, glm::vec3(255.0), 10);
+      text3D.print(window.getProjection(), window.getView(), "OGL 3D", 0, 1, 0, glm::vec3(255.0), 1);
 
     window.renderEnd();
       

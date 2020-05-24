@@ -68,7 +68,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { PLAIN, MODEL, SPHERE, TEXT, ADVANCED, CUSTOM };
+    enum STYLE { PLAIN, MODEL, SPHERE, TEXT, ADVANCED, ORTO, CUSTOM };
 
     int style;
     
@@ -123,6 +123,14 @@ namespace ogl {
     void initText() {
       init("/usr/local/include/ogl/shader/text.vs", "/usr/local/include/ogl/shader/text.fs");
       style = STYLE::TEXT;
+    }
+    
+    /*****************************************************************************/
+    // initOrto -
+    /*****************************************************************************/
+    void initOrto() {
+      init("/usr/local/include/ogl/shader/orto.vs", "/usr/local/include/ogl/shader/orto.fs");
+      style = STYLE::ORTO;
     }
     
     /*****************************************************************************/

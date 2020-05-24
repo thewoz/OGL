@@ -73,13 +73,15 @@ namespace ogl {
     //****************************************************************************/
     // glPrint3D
     //****************************************************************************/
-    glPrint3D(const std::string & _name = "") : glObject(_name) { glObject::initText();  isInited = true; }
+    glPrint3D(const std::string & _name = "") : glObject(_name) { glObject::initText3D();  isInited = true; }
   
     
     //****************************************************************************/
     // glPrint3D
     //****************************************************************************/
-    glPrint3D(const std::string & _text, float _x, float _y, float _z, glm::vec3 & _color, float _scale = 1, const std::string & _name = "") : glObject(_name) {
+    glPrint3D(const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1, const std::string & _name = "") : glObject(_name) {
+      
+      glObject::initText3D();
       
       init(_text, _x, _y, _z, _color, _scale);
       
@@ -93,7 +95,7 @@ namespace ogl {
     //****************************************************************************/
     // init
     //****************************************************************************/
-    void init(const std::string & _text, float _x, float _y, float _z, glm::vec3 & _color, float _scale = 1) {
+    void init(const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1) {
       
       DEBUG_LOG("glPrint3D::init(" + name + ")");
       
@@ -126,7 +128,7 @@ namespace ogl {
       
       scale = _scale;
       
-      print(projection, view);
+      //print(projection, view);
 
     }
     
@@ -137,35 +139,40 @@ namespace ogl {
      
       text = _text;
       
-      print(projection, view);
+      //print(projection, view);
       
     }
     
     //****************************************************************************/
     // print
     //****************************************************************************/
-    void print(const glm::mat4 & projection, const glm::mat4 & view) {
-      
-      glEnable(GL_CULL_FACE);
+    //void print(const glm::mat4 & projection, const glm::mat4 & view) {
+    void print(const glm::mat4 & projection, const glCamera * camera) {
+
+      glDisable(GL_CULL_FACE);
       
       glEnable(GL_BLEND);
       
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             
-      glObject::renderBegin(projection, view);
-      
       glActiveTexture(GL_TEXTURE0);
       
       glBindVertexArray(vao);
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+      
+      float _x = x;
+      
       // iterate through all characters
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
         
+        glm::mat4 view = camera->getLookAt(glm::vec3(x, y, z));
+        
+        glObject::renderBegin(projection, view);
+        
         Character_t ch = Characters[*c];
         
-        float xpos = x + ch.Bearing.x * scale;
+        float xpos = _x + ch.Bearing.x * scale;
         float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
         
         float w = ch.Size.x * scale;
@@ -194,7 +201,7 @@ namespace ogl {
         // render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels
-        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        _x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
         
       }
       

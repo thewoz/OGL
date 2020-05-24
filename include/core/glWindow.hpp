@@ -128,7 +128,7 @@ namespace ogl {
     void create(GLint _width, GLint _height, const char * title = "OpenGL window") {
       
       DEBUG_LOG("glWindow::create() windowID " + std::to_string(windowsCounter));
-
+      
       glfw::init();
             
       // Others Glfw options
@@ -139,7 +139,7 @@ namespace ogl {
       // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
       // Create a GLFWwindow object that we can use for GLFW's functions
-      window = glfwCreateWindow(_width, _width, title, NULL, NULL);
+      window = glfwCreateWindow(_width, _height, title, NULL, NULL);
       
       if(window == NULL) {
         fprintf(stderr, "Failed to create GLFW window\n");
@@ -497,12 +497,31 @@ namespace ogl {
     inline glm::mat4 getProjection() const { return currentCamera->getProjection(); }
     
     inline glm::mat4 getOrthoProjection() const {
+      
+      float aspect = static_cast<float>(width) / static_cast<float>(height);
+      return glm::ortho(-aspect, aspect, -1.0f, 1.0f, currentCamera->getzNear(), currentCamera->getzFar());
+      
+      //return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), currentCamera->getzNear(), currentCamera->getzFar());
+      
+    }
+      
+    inline glm::mat4 getOrthoProjectionText() const {
+      
+     // float aspect = static_cast<float>(width) / static_cast<float>(height);
+     // return glm::ortho(-aspect, aspect, -1.0f, 1.0f, currentCamera->getzNear(), currentCamera->getzFar());
+      
       return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
       
     }
-        
+    
     inline glm::mat4 getView() const { return currentCamera->getView(); }
 
+    inline float getPitch() { return currentCamera->getPitch(); }
+    inline float getYaw() { return currentCamera->getYaw(); }
+    inline glm::vec3 getCameraPosition() { return currentCamera->getPosition(); }
+
+    
+    
     /*****************************************************************************/
     // makeContextCurrent()
     /*****************************************************************************/

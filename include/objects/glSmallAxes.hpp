@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_OGL_AXES_H_
-#define _H_OGL_AXES_H_
+#ifndef _H_OGL_SMALL_AXES_H_
+#define _H_OGL_SMALL_AXES_H_
 
 #include <cstdlib>
 #include <cstdio>
@@ -38,9 +38,9 @@
 namespace ogl {
 
   /*****************************************************************************/
-  // Class glAxes
+  // Class glSmallAxes
   /*****************************************************************************/
-  class glAxes : public glObject {
+  class glSmallAxes : public glObject {
     
     private:
       
@@ -52,20 +52,20 @@ namespace ogl {
     public:
         
       /*****************************************************************************/
-      // glAxes() -
+      // glSmallAxes() -
       /*****************************************************************************/
-      glAxes(GLfloat scale = 1.0, const std::string & _name = " ") : glObject(_name) {
+      glSmallAxes(GLfloat scale = 1.0, const std::string & _name = " ") : glObject(_name) {
         
-        glObject::initPlain();
+        glObject::initOrto();
         
         init(scale);
         
       }
       
       /*****************************************************************************/
-      // ~glAxes() -
+      // ~glSmallAxes() -
       /*****************************************************************************/
-      ~glAxes() { cleanInGpu(); }
+      ~glSmallAxes() { cleanInGpu(); }
       
     
     /*****************************************************************************/
@@ -73,44 +73,89 @@ namespace ogl {
     /*****************************************************************************/
     void init(GLfloat scale = 1.0) {
       
-      DEBUG_LOG("gAxes::init(" + name + ")");
+      DEBUG_LOG("glSmallAxes::init(" + name + ")");
 
       glObject::scale(glm::vec3(scale));
 
       isInited = true;
       
     }
-      /*****************************************************************************/
-      // render() -
-      /*****************************************************************************/
-      void render(const glm::mat4 & projection, const glm::mat4 & view) {
-        
-        DEBUG_LOG("glAxes::render(" + name + ")");
-        
-        glObject::renderBegin(projection, view);
+    
+    /*****************************************************************************/
+    // render() -
+    /*****************************************************************************/
+    //void render(const glm::mat4 & projection, float yaw, float pitch, const glm::vec3 & position) {
+    void render(const glm::mat4 & projection, const glm::mat4 & view) {
 
-        for(size_t i=0; i<3; ++i) {
-          
-          shader.setUniform("color", colors[i]);
-          
-          glBindVertexArray(vao[i]);
-          
-          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // AGGIUNTA
-          
-          glEnableVertexAttribArray(0);
-          
-          //glDrawArrays(GL_LINE_STRIP, 0, 2);
-          glDrawArrays(GL_LINES, 0, 2); // AGGIUNTA
+      DEBUG_LOG("glSmallAxes::render(" + name + ")");
+      
+      GLint data[4];
+      glGetIntegerv(GL_VIEWPORT, data);
+//
+//      //printf("%d %d %d %d\n\n\n", data[0], data[1], data[2], data[3]);
+//
+//      glm::vec3 _front;
+//
+//      _front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+//      _front.y = sin(glm::radians(pitch));
+//      _front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+//
+//      glm::vec3 worldUp = glm::vec3(0.0f, 1.0f,  0.0f);
+//
+//      glm::vec3 front = glm::normalize(_front);
+//
+//      //printf("%f %f %f\n", front.x, front.y, front.z);
+//
+//      // Also re-calculate the Right and Up vector
+//      glm::vec3 right = glm::normalize(glm::cross(front, worldUp));
+//
+//      //printf("%f %f %f\n", right.x, right.y, right.z);
+//
+//      // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+//      glm::vec3 up = glm::normalize(glm::cross(right, front));
+//
+////      printf("%f %f %f\n\n\n", up.x, up.y, up.z);
+//
+//      glm::mat4 view = glm::lookAt(position, glm::vec3(0), up);
+      
+      glObject::renderBegin(projection, view);
+      
+      //glOrtho(-1, 1, -1, 1, 1, -1);
+      
+      glViewport(data[2] - 160, 10, 160, 160);
+      
+      //glEnable(GL_LINE_SMOOTH);
+      
+      //glShadeModel(GL_SMOOTH);
+      
+      //glLineWidth(2);
 
-          glBindVertexArray(0);
-
-          
-        }
+      for(size_t i=0; i<3; ++i) {
         
-        glObject::renderEnd();
+        shader.setUniform("color", colors[i]);
+        
+        glBindVertexArray(vao[i]);
+        
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // AGGIUNTA
+        
+        glEnableVertexAttribArray(0);
+        
+        //glDrawArrays(GL_LINE_STRIP, 0, 2);
+        glDrawArrays(GL_LINES, 0, 2); // AGGIUNTA
+        
+        glBindVertexArray(0);
         
       }
-  
+      
+      //glDisable(GL_LINE_SMOOTH);
+      
+      glViewport(data[0], data[1], data[2], data[3]);
+
+      glObject::renderEnd();
+      
+    }
+    
+      
     private:
       
       /*****************************************************************************/
@@ -118,7 +163,7 @@ namespace ogl {
       /*****************************************************************************/
       void setInGpu() {
         
-        DEBUG_LOG("glAxes::setInGpu(" + name + ")");
+        DEBUG_LOG("glSmallAxes::setInGpu(" + name + ")");
         
         std::vector<std::vector<glm::vec3>> vertices(3, std::vector<glm::vec3>(2, glm::vec3(0.0f)));
         
@@ -167,4 +212,4 @@ namespace ogl {
 
 } /* namespace ogl */
 
-#endif /* _H_OGL_AXES_H_ */
+#endif /* _H_OGL_SMALL_AXES_H_ */

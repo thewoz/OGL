@@ -281,7 +281,6 @@ namespace ogl {
       FT_Done_Face(face);
       FT_Done_FreeType(ft);
       
-      
       // configure VAO/VBO for texture quads
       glGenVertexArrays(1, &vao);
       glBindVertexArray(vao);

@@ -214,9 +214,15 @@ namespace ogl {
     void setPosition(const glm::vec3 & _position) { /*if(mode!=FREE)*/ position = _position; }
     //void initPosition(const glm::vec3 & _position) { position = _position; }
 
+    
+    glm::vec3 getPosition() { return position; }
+
     inline void setPitch(float _pitch) { pitch = _pitch; updateCameraVectors(); }
     inline void setYaw(float _yaw) { yaw = _yaw; updateCameraVectors(); }
 
+    inline float getPitch() { return pitch; }
+    inline float getYaw() { return yaw; }
+    
     /*****************************************************************************/
     // setTarget() - Aggiorno la posizione del target
     /*****************************************************************************/
@@ -232,6 +238,9 @@ namespace ogl {
       if(mode == FREE)   return glm::lookAt(position, position + front, up);
       if(mode == TARGET) return glm::lookAt(position, target          , up);
       abort();
+    }
+    inline glm::mat4 getLookAt(const glm::vec3 & _target) const {
+      return glm::lookAt(position, _target , up);
     }
     
     /*****************************************************************************/
@@ -256,6 +265,16 @@ namespace ogl {
       projection = glm::perspective(glm::radians(fov), width/(float)height, zNear, zFar);
 
     }
+    
+    
+    
+    //****************************************************************************/
+    // setzNearFar() -
+    //****************************************************************************/
+    inline float getzNear() { return zNear; }
+    inline float getzFar() { return zFar; }
+
+    
     
   private:
     

@@ -119,6 +119,23 @@ namespace ogl {
       }
     
     /* ****************************************************************************/
+    // initOrto() -
+    /* ****************************************************************************/
+    void initOrto(const std::string & _name = "") {
+      
+      if(name.empty()) name = _name;
+      
+      DEBUG_LOG("glObject::init(" + name + ")");
+      
+      shader.setName(name);
+      
+      shader.initOrto();
+      
+      _init();
+      
+    }
+    
+    /* ****************************************************************************/
     // initAdvanced() -
     /* ****************************************************************************/
     void initAdvanced(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
@@ -206,8 +223,10 @@ namespace ogl {
         shader.setUniform("projection", projection);
         shader.setUniform("view", view);
         shader.setUniform("model", model);
-                
-        if(shader.style == glShader::STYLE::PLAIN) shader.setUniform("color", color);
+        shader.setUniform("color", color);
+        
+        //if(shader.style != glShader::STYLE::ORTO)  shader.setUniform("model", model);
+        //if(shader.style != glShader::STYLE::MODEL) shader.setUniform("color", color);
         
         glEnable(GL_DEPTH_TEST);
         
