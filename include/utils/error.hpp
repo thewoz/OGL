@@ -32,7 +32,6 @@
 #include <string>
 #include <iostream>
 
-//#include <ogl/utils/glfw.hpp>
 
 //****************************************************************************/
 // glCheckError() -

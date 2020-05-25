@@ -72,7 +72,6 @@ namespace ogl {
         DEBUG_LOG("gAxes::init(" + name + ")");
 
         shader.setName(name);
-        
         shader.initPlain();
         
         scale(glm::vec3(_scale));

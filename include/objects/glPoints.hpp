@@ -32,18 +32,14 @@
 #include <vector>
 #include <string>
 
-//#include <opencv2/opencv.hpp>
-
-//#include <ogl/core/glObject.hpp>
-
-/*****************************************************************************/
+//****************************************************************************/
 // namespace ogl
-/*****************************************************************************/
+//****************************************************************************/
 namespace ogl {
 
-  /*****************************************************************************/
+  //****************************************************************************/
   // Class glPoints
-  /*****************************************************************************/
+  //****************************************************************************/
   class glPoints : public glObject {
     
   private:
@@ -58,31 +54,37 @@ namespace ogl {
     
   public:
     
-    /*****************************************************************************/
-    // glPoints
-    /*****************************************************************************/
-    glPoints(const std::string & _name = "") : glObject(_name) { }
-    glPoints(const std::vector<glm::vec3> & _points, const glm::vec4 & color = glm::vec4(0.0), float _radius = 1, const std::string & _name = "") : glObject(_name) { init(_points, color, _radius); }
-    glPoints(const std::vector<glm::vec3> & _points, const std::vector<glm::vec4> & _color, float _radius = 1, const std::string & _name = "") : glObject(_name) { init(_points, _color, _radius); }
+    //****************************************************************************/
+    // glPoints()
+    //****************************************************************************/
+    glPoints(const std::string & _name = "") { name = _name; }
+    glPoints(const std::vector<glm::vec3> & _points, const glm::vec4 & _color = glm::vec4(0.0), float _radius = 1, const std::string & _name = "") {
+      name = _name;
+      init(_points, _color, _radius);
+    }
+    glPoints(const std::vector<glm::vec3> & _points, const std::vector<glm::vec4> & _color, float _radius = 1, const std::string & _name = "") {
+      name = _name;
+      init(_points, _color, _radius);
+    }
 
-    
-    /*****************************************************************************/
-    // ~glPoints
-    /*****************************************************************************/
+    //****************************************************************************/
+    // ~glPoints()
+    //****************************************************************************/
     ~glPoints() { cleanInGpu(); }
  
-    /* ****************************************************************************/
-    // init
-    /* ****************************************************************************/
-    void init(const std::vector<glm::vec3> & _points, const glm::vec4 & color = glm::vec4(0.0), float _radius = 1) {
+    //****************************************************************************/
+    // init()
+    //****************************************************************************/
+    void init(const std::vector<glm::vec3> & _points, const glm::vec4 & _color = glm::vec4(0.0), float _radius = 1) {
       
       DEBUG_LOG("glPoints::init(" + name + ")");
          
-      glObject::initSphere();
-
+      shader.setName(name);
+      shader.initSphere();
+      
       points = _points;
 
-      colors.resize(points.size(), color);
+      colors.resize(points.size(), _color);
               
       radius = _radius;
 
@@ -90,15 +92,16 @@ namespace ogl {
       
     }
    
-    /* ****************************************************************************/
-    // init
-    /* ****************************************************************************/
+    //****************************************************************************/
+    // init()
+    //****************************************************************************/
     void init(const std::vector<glm::vec3> & _points, const std::vector<glm::vec4> & _color, float _radius = 1) {
       
       DEBUG_LOG("glPoints::init(" + name + ")");
       
-      glObject::initSphere();
-      
+      shader.setName(name);
+      shader.initSphere();
+            
       points = _points;
       
       colors = _color;
@@ -110,14 +113,14 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // setRadius
+    // setRadius()
     //****************************************************************************/
     void setRadius(float _radius) { radius = _radius; }
     
     //****************************************************************************/
-    // render
+    // _render()
     //****************************************************************************/
-    void render(const glm::mat4 & projection, const glm::mat4 & view, int from = 0, int to = -1) {
+    void _render(const glCamera * camera, int from = 0, int to = -1) {
       
       if(to == -1) to = (int) points.size();
       
@@ -125,11 +128,10 @@ namespace ogl {
 
       glEnable(GL_PROGRAM_POINT_SIZE);
 
-      glObject::renderBegin(projection, view);
-      
+      shader.setUniform("projection", camera->getProjection());
+      shader.setUniform("view",       camera->getView());
+      shader.setUniform("model",      modelMatrix);
       shader.setUniform("pointSize", radius);
-
-      //glEnable(GL_BLEND);
 
       glBindVertexArray(vao);
 
@@ -138,22 +140,20 @@ namespace ogl {
       
       glDrawArrays(GL_POINTS, from, to);
 
-      //glDisable(GL_BLEND);
-
       glDisable(GL_PROGRAM_POINT_SIZE);
 
       glBindVertexArray(0);
 
-      glObject::renderEnd();
-      
+      glDisable(GL_DEPTH_TEST);
+
     }
     
     
   private:
     
-    /*****************************************************************************/
-    // setInGpu
-    /*****************************************************************************/
+    //****************************************************************************/
+    // setInGpu()
+    //****************************************************************************/
     void setInGpu() {
       
       DEBUG_LOG("glPoints::setInGpu(" + name + ")");
@@ -187,9 +187,9 @@ namespace ogl {
     
   private:
     
-    /* ****************************************************************************/
-    // cleanInGpu() -
-    /* ****************************************************************************/
+    //****************************************************************************/
+    // cleanInGpu()
+    //****************************************************************************/
     void cleanInGpu() {
       
       if(isInitedInGpu) {

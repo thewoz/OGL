@@ -43,12 +43,12 @@
 		3AFE7EDC247164C7000E8463 /* shadowMap.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = shadowMap.vs; sourceTree = "<group>"; };
 		3AFE7EDD247164C7000E8463 /* shadowMap.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = shadowMap.fs; sourceTree = "<group>"; };
 		3AFE7EDE247164C7000E8463 /* depth.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = depth.fs; sourceTree = "<group>"; };
-		3AFE7EDF247164C7000E8463 /* text.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.fs; sourceTree = "<group>"; };
+		3AFE7EDF247164C7000E8463 /* text2D.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text2D.fs; sourceTree = "<group>"; };
 		3AFE7EE0247164C7000E8463 /* plain.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain.fs; sourceTree = "<group>"; };
 		3AFE7EE1247164C7000E8463 /* model.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.vs; sourceTree = "<group>"; };
 		3AFE7EE2247164C7000E8463 /* plain.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain.vs; sourceTree = "<group>"; };
 		3AFE7EE3247164C7000E8463 /* depth.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = depth.vs; sourceTree = "<group>"; };
-		3AFE7EE4247164C7000E8463 /* text.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.vs; sourceTree = "<group>"; };
+		3AFE7EE4247164C7000E8463 /* text2D.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text2D.vs; sourceTree = "<group>"; };
 		3AFE7EE5247164C7000E8463 /* sphere.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.vs; sourceTree = "<group>"; };
 		3AFE7EE8247164C8000E8463 /* AUTHORS */ = {isa = PBXFileReference; lastKnownFileType = text; path = AUTHORS; sourceTree = "<group>"; };
 		3AFE7EE9247164C8000E8463 /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
@@ -149,8 +149,8 @@
 				3A4DA33D247464F600714407 /* advanced.vs */,
 				3AFE7ED6247164C7000E8463 /* model.fs */,
 				3AFE7EE1247164C7000E8463 /* model.vs */,
-				3AFE7EDF247164C7000E8463 /* text.fs */,
-				3AFE7EE4247164C7000E8463 /* text.vs */,
+				3AFE7EDF247164C7000E8463 /* text2D.fs */,
+				3AFE7EE4247164C7000E8463 /* text2D.vs */,
 				3AF50E482476DCA500BE42EF /* text3D.vs */,
 				3AFE7ED5247164C7000E8463 /* sphere.fs */,
 				3AFE7EE5247164C7000E8463 /* sphere.vs */,
@@ -252,6 +252,7 @@
 			isa = PBXGroup;
 			children = (
 				3AFE7EFE247164C8000E8463 /* glLine.hpp */,
+				3AFE7F02247164C8000E8463 /* glQuad.hpp */,
 				3AFE7EFF247164C8000E8463 /* glAxes.hpp */,
 				3A5EBD9D247925A200F2C146 /* glReferenceAxes.hpp */,
 				3A4DA33C24745DAA00714407 /* glLines.hpp */,
@@ -260,8 +261,8 @@
 				3AFE7F03247164C8000E8463 /* glGrid.hpp */,
 				3AFE7F06247164C8000E8463 /* glBox.hpp */,
 				3AFE7EFD247164C8000E8463 /* glCuboid.hpp */,
-				3AFE7F05247164C8000E8463 /* glPoints.hpp */,
 				3AFE7F04247164C8000E8463 /* glPrint.hpp */,
+				3AFE7F05247164C8000E8463 /* glPoints.hpp */,
 				3AF50E472476DA6600BE42EF /* glPrint3D.hpp */,
 			);
 			path = objects;
@@ -270,7 +271,6 @@
 		3AFE7F07247164C8000E8463 /* core */ = {
 			isa = PBXGroup;
 			children = (
-				3AFE7F02247164C8000E8463 /* glQuad.hpp */,
 				3AFE7F08247164C8000E8463 /* glShadow.hpp */,
 				3AFE7F09247164C8000E8463 /* glCamera.hpp */,
 				3AFE7F0B247164C8000E8463 /* glObject.hpp */,

@@ -29,12 +29,9 @@
 #include <cstdlib>
 #include <cstdio>
 
-#include <glm/glm.hpp>
-
 #include "glShader.hpp"
 #include "glQuad.hpp"
 
-//class glModel;
 
 /*****************************************************************************/
 // namespace ogl

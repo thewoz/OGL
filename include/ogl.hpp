@@ -26,6 +26,25 @@
 #ifndef _H_OGL_H_
 #define _H_OGL_H_
 
+#define GL_SILENCE_DEPRECATION
+
+#include <glad/glad.h>
+
+#include <GLFW/glfw3.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+
+#include <SOIL2/SOIL2.h>
+
+#include <mpl/stdio.hpp>
+
+
 // Debug
 //#define DEBUG_OGL
 #include <ogl/utils/debug.hpp>
@@ -39,20 +58,20 @@
 #include <ogl/core/glCamera.hpp>
 #include <ogl/core/glWindow.hpp>
 #include <ogl/core/glShader.hpp>
-#include <ogl/core/glQuad.hpp>
 #include <ogl/core/glTexture.hpp>
 #include <ogl/core/glObject.hpp>
 #include <ogl/core/glColors.hpp>
 //#include "glShadow.hpp"
 
 // Model
-//#include <ogl/model/glLight.hpp>
-//#include <ogl/model/glMaterial.hpp>
-//#include <ogl/model/glMesh.hpp>
-//#include <ogl/model/glModel.hpp>
+#include <ogl/model/glLight.hpp>
+#include <ogl/model/glMaterial.hpp>
+#include <ogl/model/glMesh.hpp>
+#include <ogl/model/glModel.hpp>
 
 // Objects
 #include <ogl/objects/glLine.hpp>
+#include <ogl/objects/glQuad.hpp>
 //#include <ogl/objects/glLines.hpp>
 #include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glEllipse.hpp>
@@ -62,7 +81,7 @@
 #include <ogl/objects/glAxes.hpp>
 #include <ogl/objects/glReferenceAxes.hpp>
 //#include <ogl/objects/glPoints.hpp>
-//#include <ogl/objects/glPrint.hpp>
+#include <ogl/objects/glPrint.hpp>
 //#include <ogl/objects/glPrint3D.hpp>
 
 #endif /* _H_OGL_H_ */

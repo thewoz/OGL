@@ -30,13 +30,7 @@
 #include <cstdio>
 
 #include <vector>
-#include  <string>
-
-//#include <ogl/utils/glfw.hpp>
-//#include <ogl/utils/tiff.hpp>
-
-//#include <ogl/core/glCamera.hpp>
-
+#include <string>
 
 /*****************************************************************************/
 // namespace ogl

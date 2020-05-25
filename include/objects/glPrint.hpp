@@ -34,9 +34,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-//#include <ogl/core/glObject.hpp>
-
-
 //****************************************************************************/
 // namespace ogl
 //****************************************************************************/
@@ -56,6 +53,8 @@ namespace ogl {
     
     float scale;
     
+    glm::vec3 color;
+    
     std::string text;
     
     struct Character_t {
@@ -70,31 +69,34 @@ namespace ogl {
   public:
     
     //****************************************************************************/
-    // glPrint
+    // glPrint()
     //****************************************************************************/
-    glPrint(const std::string & _name = "") : glObject(_name) { glObject::initText();  isInited = true; }
+    glPrint(const std::string & _name = "") { name = _name; }
   
     
     //****************************************************************************/
-    // glPrint
+    // glPrint()
     //****************************************************************************/
-    glPrint(const std::string & _text, float _x, float _y, glm::vec3 & _color, float _scale = 1, const std::string & _name = "") : glObject(_name) {
-      
+    glPrint(const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1, const std::string & _name = "") {
+      name = _name;
       init(_text, _x, _y, _color, _scale);
-      
     }
     
     //****************************************************************************/
-    // ~glPrint
+    // ~glPrint()
     //****************************************************************************/
     ~glPrint() { cleanInGpu(); }
     
     //****************************************************************************/
-    // init
+    // init()
     //****************************************************************************/
-    void init(const std::string & _text, float _x, float _y, glm::vec3 & _color, float _scale = 1) {
+    void init(const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1) {
       
       DEBUG_LOG("glPrint::init(" + name + ")");
+      
+      shader.setName(name);
+      
+      shader.initText2D();
       
       text = _text;
       
@@ -110,9 +112,9 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // print
+    // render()
     //****************************************************************************/
-    void print(const glm::mat4 & projection, const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1) {
+    void render(const glCamera * camera, const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1) {
       
       text = _text;
       
@@ -123,34 +125,51 @@ namespace ogl {
       
       scale = _scale;
       
-      print(projection);
+      if(!isInited){
+        shader.setName(name);
+        shader.initText2D();
+        isInited = true;
+      }
+      
+      glObject::render(camera);
 
     }
     
     //****************************************************************************/
-    // print
+    // render()
     //****************************************************************************/
-    void print(const glm::mat4 & projection, const std::string & _text) {
-     
+    void render(const glCamera * camera, const std::string & _text) {
+      
       text = _text;
       
-      print(projection);
+      if(!isInited){
+        shader.setName(name);
+        shader.initText2D();
+        isInited = true;
+      }
+      
+      glObject::render(camera);
       
     }
     
     //****************************************************************************/
-    // print
+    // _render()
     //****************************************************************************/
-    void print(const glm::mat4 & projection) {
+    void _render(const glCamera * camera) {
+      
+      DEBUG_LOG("glPrint::_render(" + name + ")");
+      
+      shader.setUniform("projection", camera->getText2DOrthoProjection());
+      shader.setUniform("color",      color);
+      
+      glEnable(GL_DEPTH_TEST);
       
       glEnable(GL_CULL_FACE);
       
       glEnable(GL_BLEND);
       
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            
-      glObject::renderBegin(projection);
-      
+                  
       glActiveTexture(GL_TEXTURE0);
       
       glBindVertexArray(vao);
@@ -198,8 +217,8 @@ namespace ogl {
       glBindVertexArray(0);
       glBindTexture(GL_TEXTURE_2D, 0);
       
-      glObject::renderEnd();
-      
+      glDisable(GL_DEPTH_TEST);
+
       glDisable(GL_CULL_FACE);
       
       glDisable(GL_BLEND);
@@ -209,7 +228,7 @@ namespace ogl {
   private:
     
     //****************************************************************************/
-    // setInGpu
+    // setInGpu()
     //****************************************************************************/
     void setInGpu() {
       
@@ -301,7 +320,7 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // cleanInGpu() -
+    // cleanInGpu()
     //****************************************************************************/
     void cleanInGpu() {
       

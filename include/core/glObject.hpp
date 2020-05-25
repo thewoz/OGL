@@ -31,14 +31,6 @@
 
 #include <string>
 
-#include <glm/glm.hpp>
-
-//#include <ogl/utils/glfw.hpp>
-
-//#include <ogl/core/glWindow.hpp>
-//#include <ogl/core/glShader.hpp>
-
-
 /* ****************************************************************************/
 // namespace ogl
 /* ****************************************************************************/

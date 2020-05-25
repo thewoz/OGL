@@ -30,8 +30,6 @@
 
 #include <string>
 
-#include <glm/glm.hpp>
-
 #include "freeglut/fg_font_data.hpp"
 
 /*****************************************************************************/
