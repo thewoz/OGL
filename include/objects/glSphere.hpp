@@ -29,60 +29,61 @@
 #include <cstdio>
 #include <cstdlib>
 
-//#include <ogl/core/glObject.hpp>
-
-
-/*****************************************************************************/
+//****************************************************************************/
 // namespace ogl
-/*****************************************************************************/
+//****************************************************************************/
 namespace ogl {
 
-  /*****************************************************************************/
+  //****************************************************************************/
   // Class glSphere
-  /*****************************************************************************/
+  //****************************************************************************/
   class glSphere : public glObject {
     
     private:
       
-      GLuint vao;
+      GLuint vao = -1;
       GLuint vbo[4];
       
-      GLfloat radius;
-      GLint   slices;
-      GLint   stacks;
+      float radius;
+      int   slices;
+      int   stacks;
+    
+      glm::vec3 color;
       
     public:
       
-      /*****************************************************************************/
-      // glSphere
-      /*****************************************************************************/
-      glSphere(const std::string & _name = "") : glObject(_name) { }
+      //****************************************************************************/
+      // glSphere()
+      //****************************************************************************/
+      glSphere(const std::string & _name = "") { name = _name; }
       
-      /*****************************************************************************/
-      // glSphere
-      /*****************************************************************************/
-      glSphere(GLfloat _radius, GLint _slices, GLint _stacks, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") : glObject(_name) {
+      //****************************************************************************/
+      // glSphere()
+      //****************************************************************************/
+      glSphere(float _radius, int _slices, int _stacks, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+        name = _name;
         init(_radius, _slices, _stacks, _style, _color);
       }
       
-      /*****************************************************************************/
-      // ~glSphere
-      /*****************************************************************************/
+      //****************************************************************************/
+      // ~glSphere()
+      //****************************************************************************/
       ~glSphere() { cleanInGpu(); }
       
-      /*****************************************************************************/
-      // init
-      /*****************************************************************************/
-      void init(GLfloat _radius, GLint _slices, GLint _stacks, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
+      //****************************************************************************/
+      // init()
+      //****************************************************************************/
+      void init(float _radius, int _slices, int _stacks, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
         
         DEBUG_LOG("glSphere::init(" + name + ")");
 
-        glObject::initPlain();
+        shader.setName(name);
+        
+        shader.initPlain();
         
         radius = _radius;
         
         slices = _slices;
-        
         stacks = _stacks;
         
         style = _style;
@@ -93,17 +94,22 @@ namespace ogl {
         
       }
       
-      /*****************************************************************************/
-      // render
-      /*****************************************************************************/
-      void render(const glm::mat4 & projection, const glm::mat4 & view) {
+      //****************************************************************************/
+      // _render()
+      //****************************************************************************/
+      void _render(const glCamera * camera) {
         
-        DEBUG_LOG("gSphere::setInGpu(" + name + ")");
+        DEBUG_LOG("gSphere::_render(" + name + ")");
 
-        glObject::renderBegin(projection, view);
-       
+        shader.setUniform("projection", camera->getProjection());
+        shader.setUniform("view",       camera->getView());
+        shader.setUniform("model",      modelMatrix);
+        shader.setUniform("color",      color);
+        
+        glEnable(GL_DEPTH_TEST);
+        
         glDisable(GL_CULL_FACE);
-
+        
         glBindVertexArray(vao);
         
         glEnableVertexAttribArray(0);
@@ -120,16 +126,16 @@ namespace ogl {
         glDisableVertexAttribArray(0);
         
         glBindVertexArray(0);
-                
-        glObject::renderEnd();
         
+        glDisable(GL_DEPTH_TEST);
+
       }
       
     private:
       
-      /*****************************************************************************/
-      // setInGpu
-      /*****************************************************************************/
+      //****************************************************************************/
+      // setInGpu()
+      //****************************************************************************/
       void setInGpu() {
         
         DEBUG_LOG("glSphere::setInGpu(" + name + ")");
@@ -156,9 +162,9 @@ namespace ogl {
               float Y = cos(phi);
               float Z = sin(theta) * sin(phi);
               
-              positions.push_back( glm::vec3( X, Y, Z) * radius );
-              normals.push_back( glm::vec3(X, Y, Z) );
-              textureCoords.push_back( glm::vec2(U, V) );
+              positions.push_back(glm::vec3( X, Y, Z) * radius);
+              normals.push_back(glm::vec3(X, Y, Z));
+              textureCoords.push_back(glm::vec2(U, V));
               
             }
             
@@ -199,13 +205,13 @@ namespace ogl {
           
           glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
           glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);
-          glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
-          glEnableVertexAttribArray(2);
+          glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
+          glEnableVertexAttribArray(1);
           
           glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
           glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(glm::vec2), textureCoords.data(), GL_STATIC_DRAW);
-          glVertexAttribPointer(8, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-          glEnableVertexAttribArray(8);
+          glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+          glEnableVertexAttribArray(2);
           
           glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
           glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(GLuint), indicies.data(), GL_STATIC_DRAW);
@@ -223,9 +229,9 @@ namespace ogl {
     
   private:
     
-    /* ****************************************************************************/
-    // cleanInGpu() -
-    /* ****************************************************************************/
+    //****************************************************************************/
+    // cleanInGpu()
+    //****************************************************************************/
     void cleanInGpu() {
       
       if(isInitedInGpu) {

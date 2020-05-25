@@ -32,18 +32,14 @@
 #include <vector>
 #include <string>
 
-//#include <opencv2/opencv.hpp>
-
-//#include <ogl/core/glObject.hpp>
-
-/*****************************************************************************/
+//****************************************************************************/
 // namespace ogl
-/*****************************************************************************/
+//****************************************************************************/
 namespace ogl {
   
-  /*****************************************************************************/
+  //****************************************************************************/
   // Class glLines
-  /*****************************************************************************/
+  //****************************************************************************/
   class glLines : public glObject {
     
   private:
@@ -59,45 +55,55 @@ namespace ogl {
   public:
     
     //****************************************************************************/
-    // glLines
+    // glLines()
     //****************************************************************************/
-    glLines(const std::string & _name = "") : glObject(_name) { }
-    glLines(const std::vector<glm::vec3> & _vertices, const glm::vec4 & color = glm::vec4(0.0), float _lineWidth = 1, const std::string & _name = "") : glObject(_name) { init(_vertices, color, _lineWidth); }
-    glLines(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, float _lineWidth = 1, const std::string & _name = "") : glObject(_name) { init(_vertices, _color, _lineWidth); }
+    glLines(const std::string & _name = "") { name = _name; }
+    glLines(const std::vector<glm::vec3> & _vertices, const glm::vec4 & _color = glm::vec4(0.0), float _lineWidth = 1, const std::string & _name = "") {
+      name = _name;
+      init(_vertices, _color, _lineWidth);
+    }
+    glLines(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, float _lineWidth = 1, const std::string & _name = "") {
+      name = _name;
+      init(_vertices, _color, _lineWidth);
+    }
     
     
     //****************************************************************************/
-    // ~glLines
+    // ~glLines()
     //****************************************************************************/
     ~glLines() { cleanInGpu(); }
     
     //****************************************************************************/
-    // init
+    // init()
     //****************************************************************************/
-    void init(const std::vector<glm::vec3> & _vertices, const glm::vec4 & color = glm::vec4(0.0), float _lineWidth = 1) {
+    void init(const std::vector<glm::vec3> & _vertices, const glm::vec4 & _color = glm::vec4(0.0), float _lineWidth = 1) {
       
       DEBUG_LOG("glLines::init(" + name + ")");
       
-      glObject::initAdvanced();
+      shader.setName(name);
+      
+      shader.initAdvanced();
       
       vertices = _vertices;
       
       lineWidth = _lineWidth;
       
-      colors.resize(vertices.size(), color);
+      colors.resize(vertices.size(), _color);
             
       isInited = true;
       
     }
     
-    /* ****************************************************************************/
+    //****************************************************************************/
     // init
-    /* ****************************************************************************/
+    //****************************************************************************/
     void init(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, float _lineWidth = 1) {
       
       DEBUG_LOG("glLines::init(" + name + ")");
       
-      glObject::initAdvanced();
+      shader.setName(name);
+      
+      shader.initAdvanced();
       
       vertices = _vertices;
       
@@ -115,22 +121,20 @@ namespace ogl {
     //void setLineWidth(float _lineWidth) { lineWidth = _lineWidth; }
   
     //****************************************************************************/
-    // render
+    // _render()
     //****************************************************************************/
-    void render(const glm::mat4 & projection, const glm::mat4 & view, int from = 0, int to = -1, int strip = -1, int stripOffset = -1) {
+    void _render(const glCamera * camera, int from = 0, int to = -1, int strip = -1, int stripOffset = -1) {
       
       if(to == -1) to = (int) vertices.size();
       
       DEBUG_LOG("glLines::render(" + name + ")");
           
-      glObject::renderBegin(projection, view);
+      shader.setUniform("projection", camera->getProjection());
+      shader.setUniform("view",       camera->getView());
+      shader.setUniform("model",      modelMatrix);
+      
+      glEnable(GL_DEPTH_TEST);
                   
-      //glEnable(GL_BLEND);
-      
-      glEnable(GL_LINE_SMOOTH);
-      
-      glShadeModel(GL_SMOOTH);
-      
       // https://vitaliburkov.wordpress.com/2016/09/17/simple-and-fast-high-quality-antialiased-lines-with-opengl/
       //glLineWidth(lineWidth);
       
@@ -150,22 +154,17 @@ namespace ogl {
 
       }
 
-
-      //glDisable(GL_BLEND);
-            
-      glDisable(GL_LINE_SMOOTH);
-
       glBindVertexArray(0);
       
-      glObject::renderEnd();
-      
+      glDisable(GL_DEPTH_TEST);
+
     }
     
     
   private:
     
     //****************************************************************************/
-    // setInGpu
+    // setInGpu()
     //****************************************************************************/
     void setInGpu() {
       
@@ -200,9 +199,9 @@ namespace ogl {
     
   private:
     
-    /* ****************************************************************************/
-    // cleanInGpu() -
-    /* ****************************************************************************/
+    //****************************************************************************/
+    // cleanInGpu()
+    //****************************************************************************/
     void cleanInGpu() {
       
       if(isInitedInGpu) {

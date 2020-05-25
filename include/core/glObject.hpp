@@ -61,209 +61,248 @@ namespace ogl {
       bool isInitedInGpu;
       bool isToUpdateInGpu;
       
-      glm::vec3 center;
-      glm::vec3 angles;
-      glm::vec3 size;
+      glm::vec3 _position;
+      glm::vec3 _rotation;
+      glm::vec3 _scale;
       
-      glm::mat4 model;
+      glm::mat4 modelMatrix;
       
-      glm::vec3 color;
+    //  glm::vec3 color;
       
       int style;
       
     public:
-      
-      enum STYLE { SOLID, WIREFRAME };
-      
-      /* ****************************************************************************/
-      // glObject() -
-      /* ****************************************************************************/
-      glObject(const std::string & _name = "") : isInited(false), isInitedInGpu(false), isToUpdateInGpu(false), name(_name) {
-                
-        _init(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(1.0));
-        
-      }
-      
-      /* ****************************************************************************/
-      // initModel() -
-      /* ****************************************************************************/
-      void initModel(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
-        
-        if(name.empty()) name = _name;
-               
-        DEBUG_LOG("glObject::init(" + name + ")");
-        
-        shader.setName(name);
-
-        shader.initModel();
-
-        _init(_center, _angles, _size);
-                
-      }
     
-      /* ****************************************************************************/
-      // initPlain() -
-      /* ****************************************************************************/
-      void initPlain(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
-        
-        if(name.empty()) name = _name;
-
-        DEBUG_LOG("glObject::init(" + name + ")");
-        
-        shader.setName(name);
-
-        shader.initPlain();
-        
-        _init(_center, _angles, _size);
-        
-      }
+    enum STYLE { WIREFRAME, SOLID, MODEL };
     
-    /* ****************************************************************************/
-    // initOrto() -
-    /* ****************************************************************************/
-    void initOrto(const std::string & _name = "") {
+    //***************************************************************************
+    // glObject()
+    //***************************************************************************
+    glObject() {
+    
+      name = "glObject";
       
-      if(name.empty()) name = _name;
-      
-      DEBUG_LOG("glObject::init(" + name + ")");
-      
-      shader.setName(name);
-      
-      shader.initOrto();
-      
-      _init();
+      _position = glm::vec3(0.0);
+      _rotation = glm::vec3(0.0);
+      _scale    = glm::vec3(1.0);
+    
+      updateModelMatrix();
       
     }
     
-    /* ****************************************************************************/
-    // initAdvanced() -
-    /* ****************************************************************************/
-    void initAdvanced(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
-      
-      if(name.empty()) name = _name;
-      
-      DEBUG_LOG("glObject::init(" + name + ")");
-      
-      shader.setName(name);
-      
-      shader.initAdvanced();
-      
-      _init(_center, _angles, _size);
-      
-    }
+     //***************************************************************************
+     // render()
+     //***************************************************************************
+     void render(const glCamera * camera) {
     
-    /* ****************************************************************************/
-    // initText() -
-    /* ****************************************************************************/
-    void initText(const std::string & _name = "") {
+       DEBUG_LOG("glObject::render(" + name + ")");
       
-      if(name.empty()) name = _name;
-      
-      DEBUG_LOG("glObject::init(" + name + ")");
-      
-      shader.setName(name);
-      
-      shader.initText();
-      
-      _init();
-      
-    }
+       if(!isInited){
+         fprintf(stderr, "line must be inited before render\n");
+         abort();
+       }
     
-    /* ****************************************************************************/
-    // initText3D() -
-    /* ****************************************************************************/
-    void initText3D(const std::string & _name = "") {
-      
-      if(name.empty()) name = _name;
-      
-      DEBUG_LOG("glObject::init(" + name + ")");
-      
-      shader.setName(name);
-      
-      shader.initText3D();
-      
-      _init();
-      
-    }
+       if(isToInitInGpu()) initInGpu();
     
-    
-      /* ****************************************************************************/
-      // initSphere() -
-      /* ****************************************************************************/
-      void initSphere(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
-        
-        if(name.empty()) name = _name;
-        
-        DEBUG_LOG("glObject::init(" + name + ")");
-        
-        shader.setName(name);
-        
-        shader.initSphere();
-        
-        _init(_center, _angles, _size);
-        
-      }
+       shader.use();
+       
+       _render(camera);
+       
+     }
+       
+//
+//      /* ****************************************************************************/
+//      // glObject() -
+//      /* ****************************************************************************/
+//      glObject(const std::string & _name = "") : isInited(false), isInitedInGpu(false), isToUpdateInGpu(false), name(_name) {
+//
+//        _init(glm::vec3(0.0), glm::vec3(0.0), glm::vec3(1.0));
+//
+//      }
+//
+//      /* ****************************************************************************/
+//      // initModel() -
+//      /* ****************************************************************************/
+//      void initModel(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
+//
+//        if(name.empty()) name = _name;
+//
+//        DEBUG_LOG("glObject::init(" + name + ")");
+//
+//        shader.setName(name);
+//
+//        shader.initModel();
+//
+//        _init(_center, _angles, _size);
+//
+//      }
+//
+//      /* ****************************************************************************/
+//      // initPlain() -
+//      /* ****************************************************************************/
+//      void initPlain(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
+//
+//        if(name.empty()) name = _name;
+//
+//        DEBUG_LOG("glObject::init(" + name + ")");
+//
+//        shader.setName(name);
+//
+//        shader.initPlain();
+//
+//        _init(_center, _angles, _size);
+//
+//      }
+//
+//    /* ****************************************************************************/
+//    // initOrto() -
+//    /* ****************************************************************************/
+//    void initOrto(const std::string & _name = "") {
+//
+//      if(name.empty()) name = _name;
+//
+//      DEBUG_LOG("glObject::init(" + name + ")");
+//
+//      shader.setName(name);
+//
+//      shader.initOrto();
+//
+//      _init();
+//
+//    }
+//
+//    /* ****************************************************************************/
+//    // initAdvanced() -
+//    /* ****************************************************************************/
+//    void initAdvanced(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
+//
+//      if(name.empty()) name = _name;
+//
+//      DEBUG_LOG("glObject::init(" + name + ")");
+//
+//      shader.setName(name);
+//
+//      shader.initAdvanced();
+//
+//      _init(_center, _angles, _size);
+//
+//    }
+//
+//    /* ****************************************************************************/
+//    // initText() -
+//    /* ****************************************************************************/
+//    void initText(const std::string & _name = "") {
+//
+//      if(name.empty()) name = _name;
+//
+//      DEBUG_LOG("glObject::init(" + name + ")");
+//
+//      shader.setName(name);
+//
+//      shader.initText();
+//
+//      _init();
+//
+//    }
+//
+//    /* ****************************************************************************/
+//    // initText3D() -
+//    /* ****************************************************************************/
+//    void initText3D(const std::string & _name = "") {
+//
+//      if(name.empty()) name = _name;
+//
+//      DEBUG_LOG("glObject::init(" + name + ")");
+//
+//      shader.setName(name);
+//
+//      shader.initText3D();
+//
+//      _init();
+//
+//    }
+//
+//
+//      /* ****************************************************************************/
+//      // initSphere() -
+//      /* ****************************************************************************/
+//      void initSphere(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0), const std::string & _name = "") {
+//
+//        if(name.empty()) name = _name;
+//
+//        DEBUG_LOG("glObject::init(" + name + ")");
+//
+//        shader.setName(name);
+//
+//        shader.initSphere();
+//
+//        _init(_center, _angles, _size);
+//
+//      }
+//
+//      /* ****************************************************************************/
+//      // renderBegin() -
+//      /* ****************************************************************************/
+//      void renderBegin(const glm::mat4 & projection, const glm::mat4 & view) {
+//
+//        DEBUG_LOG("glObject::renderBegin(" + name + ")");
+//
+//        if(!isInited){
+//          fprintf(stderr, "line must be inited before render\n");
+//          abort();
+//        }
+//
+//        if(isToInitInGpu()) initInGpu();
+//
+//        shader.use();
+//
+//        shader.setUniform("projection", projection);
+//        shader.setUniform("view", view);
+//        shader.setUniform("model", model);
+//        shader.setUniform("color", color);
+//
+//        //if(shader.style != glShader::STYLE::ORTO)  shader.setUniform("model", model);
+//        //if(shader.style != glShader::STYLE::MODEL) shader.setUniform("color", color);
+//
+//        glEnable(GL_DEPTH_TEST);
+//
+//      }
+//
+//    /* ****************************************************************************/
+//    // renderBegin() -
+//    /* ****************************************************************************/
+//    void renderBegin(const glm::mat4 & projection) {
+//
+//      DEBUG_LOG("glObject::renderBegin(" + name + ")");
+//
+//      if(!isInited){
+//        fprintf(stderr, "line must be inited before render\n");
+//        abort();
+//      }
+//
+//      if(isToInitInGpu()) initInGpu();
+//
+//      shader.use();
+//
+//      shader.setUniform("projection", projection);
+//      shader.setUniform("color", color);
+//
+//      glEnable(GL_DEPTH_TEST);
+//
+//    }
+//
+//      /* ****************************************************************************/
+//      // renderEnd() -
+//      /* ****************************************************************************/
+//      void renderEnd() {
+//
+//        glDisable(GL_DEPTH_TEST);
+//
+//      }
       
-      /* ****************************************************************************/
-      // renderBegin() -
-      /* ****************************************************************************/
-      void renderBegin(const glm::mat4 & projection, const glm::mat4 & view) {
-        
-        DEBUG_LOG("glObject::renderBegin(" + name + ")");
+      //virtual void renderEnd() = 0;
+    
 
-        if(!isInited){
-          fprintf(stderr, "line must be inited before render\n");
-          abort();
-        }
-        
-        if(isToInitInGpu()) initInGpu();
-        
-        shader.use();
-                
-        shader.setUniform("projection", projection);
-        shader.setUniform("view", view);
-        shader.setUniform("model", model);
-        shader.setUniform("color", color);
-        
-        //if(shader.style != glShader::STYLE::ORTO)  shader.setUniform("model", model);
-        //if(shader.style != glShader::STYLE::MODEL) shader.setUniform("color", color);
-        
-        glEnable(GL_DEPTH_TEST);
-        
-      }
-    
-    /* ****************************************************************************/
-    // renderBegin() -
-    /* ****************************************************************************/
-    void renderBegin(const glm::mat4 & projection) {
-      
-      DEBUG_LOG("glObject::renderBegin(" + name + ")");
-      
-      if(!isInited){
-        fprintf(stderr, "line must be inited before render\n");
-        abort();
-      }
-      
-      if(isToInitInGpu()) initInGpu();
-      
-      shader.use();
-      
-      shader.setUniform("projection", projection);
-      shader.setUniform("color", color);
-      
-      glEnable(GL_DEPTH_TEST);
-      
-    }
-      
-      /* ****************************************************************************/
-      // renderEnd() -
-      /* ****************************************************************************/
-      void renderEnd() {
-        
-        glDisable(GL_DEPTH_TEST);
-        
-      }
-      
       /* ****************************************************************************/
       // initInGpu() -
       /* ****************************************************************************/
@@ -277,9 +316,7 @@ namespace ogl {
           fprintf(stderr, "glObject must be inited before set in GPU\n");
           abort();
         }
-        
-       // shader.initInGpu(); //NOTE: tolto ma non sono sicuro
-        
+                
         setInGpu();
         
         isInitedInGpu = true;
@@ -289,22 +326,21 @@ namespace ogl {
       /* ****************************************************************************/
       // Position fuction
       /* ****************************************************************************/
-      inline void translate(const glm::vec3 & _center) { center = _center; updateModelMatrix(); }
-      inline void rotate(const glm::vec3 & _angles) { angles = _angles; updateModelMatrix(); }
-      //inline void rotate(const glm::quat & _angles) { angles.x = _angles.x; angles.y = _angles.y; angles.z = _angles.z; updateModelMatrix(); }
-      inline void scale(const glm::vec3 & _size) { size = _size; updateModelMatrix(); }
-      inline void move(const glm::vec3 & _angles, const glm::vec3 & _center, const glm::vec3 & _size) {
-        angles = _angles;
-        center = _center;
-        size = _size;
+      inline void translate(const glm::vec3 & value) { _position = value; updateModelMatrix(); }
+      inline void rotate   (const glm::vec3 & value) { _rotation = value; updateModelMatrix(); }
+      inline void scale    (const glm::vec3 & value) { _scale    = value; updateModelMatrix(); }
+    
+      inline void move(const glm::vec3 & value1, const glm::vec3 & value2, const glm::vec3 & value3) {
+        _position = value1;
+        _rotation = value2;
+        _scale    = value3;
         updateModelMatrix();
-        
       }
       
       /* ****************************************************************************/
       // getModelMatrix() -
       /* ****************************************************************************/
-      glm::mat4 getModelMatrix() const { return model; }
+      glm::mat4 getModelMatrix() const { return modelMatrix; }
     
       /* ****************************************************************************/
       // getShader() -
@@ -314,45 +350,48 @@ namespace ogl {
       /* ****************************************************************************/
       //
       /* ****************************************************************************/
-      glm::vec3 getTranslation() const { return center; }
-      glm::vec3 getRotation()    const { return angles; }
+      glm::vec3 getTranslation() const { return _position; }
+      glm::vec3 getRotation()    const { return _rotation; }
     
-      /* ****************************************************************************/
-      // setColor() -
-      /* ****************************************************************************/
-      inline void setColor(const glm::vec3 & _color) { color = _color; }
-      
-      /* ****************************************************************************/
-      // setStyle() -
-      /* ****************************************************************************/
-      inline void setStyle(int _style) { style = _style; }
-    
-      /* ****************************************************************************/
-      // setName() -
-      /* ****************************************************************************/
-      inline void setName(std::string _name) { name = _name; }
+//
+//      /* ****************************************************************************/
+//      // setColor() -
+//      /* ****************************************************************************/
+//      inline void setColor(const glm::vec3 & _color) { color = _color; }
+//
+        //****************************************************************************/
+        // setStyle()
+        //****************************************************************************/
+        inline void setStyle(int _style) { style = _style; }
+
+        //****************************************************************************/
+        // setName()
+        //****************************************************************************/
+        inline void setName(std::string _name) { name = _name; }
     
     private:
       
-      /* ****************************************************************************/
-      // updateModelMatrix() -
-      /* ****************************************************************************/
+      //****************************************************************************/
+      // updateModelMatrix()
+      //****************************************************************************/
       inline void updateModelMatrix() {
         
-        model = glm::mat4(1.0f);
+        modelMatrix = glm::mat4(1.0f);
         
-        model = glm::translate(model, center); // Translate it down a bit so it's at the center of the scene
+        modelMatrix = glm::translate(modelMatrix, _position); // Translate it down a bit so it's at the center of the scene
         
-        model = glm::scale(model, size);
+        modelMatrix = glm::scale(modelMatrix, _scale);
         
-        model  = glm::rotate(model, angles.x, glm::vec3(1, 0, 0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
-        model  = glm::rotate(model, angles.y, glm::vec3(0, 1, 0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
-        model  = glm::rotate(model, angles.z, glm::vec3(0, 0, 1)); // where x, y, z is axis of rotation (e.g. 0 1 0)
+        modelMatrix  = glm::rotate(modelMatrix, _rotation.x, glm::vec3(1, 0, 0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
+        modelMatrix  = glm::rotate(modelMatrix, _rotation.y, glm::vec3(0, 1, 0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
+        modelMatrix  = glm::rotate(modelMatrix, _rotation.z, glm::vec3(0, 0, 1)); // where x, y, z is axis of rotation (e.g. 0 1 0)
         
       }
       
   protected:
       
+    virtual void _render(const glCamera * camera) = 0;
+
     /* ****************************************************************************/
     // setInGpu
     /* ****************************************************************************/
@@ -391,27 +430,27 @@ namespace ogl {
     }
     
   private:
-    
-    /* ****************************************************************************/
-    // _init
-    /* ****************************************************************************/
-    void _init(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0)) {
-      
-      center = _center;
-      
-      angles = _angles;
-      
-      size = _size;
-      
-      updateModelMatrix();
-      
-      isInited = false;
-      
-      isInitedInGpu = false;
-      
-      isToUpdateInGpu = false;
-      
-    }
+//
+//    /* ****************************************************************************/
+//    // _init
+//    /* ****************************************************************************/
+//    void _init(const glm::vec3 & _center = glm::vec3(0.0), const glm::vec3 & _angles = glm::vec3(0.0), const glm::vec3 & _size = glm::vec3(1.0)) {
+//
+//      center = _center;
+//
+//      angles = _angles;
+//
+//      size = _size;
+//
+//      updateModelMatrix();
+//
+//      isInited = false;
+//
+//      isInitedInGpu = false;
+//
+//      isToUpdateInGpu = false;
+//
+//    }
     
   }; /* class glObject */
 

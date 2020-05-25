@@ -29,17 +29,14 @@
 #include <cstdio>
 #include <cstdlib>
 
-//#include <ogl/core/glObject.hpp>
-
-
-/*****************************************************************************/
+//****************************************************************************/
 // namespace ogl
-/*****************************************************************************/
+//****************************************************************************/
 namespace ogl {
   
-  /*****************************************************************************/
+  //****************************************************************************/
   // Class glEllipse
-  /*****************************************************************************/
+  //****************************************************************************/
   class glEllipse : public glObject {
     
   private:
@@ -47,41 +44,49 @@ namespace ogl {
     GLuint vao = -1;
     GLuint vbo[4];
 
-    GLuint stacks;
-    GLuint slices;
+    int stacks;
+    int slices;
     
-    GLfloat a;
-    GLfloat b;
-    GLfloat c;
+    float a;
+    float b;
+    float c;
+    
+    glm::vec3 color;
     
   public:
         
-    /*****************************************************************************/
+    //****************************************************************************/
     // glEllipse
-    /*****************************************************************************/
-    glEllipse(const std::string & _name = "") : glObject(_name) { }
+    //****************************************************************************/
+    glEllipse(const std::string & _name = "") { name = _name; }
 
-    /*****************************************************************************/
-    // glEllipse
-    /*****************************************************************************/
-    glEllipse(GLfloat _a, GLfloat _b, GLfloat _c, GLuint _uiStacks, GLuint _uiSlices, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(0.0), const std::string & _name = "") : glObject(_name) { init(_a, _b, _c, _uiStacks, _uiSlices, _style, _color); }
+    //****************************************************************************/
+    // glEllipse()
+    //****************************************************************************/
+    glEllipse(float _a, float _b, float _c, int _stacks, int _slices, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+      
+      name = _name;
+      
+      init(_a, _b, _c, _stacks, _slices, _style, _color); }
     
-    /*****************************************************************************/
-    // ~glEllipse
-    /*****************************************************************************/
+    //****************************************************************************/
+    // ~glEllipse()
+    //****************************************************************************/
     ~glEllipse() { cleanInGpu(); }
     
-    /*****************************************************************************/
-    // init
-    /*****************************************************************************/
-    void init(GLfloat _a, GLfloat _b, GLfloat _c, GLuint _uiStacks, GLuint _uiSlices, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(0.0)) {
+    //****************************************************************************/
+    // init()
+    //****************************************************************************/
+    void init(float _a, float _b, float _c, int _stacks, int _slices, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
       
       DEBUG_LOG("glEllipse::init(" + name + ")");
-      
-      glObject::initPlain();
 
-      stacks = _uiStacks;
-      slices = _uiSlices;
+      shader.setName(name);
+      
+      shader.initPlain();
+      
+      stacks = _stacks;
+      slices = _slices;
       
       a = _a;
       b = _b;
@@ -95,14 +100,19 @@ namespace ogl {
       
     }
     
-    /*****************************************************************************/
-    // render
-    /*****************************************************************************/
-    void render(const glm::mat4 & projection, const glm::mat4 & view) {
+    //****************************************************************************/
+    // _render()
+    //****************************************************************************/
+    void _render(const glCamera * camera) {
             
-      DEBUG_LOG("glEllipse::render(" + name + ")");
+      DEBUG_LOG("glEllipse::_render(" + name + ")");
 
-      glObject::renderBegin(projection, view);
+      shader.setUniform("projection", camera->getProjection());
+      shader.setUniform("view",       camera->getView());
+      shader.setUniform("model",      modelMatrix);
+      shader.setUniform("color",      color);
+
+      glEnable(GL_DEPTH_TEST);
       
       glDisable(GL_CULL_FACE);
 
@@ -123,15 +133,15 @@ namespace ogl {
       
       glBindVertexArray(0);
       
-      glObject::renderEnd();
+      glDisable(GL_DEPTH_TEST);
 
     }
     
     private:
 
-    /*****************************************************************************/
-    // setInGpu
-    /*****************************************************************************/
+    //****************************************************************************/
+    // setInGpu()
+    //****************************************************************************/
     void setInGpu() {
       
       DEBUG_LOG("glEllipse::setInGpu(" + name + ")");
@@ -164,12 +174,8 @@ namespace ogl {
             
           }
           
-          //exit(0);
-
         }
-        
-        //exit(0);
-        
+                
         // Now generate the index buffer
         std::vector<GLuint> indicies;
         
@@ -228,9 +234,9 @@ namespace ogl {
     
   private:
     
-    /* ****************************************************************************/
-    // cleanInGpu() -
-    /* ****************************************************************************/
+    //****************************************************************************/
+    // cleanInGpu()
+    //****************************************************************************/
     void cleanInGpu() {
       
       if(isInitedInGpu) {

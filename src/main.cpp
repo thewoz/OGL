@@ -49,6 +49,46 @@ int main(int argc, char * const argv []) {
   
   window.makeContextCurrent();
   
+  ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0));
+  ogl::glAxes axes;
+  ogl::glReferenceAxes referenceAxes;
+  ogl::glEllipse ellipse(0.1, 0.1, 0.3, 10, 20, ogl::glObject::STYLE::WIREFRAME, glm::vec3(2.0,0.0,1.0));
+  ogl::glSphere sphere(1.0, 10, 10, ogl::glObject::STYLE::WIREFRAME, glm::vec3(0.0,0.0,1.0));
+  ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0));
+  ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0)); box.translate(glm::vec3(-0.5));
+  ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0)); cube.translate(glm::vec3(0.5));
+  //ogl::glLines lines({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,0.0));
+
+  while(!window.shouldClose()) {
+    
+    window.renderBegin();
+    
+      line.render(window.getCurrentCamera()); glCheckError();
+      axes.render(window.getCurrentCamera()); glCheckError();
+      ellipse.render(window.getCurrentCamera()); glCheckError();
+      sphere.render(window.getCurrentCamera()); glCheckError();
+      grid.render(window.getCurrentCamera()); glCheckError();
+      box.render(window.getCurrentCamera()); glCheckError();
+      cube.render(window.getCurrentCamera()); glCheckError();
+      referenceAxes.render(window.getCurrentCamera()); glCheckError();
+
+    window.renderEnd();
+        
+  }
+  
+#endif
+  
+  
+#if(0)
+  
+  ogl::glWindow window;
+  
+  window.create(800, 600, "ModelView");
+  
+  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+  
+  window.makeContextCurrent();
+  
   ogl::glAxes axes(1.0);
   ogl::glSmallAxes axesSmall(1.0);
 

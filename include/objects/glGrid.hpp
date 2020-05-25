@@ -47,31 +47,38 @@ namespace ogl {
     GLuint vbo = -1;
     GLuint ibo = -1;
     
-    GLuint slices;
-    GLuint lenght;
+    int slices;
+    int lenght;
+    
+    glm::vec3 color;
     
   public:
     
-    /*****************************************************************************/
-    // glGrid
-    /*****************************************************************************/
-    glGrid(const std::string & _name = "") : glObject(_name) { }
-    glGrid(GLuint _slices, const glm::vec3 & _color = glm::vec3(0.0), const std::string & _name = "") : glObject(_name) { init(_slices, _color); }
+    //****************************************************************************/
+    // glGrid()
+    //****************************************************************************/
+    glGrid(const std::string & _name = "") { name = _name; }
+    glGrid(int _slices, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+      name = _name;
+      init(_slices, _color);
+    }
     
-    /*****************************************************************************/
-    // ~glGrid
-    /*****************************************************************************/
+    //****************************************************************************/
+    // ~glGrid()
+    //****************************************************************************/
     ~glGrid() { cleanInGpu(); }
  
-    /*****************************************************************************/
-    // init
-    /*****************************************************************************/
-    void init(GLuint _slices, const glm::vec3 & _color = glm::vec3(0.0)) {
+    //****************************************************************************/
+    // init()
+    //****************************************************************************/
+    void init(int _slices, const glm::vec3 & _color = glm::vec3(0.0)) {
       
       DEBUG_LOG("glGrid::init(" + name + ")");
 
-      glObject::initPlain();
-    
+      shader.setName(name);
+      
+      shader.initPlain();
+      
       slices = _slices;
 
       color = _color;
@@ -80,30 +87,35 @@ namespace ogl {
       
     }
    
-    /*****************************************************************************/
-    // render
-    /*****************************************************************************/
-    void render(const glm::mat4 & projection, const glm::mat4 & view) {
+    //****************************************************************************/
+    // _render()
+    //****************************************************************************/
+    void _render(const glCamera * camera) {
       
       DEBUG_LOG("glGrid::setInGpu(" + name + ")");
 
-      glObject::renderBegin(projection, view);
-          
+      shader.setUniform("projection", camera->getProjection());
+      shader.setUniform("view",       camera->getView());
+      shader.setUniform("model",      modelMatrix);
+      shader.setUniform("color",      color);
+      
+      glEnable(GL_DEPTH_TEST);
+      
       glBindVertexArray(vao);
           
       glDrawElements(GL_LINES, lenght, GL_UNSIGNED_INT, nullptr);
 
       glBindVertexArray(0);
             
-      glObject::renderEnd();
+      glDisable(GL_DEPTH_TEST);
 
     }
     
   private:
     
-    /*****************************************************************************/
-    // setInGpu
-    /*****************************************************************************/
+    //****************************************************************************/
+    // setInGpu()
+    //****************************************************************************/
     void setInGpu() {
       
       DEBUG_LOG("glGrid::setInGpu(" + name + ")");
@@ -155,9 +167,9 @@ namespace ogl {
     
   private:
     
-    /* ****************************************************************************/
-    // cleanInGpu() -
-    /* ****************************************************************************/
+    //****************************************************************************/
+    // cleanInGpu()
+    //****************************************************************************/
     void cleanInGpu() {
       
       if(isInitedInGpu) {

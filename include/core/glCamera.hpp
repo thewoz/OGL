@@ -266,21 +266,26 @@ namespace ogl {
 
     }
     
-    
-    
     //****************************************************************************/
-    // setzNearFar() -
+    // setzNearFar()
     //****************************************************************************/
     inline float getzNear() { return zNear; }
     inline float getzFar() { return zFar; }
 
+    //****************************************************************************/
+    // get3DOrthoProjection()
+    //****************************************************************************/
+    inline glm::mat4 get3DOrthoProjection() const {
+      float aspect = static_cast<float>(width) / static_cast<float>(height);
+      return glm::ortho(-aspect, aspect, -1.0f, 1.0f, zNear, zFar);
+    }
     
     
   private:
     
-    /*****************************************************************************/
+    //****************************************************************************/
     //updateCameraVectors
-    /*****************************************************************************/
+    //****************************************************************************/
     // Calculates the front vector from the Camera's (updated) Eular Angles
     void updateCameraVectors() {
       

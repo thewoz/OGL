@@ -27,7 +27,7 @@
 		3A4DA33C24745DAA00714407 /* glLines.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glLines.hpp; sourceTree = "<group>"; };
 		3A4DA33D247464F600714407 /* advanced.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = advanced.vs; sourceTree = "<group>"; };
 		3A4DA33E247464F800714407 /* advanced.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = advanced.fs; sourceTree = "<group>"; };
-		3A5EBD9D247925A200F2C146 /* glSmallAxes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glSmallAxes.hpp; sourceTree = "<group>"; };
+		3A5EBD9D247925A200F2C146 /* glReferenceAxes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glReferenceAxes.hpp; sourceTree = "<group>"; };
 		3A996DAA247AC96C00EF032F /* orto.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = orto.fs; sourceTree = "<group>"; };
 		3A996DAB247AC97700EF032F /* orto.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = orto.vs; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -251,18 +251,18 @@
 		3AFE7EFC247164C8000E8463 /* objects */ = {
 			isa = PBXGroup;
 			children = (
-				3AFE7EFD247164C8000E8463 /* glCuboid.hpp */,
 				3AFE7EFE247164C8000E8463 /* glLine.hpp */,
-				3A4DA33C24745DAA00714407 /* glLines.hpp */,
 				3AFE7EFF247164C8000E8463 /* glAxes.hpp */,
-				3A5EBD9D247925A200F2C146 /* glSmallAxes.hpp */,
+				3A5EBD9D247925A200F2C146 /* glReferenceAxes.hpp */,
+				3A4DA33C24745DAA00714407 /* glLines.hpp */,
 				3AFE7F00247164C8000E8463 /* glEllipse.hpp */,
 				3AFE7F01247164C8000E8463 /* glSphere.hpp */,
 				3AFE7F03247164C8000E8463 /* glGrid.hpp */,
+				3AFE7F06247164C8000E8463 /* glBox.hpp */,
+				3AFE7EFD247164C8000E8463 /* glCuboid.hpp */,
+				3AFE7F05247164C8000E8463 /* glPoints.hpp */,
 				3AFE7F04247164C8000E8463 /* glPrint.hpp */,
 				3AF50E472476DA6600BE42EF /* glPrint3D.hpp */,
-				3AFE7F05247164C8000E8463 /* glPoints.hpp */,
-				3AFE7F06247164C8000E8463 /* glBox.hpp */,
 			);
 			path = objects;
 			sourceTree = "<group>";

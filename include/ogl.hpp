@@ -27,8 +27,8 @@
 #define _H_OGL_H_
 
 // Debug
-#include <ogl/utils/debug.hpp>
 //#define DEBUG_OGL
+#include <ogl/utils/debug.hpp>
 
 // Utils
 #include <ogl/utils/glfw.hpp>
@@ -46,24 +46,24 @@
 //#include "glShadow.hpp"
 
 // Model
-#include <ogl/model/glLight.hpp>
-#include <ogl/model/glMaterial.hpp>
-#include <ogl/model/glMesh.hpp>
-#include <ogl/model/glModel.hpp>
+//#include <ogl/model/glLight.hpp>
+//#include <ogl/model/glMaterial.hpp>
+//#include <ogl/model/glMesh.hpp>
+//#include <ogl/model/glModel.hpp>
 
 // Objects
 #include <ogl/objects/glLine.hpp>
-#include <ogl/objects/glLines.hpp>
+//#include <ogl/objects/glLines.hpp>
 #include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glEllipse.hpp>
 #include <ogl/objects/glGrid.hpp>
 #include <ogl/objects/glBox.hpp>
 #include <ogl/objects/glCuboid.hpp>
 #include <ogl/objects/glAxes.hpp>
-#include <ogl/objects/glSmallAxes.hpp>
-#include <ogl/objects/glPoints.hpp>
-#include <ogl/objects/glPrint.hpp>
-#include <ogl/objects/glPrint3D.hpp>
+#include <ogl/objects/glReferenceAxes.hpp>
+//#include <ogl/objects/glPoints.hpp>
+//#include <ogl/objects/glPrint.hpp>
+//#include <ogl/objects/glPrint3D.hpp>
 
 #endif /* _H_OGL_H_ */
 

@@ -23,8 +23,8 @@
  * SOFTWARE.
  */
 
-#ifndef _H_OGL_AXES_H_
-#define _H_OGL_AXES_H_
+#ifndef _H_OGL_REFERENCE_AXES_H_
+#define _H_OGL_REFERENCE_AXES_H_
 
 #include <cstdlib>
 #include <cstdio>
@@ -35,9 +35,9 @@
 namespace ogl {
 
   //****************************************************************************/
-  // Class glAxes
+  // Class glReferenceAxes
   //****************************************************************************/
-  class glAxes : public glObject {
+  class glReferenceAxes : public glObject {
     
     private:
       
@@ -49,28 +49,25 @@ namespace ogl {
     public:
         
       //****************************************************************************/
-      // glAxes()
+      // glReferenceAxes()
       //****************************************************************************/
-      glAxes(GLfloat _scale = 1.0, const std::string & _name = " ") {
-                
+      glReferenceAxes(float _scale = 1.0, const std::string & _name = " "){
         name = _name;
-        
         init(_scale);
-        
       }
       
       //****************************************************************************/
-      // ~glAxes()
+      // ~glReferenceAxes()
       //****************************************************************************/
-      ~glAxes() { cleanInGpu(); }
+      ~glReferenceAxes() { cleanInGpu(); }
     
       //****************************************************************************/
       // init()
       //****************************************************************************/
-      void init(GLfloat _scale = 1.0) {
+      void init(float _scale = 1.0) {
         
-        DEBUG_LOG("gAxes::init(" + name + ")");
-
+        DEBUG_LOG("glReferenceAxes::init(" + name + ")");
+        
         shader.setName(name);
         
         shader.initPlain();
@@ -85,14 +82,21 @@ namespace ogl {
       // _render()
       //****************************************************************************/
       void _render(const glCamera * camera) {
+
+        DEBUG_LOG("glReferenceAxes::render(" + name + ")");
         
-        DEBUG_LOG("glAxes::render(" + name + ")");
+        GLint viewport[4]; glGetIntegerv(GL_VIEWPORT, viewport);
         
-        shader.setUniform("projection", camera->getProjection());
-        shader.setUniform("view",       camera->getView());
+        glViewport(viewport[2] - 160, 10, 160, 160);
+
+        shader.setUniform("projection", camera->get3DOrthoProjection());
+        shader.setUniform("view",       camera->getLookAt(glm::vec3(0.0f)));
         shader.setUniform("model",      modelMatrix);
-        
+                
         glEnable(GL_DEPTH_TEST);
+        
+        // https://vitaliburkov.wordpress.com/2016/09/17/simple-and-fast-high-quality-antialiased-lines-with-opengl/
+        //glLineWidth(lineWidth);
         
         for(size_t i=0; i<3; ++i) {
           
@@ -105,15 +109,18 @@ namespace ogl {
           glEnableVertexAttribArray(0);
           
           glDrawArrays(GL_LINES, 0, 2);
-
+          
           glBindVertexArray(0);
           
         }
-        
+                
         glDisable(GL_DEPTH_TEST);
 
+        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
       }
-  
+      
+      
     private:
       
       //****************************************************************************/
@@ -121,7 +128,7 @@ namespace ogl {
       //****************************************************************************/
       void setInGpu() {
         
-        DEBUG_LOG("glAxes::setInGpu(" + name + ")");
+        DEBUG_LOG("glReferenceAxes::setInGpu(" + name + ")");
         
         std::vector<std::vector<glm::vec3>> vertices(3, std::vector<glm::vec3>(2, glm::vec3(0.0f)));
         
@@ -145,7 +152,7 @@ namespace ogl {
         glBindBuffer(GL_ARRAY_BUFFER,0);
         
         glBindVertexArray(0);
-        
+                
       }
     
   private:
@@ -170,4 +177,4 @@ namespace ogl {
 
 } /* namespace ogl */
 
-#endif /* _H_OGL_AXES_H_ */
+#endif /* _H_OGL_REFERENCE_AXES_H_ */
