@@ -121,14 +121,21 @@ namespace ogl {
     //void setLineWidth(float _lineWidth) { lineWidth = _lineWidth; }
   
     //****************************************************************************/
-    // _render()
+    // render()
     //****************************************************************************/
-    void _render(const glCamera * camera, int from = 0, int to = -1, int strip = -1, int stripOffset = -1) {
-      
-      if(to == -1) to = (int) vertices.size();
+    void render(const glCamera * camera, int from = 0, int to = -1, int strip = -1, int stripOffset = -1) {
       
       DEBUG_LOG("glLines::render(" + name + ")");
           
+      if(!isInited){
+        fprintf(stderr, "glLines must be inited before render\n");
+        abort();
+      }
+      
+      if(isToInitInGpu()) initInGpu();
+      
+      shader.use();
+      
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
@@ -142,6 +149,8 @@ namespace ogl {
       
       glEnableVertexAttribArray(0);
       glEnableVertexAttribArray(1);
+      
+      if(to == -1) to = (int) vertices.size();
       
       if(strip == -1) {
         

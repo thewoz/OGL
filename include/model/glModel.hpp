@@ -128,10 +128,19 @@ namespace ogl {
     //****************************************************************************/
     // _render() - Render the model, and thus all its meshes
     //****************************************************************************/
-    void _render(const glCamera * camera, bool withMaterials = true) {
+    void render(const glCamera * camera, bool withMaterials = true) {
             
       DEBUG_LOG("glModel::render(" + name + ")");
 
+      if(!isInited){
+        fprintf(stderr, "glBox must be inited before render\n");
+        abort();
+      }
+      
+      if(isToInitInGpu()) initInGpu();
+      
+      shader.use();
+      
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);

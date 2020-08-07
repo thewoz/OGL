@@ -116,6 +116,8 @@ namespace ogl {
     //****************************************************************************/
     void render(const glCamera * camera, const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1) {
       
+      DEBUG_LOG("glPrint::render(" + name + ")");
+
       text = _text;
       
       x = _x;
@@ -125,14 +127,8 @@ namespace ogl {
       
       scale = _scale;
       
-      if(!isInited){
-        shader.setName(name);
-        shader.initText2D();
-        isInited = true;
-      }
+      _render(camera);
       
-      glObject::render(camera);
-
     }
     
     //****************************************************************************/
@@ -140,17 +136,27 @@ namespace ogl {
     //****************************************************************************/
     void render(const glCamera * camera, const std::string & _text) {
       
+      DEBUG_LOG("glPrint::render(" + name + ")");
+
       text = _text;
       
-      if(!isInited){
-        shader.setName(name);
-        shader.initText2D();
-        isInited = true;
-      }
-      
-      glObject::render(camera);
+      _render(camera);
       
     }
+    
+    //****************************************************************************/
+    // render()
+    //****************************************************************************/
+    void render(const glCamera * camera) {
+            
+      DEBUG_LOG("glPrint::render(" + name + ")");
+      
+      _render(camera);
+            
+    }
+    
+    
+  private:
     
     //****************************************************************************/
     // _render()
@@ -159,9 +165,19 @@ namespace ogl {
       
       DEBUG_LOG("glPrint::_render(" + name + ")");
       
+      if(!isInited){
+        shader.setName(name);
+        shader.initText2D();
+        isInited = true;
+      }
+      
+      if(isToInitInGpu()) initInGpu();
+      
+      shader.use();
+      
       shader.setUniform("projection", camera->getText2DOrthoProjection());
       shader.setUniform("color",      color);
-      
+            
       glEnable(GL_DEPTH_TEST);
       
       glEnable(GL_CULL_FACE);
@@ -174,14 +190,18 @@ namespace ogl {
       
       glBindVertexArray(vao);
       
+      glEnableVertexAttribArray(0); // NB: MESSO DA ME
+
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      
+      float tmpX = x;
 
       // iterate through all characters
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
         
         Character_t ch = Characters[*c];
         
-        float xpos = x + ch.Bearing.x * scale;
+        float xpos = tmpX + ch.Bearing.x * scale;
         float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
         
         float w = ch.Size.x * scale;
@@ -205,16 +225,20 @@ namespace ogl {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
         
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //glBindBuffer(GL_ARRAY_BUFFER, 0); // NB: TOLTO DA ME
         
         // render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels
-        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        tmpX += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        
+        glCheckError();
         
       }
       
       glBindVertexArray(0);
+      
       glBindTexture(GL_TEXTURE_2D, 0);
       
       glDisable(GL_DEPTH_TEST);
@@ -224,8 +248,6 @@ namespace ogl {
       glDisable(GL_BLEND);
       
     }
-    
-  private:
     
     //****************************************************************************/
     // setInGpu()

@@ -79,11 +79,20 @@ namespace ogl {
       }
     
       //****************************************************************************/
-      // _render()
+      // render()
       //****************************************************************************/
-      void _render(const glCamera * camera) {
+      void render(const glCamera * camera) {
 
         DEBUG_LOG("glReferenceAxes::render(" + name + ")");
+        
+        if(!isInited){
+          fprintf(stderr, "glReferenceAxes must be inited before render\n");
+          abort();
+        }
+        
+        if(isToInitInGpu()) initInGpu();
+        
+        shader.use();
         
         GLint viewport[4]; glGetIntegerv(GL_VIEWPORT, viewport);
         

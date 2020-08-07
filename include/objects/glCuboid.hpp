@@ -88,12 +88,21 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // _render()
+    // render()
     //****************************************************************************/
-    void _render(const glCamera * camera) {
+    void render(const glCamera * camera) {
             
       DEBUG_LOG("glCuboid::render(" + name + ")");
 
+      if(!isInited){
+        fprintf(stderr, "glCuboid must be inited before render\n");
+        abort();
+      }
+      
+      if(isToInitInGpu()) initInGpu();
+      
+      shader.use();
+      
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);

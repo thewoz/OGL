@@ -82,25 +82,25 @@ namespace ogl {
       
     }
     
-     //***************************************************************************
-     // render()
-     //***************************************************************************
-     void render(const glCamera * camera) {
-    
-       DEBUG_LOG("glObject::render(" + name + ")");
-      
-       if(!isInited){
-         fprintf(stderr, "line must be inited before render\n");
-         abort();
-       }
-    
-       if(isToInitInGpu()) initInGpu();
-    
-       shader.use();
-       
-       _render(camera);
-       
-     }
+//     //***************************************************************************
+//     // render()
+//     //***************************************************************************
+//     void render(const glCamera * camera, int from = 0, int to = -1) {
+//
+//       DEBUG_LOG("glObject::render(" + name + ")");
+//
+//       if(!isInited){
+//         fprintf(stderr, "line must be inited before render\n");
+//         abort();
+//       }
+//
+//       if(isToInitInGpu()) initInGpu();
+//
+//       shader.use();
+//
+//       _render(camera);
+//
+//     }
        
 //
 //      /* ****************************************************************************/
@@ -382,7 +382,7 @@ namespace ogl {
       
   protected:
       
-    virtual void _render(const glCamera * camera) = 0;
+    //virtual void _render(const glCamera * camera, int from = 0, int to = -1) = 0;
 
     /* ****************************************************************************/
     // setInGpu

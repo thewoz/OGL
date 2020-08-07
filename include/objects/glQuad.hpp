@@ -44,12 +44,11 @@ namespace ogl {
     GLuint vao = -1;
     GLuint vbo = -1;
 
-    float vertices[20] = {
-      -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-       1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-       1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-    };
+    float vertices[12] = {
+      -0.5f, 0.5f, 0.0f,
+       0.5,  0.5f, 0.0f,
+       0.5, -0.5f, 0.0f,
+      -0.5, -0.5f, 0.0f };
     
     glm::vec3 color = glm::vec3(1.0);
     
@@ -77,12 +76,21 @@ namespace ogl {
     //****************************************************************************/
     // render
     //****************************************************************************/
-    void _render(const glCamera * camera) {
+    void render(const glCamera * camera) {
       
       DEBUG_LOG("glQuad::render(" + name + ")");
       
+      if(!isInited){
+        fprintf(stderr, "glQuad must be inited before render\n");
+        abort();
+      }
+      
+      if(isToInitInGpu()) initInGpu();
+      
+      shader.use();
+      
       shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getView());
+      shader.setUniform("view",       camera->getLookAt(getTranslation()));
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("color",      color);
       
@@ -94,8 +102,9 @@ namespace ogl {
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
-      glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-      
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+      //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
       glBindVertexArray(0);
       
       glDisable(GL_DEPTH_TEST);
@@ -117,7 +126,7 @@ namespace ogl {
       glGenBuffers(1, &vbo);
 
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), vertices, GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), vertices, GL_STATIC_DRAW);
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(0);
       

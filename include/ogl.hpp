@@ -46,7 +46,7 @@
 
 
 // Debug
-//#define DEBUG_OGL
+#define DEBUG_OGL
 #include <ogl/utils/debug.hpp>
 
 // Utils
@@ -72,7 +72,7 @@
 // Objects
 #include <ogl/objects/glLine.hpp>
 #include <ogl/objects/glQuad.hpp>
-//#include <ogl/objects/glLines.hpp>
+#include <ogl/objects/glLines.hpp>
 #include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glEllipse.hpp>
 #include <ogl/objects/glGrid.hpp>
@@ -80,7 +80,7 @@
 #include <ogl/objects/glCuboid.hpp>
 #include <ogl/objects/glAxes.hpp>
 #include <ogl/objects/glReferenceAxes.hpp>
-//#include <ogl/objects/glPoints.hpp>
+#include <ogl/objects/glPoints.hpp>
 #include <ogl/objects/glPrint.hpp>
 //#include <ogl/objects/glPrint3D.hpp>
 

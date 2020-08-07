@@ -118,20 +118,29 @@ namespace ogl {
     void setRadius(float _radius) { radius = _radius; }
     
     //****************************************************************************/
-    // _render()
+    // render()
     //****************************************************************************/
-    void _render(const glCamera * camera, int from = 0, int to = -1) {
-      
-      if(to == -1) to = (int) points.size();
-      
+    void render(const glCamera * camera, int from = 0, int to = -1) {
+            
       DEBUG_LOG("glPoints::render(" + name + ")");
 
+      if(!isInited){
+        fprintf(stderr, "glPoints must be inited before render\n");
+        abort();
+      }
+      
+      if(isToInitInGpu()) initInGpu();
+      
+      shader.use();
+      
       glEnable(GL_PROGRAM_POINT_SIZE);
 
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("pointSize", radius);
+      
+      if(to == -1) to = (int) points.size();
 
       glBindVertexArray(vao);
 
@@ -202,7 +211,6 @@ namespace ogl {
       }
       
     }
-    
     
   };
   

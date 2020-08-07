@@ -109,11 +109,11 @@
 				3AFE7EE6247164C8000E8463 /* OpenGL2.1 */,
 				3AFE7ED4247164C7000E8463 /* shader */,
 				3AFE7EED247164C8000E8463 /* data */,
+				3AFE7F1824716691000E8463 /* ogl.hpp */,
 				3AFE7F14247164C8000E8463 /* utils */,
 				3AFE7F0F247164C8000E8463 /* model */,
 				3AFE7F07247164C8000E8463 /* core */,
 				3AFE7EFC247164C8000E8463 /* objects */,
-				3AFE7F1824716691000E8463 /* ogl.hpp */,
 			);
 			path = include;
 			sourceTree = "<group>";
