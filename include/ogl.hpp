@@ -44,7 +44,6 @@
 
 #include <mpl/stdio.hpp>
 
-
 // Debug
 #define DEBUG_OGL
 #include <ogl/utils/debug.hpp>
@@ -82,7 +81,7 @@
 #include <ogl/objects/glReferenceAxes.hpp>
 #include <ogl/objects/glPoints.hpp>
 #include <ogl/objects/glPrint.hpp>
-//#include <ogl/objects/glPrint3D.hpp>
+#include <ogl/objects/glPrint3D.hpp>
 
 #endif /* _H_OGL_H_ */
 

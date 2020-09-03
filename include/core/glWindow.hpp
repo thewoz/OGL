@@ -288,7 +288,7 @@ namespace ogl {
     //****************************************************************************//
     // getCurrentCamera() -
     //****************************************************************************//
-    const ogl::glCamera * getCurrentCamera() { return currentCamera; }
+    ogl::glCamera * getCurrentCamera() { return currentCamera; }
       
     
   private:

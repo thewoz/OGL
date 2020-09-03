@@ -34,14 +34,14 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-//#include <ogl/core/glObject.hpp>
-
-
 //****************************************************************************/
 // namespace ogl
 //****************************************************************************/
 namespace ogl {
 
+  //****************************************************************************/
+  // Class glPrint3D
+  //****************************************************************************/
   class glPrint3D : public glObject {
     
   private:
@@ -50,12 +50,14 @@ namespace ogl {
     GLuint vbo;
     
     unsigned int textureID;
-
+    
     float x;
     float y;
     float z;
 
     float scale;
+    
+    glm::vec3 color;
     
     std::string text;
     
@@ -73,16 +75,15 @@ namespace ogl {
     //****************************************************************************/
     // glPrint3D
     //****************************************************************************/
-    glPrint3D(const std::string & _name = "") : glObject(_name) { glObject::initText3D();  isInited = true; }
+    glPrint3D(const std::string & _name = "") { name = _name; }
   
     
     //****************************************************************************/
     // glPrint3D
     //****************************************************************************/
-    glPrint3D(const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1, const std::string & _name = "") : glObject(_name) {
+    glPrint3D(const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1, const std::string & _name = "") {
       
-      glObject::initText3D();
-      
+      name = _name;
       init(_text, _x, _y, _z, _color, _scale);
       
     }
@@ -99,12 +100,16 @@ namespace ogl {
       
       DEBUG_LOG("glPrint3D::init(" + name + ")");
       
+      shader.setName(name);
+      
+      shader.initText3D();
+      
       text = _text;
       
       x = _x;
       y = _y;
-      z = _z;
-      
+      z = _y;
+
       color = _color;
       
       scale = _scale;
@@ -114,79 +119,110 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // print
+    // render()
     //****************************************************************************/
-    void print(const glm::mat4 & projection, const glm::mat4 & view, const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1) {
+    void render(const glCamera * camera, const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1) {
       
+      DEBUG_LOG("glPrint3D::render(" + name + ")");
+
       text = _text;
       
       x = _x;
       y = _y;
       z = _z;
-      
+
       color = _color;
       
       scale = _scale;
       
-      //print(projection, view);
+      _render(camera);
 
     }
     
     //****************************************************************************/
-    // print
+    // render()
     //****************************************************************************/
-    void print(const glm::mat4 & projection, const glm::mat4 & view, const std::string & _text) {
-     
+    void render(const glCamera * camera, const std::string & _text) {
+
+      DEBUG_LOG("glPrint3D::render(" + name + ")");
+
       text = _text;
       
-      //print(projection, view);
-      
+      _render(camera);
+
     }
     
     //****************************************************************************/
-    // print
+    // render()
     //****************************************************************************/
-    //void print(const glm::mat4 & projection, const glm::mat4 & view) {
-    void print(const glm::mat4 & projection, const glCamera * camera) {
+    void render(const glCamera * camera) {
+      
+      DEBUG_LOG("glPrint3D::render(" + name + ")");
 
-      glDisable(GL_CULL_FACE);
+      _render(camera);
+      
+    }
+   
+  private:
+    
+    //****************************************************************************/
+    // _render
+    //****************************************************************************/
+    void _render(const glCamera * camera) {
+
+      DEBUG_LOG("glPrint::_render(" + name + ")");
+      
+      if(!isInited){
+        shader.setName(name);
+        shader.initText2D();
+        isInited = true;
+      }
+      
+      if(isToInitInGpu()) initInGpu();
+      
+      shader.use();
+      
+      shader.setUniform("projection", camera->getLookAt(glm::vec3(x,y,z)));
+      shader.setUniform("color",      color);
+      
+      glEnable(GL_DEPTH_TEST);
+      
+      glEnable(GL_CULL_FACE);
       
       glEnable(GL_BLEND);
       
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            
+      
       glActiveTexture(GL_TEXTURE0);
       
       glBindVertexArray(vao);
       
+      glEnableVertexAttribArray(0); // NB: MESSO DA ME
+      
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
-      float _x = x;
+      float tmpX = x;
       
       // iterate through all characters
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
         
-        glm::mat4 view = camera->getLookAt(glm::vec3(x, y, z));
-        
-        glObject::renderBegin(projection, view);
-        
         Character_t ch = Characters[*c];
         
-        float xpos = _x + ch.Bearing.x * scale;
+        float xpos = tmpX + ch.Bearing.x * scale;
         float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
         
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
-                
+        
         // update VBO for each character
         float vertices[6][4] = {
-          { xpos,     ypos + h,   z, 0.0f },
-          { xpos,     ypos,       z, 1.0f },
-          { xpos + w, ypos,       z, 2.0f },
+          { xpos,     ypos + h,   0.0f, 0.0f },
+          { xpos,     ypos,       0.0f, 1.0f },
+          { xpos + w, ypos,       1.0f, 1.0f },
           
-          { xpos,     ypos + h,   z, 0.0f },
-          { xpos + w, ypos,       z, 2.0f },
-          { xpos + w, ypos + h,   z, 3.0f }
+          { xpos,     ypos + h,   0.0f, 0.0f },
+          { xpos + w, ypos,       1.0f, 1.0f },
+          { xpos + w, ypos + h,   1.0f, 0.0f }
         };
         
         // render glyph texture over quad
@@ -196,19 +232,23 @@ namespace ogl {
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
         
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        //glBindBuffer(GL_ARRAY_BUFFER, 0); // NB: TOLTO DA ME
         
         // render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
+        
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels
-        _x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        tmpX += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        
+        glCheckError();
         
       }
       
       glBindVertexArray(0);
+      
       glBindTexture(GL_TEXTURE_2D, 0);
       
-      glObject::renderEnd();
+      glDisable(GL_DEPTH_TEST);
       
       glDisable(GL_CULL_FACE);
       

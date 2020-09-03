@@ -262,8 +262,8 @@
 				3AFE7F06247164C8000E8463 /* glBox.hpp */,
 				3AFE7EFD247164C8000E8463 /* glCuboid.hpp */,
 				3AFE7F04247164C8000E8463 /* glPrint.hpp */,
-				3AFE7F05247164C8000E8463 /* glPoints.hpp */,
 				3AF50E472476DA6600BE42EF /* glPrint3D.hpp */,
+				3AFE7F05247164C8000E8463 /* glPoints.hpp */,
 			);
 			path = objects;
 			sourceTree = "<group>";

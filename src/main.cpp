@@ -49,7 +49,7 @@ int main(int argc, char * const argv []) {
   
   window.makeContextCurrent();
   
-//  ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0));
+  ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0));
 //  ogl::glAxes axes;
 //  ogl::glReferenceAxes referenceAxes;
 //  ogl::glEllipse ellipse(0.1, 0.1, 0.3, 10, 20, ogl::glObject::STYLE::WIREFRAME, glm::vec3(2.0,0.0,1.0));
@@ -80,7 +80,7 @@ int main(int argc, char * const argv []) {
     
     window.renderBegin();
     
-//      line.render(window.getCurrentCamera()); glCheckError();
+      line.render(window.getCurrentCamera()); glCheckError();
 //      axes.render(window.getCurrentCamera()); glCheckError();
 //      ellipse.render(window.getCurrentCamera()); glCheckError();
 //      sphere.render(window.getCurrentCamera()); glCheckError();
