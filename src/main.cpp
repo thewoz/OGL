@@ -50,49 +50,46 @@ int main(int argc, char * const argv []) {
   window.makeContextCurrent();
   
   ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0));
-//  ogl::glAxes axes;
-//  ogl::glReferenceAxes referenceAxes;
-//  ogl::glEllipse ellipse(0.1, 0.1, 0.3, 10, 20, ogl::glObject::STYLE::WIREFRAME, glm::vec3(2.0,0.0,1.0));
-//  ogl::glSphere sphere(1.0, 10, 10, ogl::glObject::STYLE::WIREFRAME, glm::vec3(0.0,0.0,1.0));
-//  ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0));
-//  ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0)); box.translate(glm::vec3(-0.5));
-//  ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0)); cube.translate(glm::vec3(0.5));
-//  ogl::glLines lines({glm::vec3(0.0,0.0,0.0), glm::vec3(-1.0,-1.0,-1.0), glm::vec3(-1.0,1.0,1.0)}, glm::vec4(1.0));
-  ogl::glPrint text2D("leo", 10, 10, glm::vec3(1.0));
-  //ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  ogl::glQuad quad; quad.translate(glm::vec3(1.0,0.5,-1)); quad.scale(glm::vec3(1));
+  ogl::glAxes axes;
+  ogl::glReferenceAxes referenceAxes;
+  ogl::glEllipse ellipse(0.1, 0.1, 0.3, 10, 20, ogl::glObject::STYLE::WIREFRAME, glm::vec3(2.0,0.0,1.0));
+  ogl::glSphere sphere(1.0, 10, 10, ogl::glObject::STYLE::WIREFRAME, glm::vec3(0.0,0.0,1.0));
+  ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0));
+  ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0)); box.translate(glm::vec3(-0.5));
+  ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0)); cube.translate(glm::vec3(0.5));
+  ogl::glLines lines({glm::vec3(0.0,0.0,0.0), glm::vec3(-1.0,-1.0,-1.0), glm::vec3(-1.0,1.0,1.0)}, glm::vec4(1.0));
+  ogl::glPrint text2D("OGL", 10, 10, glm::vec3(1.0));
+  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
   
-//  std::random_device rd;
-//  std::mt19937 gen = std::mt19937(rd());
-//  std::normal_distribution<float> gaussRandom = std::normal_distribution<float>(-0.2, 0.2);
-//
-//  std::vector<glm::vec3> coords(1000);
-//
-//  for(size_t i=0; i<1000; ++i) {
-//    coords[i].x = gaussRandom(gen);
-//    coords[i].y = gaussRandom(gen);
-//    coords[i].z = gaussRandom(gen);
-//  }
-//
-//  ogl::glPoints points(coords, glm::vec4(1.0), 10, "punti");
+  std::random_device rd;
+  std::mt19937 gen = std::mt19937(rd());
+  std::normal_distribution<float> gaussRandom = std::normal_distribution<float>(-0.2, 0.2);
+
+  std::vector<glm::vec3> coords(1000);
+
+  for(size_t i=0; i<1000; ++i) {
+    coords[i].x = gaussRandom(gen);
+    coords[i].y = gaussRandom(gen);
+    coords[i].z = gaussRandom(gen);
+  }
+
+  ogl::glPoints points(coords, glm::vec4(1.0), 10, "points");
 
   while(!window.shouldClose()) {
     
     window.renderBegin();
-    
       line.render(window.getCurrentCamera()); glCheckError();
-//      axes.render(window.getCurrentCamera()); glCheckError();
-//      ellipse.render(window.getCurrentCamera()); glCheckError();
-//      sphere.render(window.getCurrentCamera()); glCheckError();
-//      grid.render(window.getCurrentCamera()); glCheckError();
-//      box.render(window.getCurrentCamera()); glCheckError();
-//      cube.render(window.getCurrentCamera()); glCheckError();
-//      referenceAxes.render(window.getCurrentCamera()); glCheckError();
+      axes.render(window.getCurrentCamera()); glCheckError();
+      ellipse.render(window.getCurrentCamera()); glCheckError();
+      sphere.render(window.getCurrentCamera()); glCheckError();
+      grid.render(window.getCurrentCamera()); glCheckError();
+      box.render(window.getCurrentCamera()); glCheckError();
+      cube.render(window.getCurrentCamera()); glCheckError();
+      referenceAxes.render(window.getCurrentCamera()); glCheckError();
       text2D.render(window.getCurrentCamera()); glCheckError();
-      //points.render(window.getCurrentCamera()); glCheckError();
-      //lines.render(window.getCurrentCamera()); glCheckError();
-      //model.render(window.getCurrentCamera()); glCheckError();
-      quad.render(window.getCurrentCamera()); glCheckError();
+      points.render(window.getCurrentCamera()); glCheckError();
+      lines.render(window.getCurrentCamera()); glCheckError();
+      model.render(window.getCurrentCamera()); glCheckError();
     window.renderEnd();
         
   }

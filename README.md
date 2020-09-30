@@ -2,7 +2,22 @@
 
 OGL is minimal OpenGL library based on header files written in C++
 
-## Dependencies
+The libray is able to draw:
+
+* Line
+* Sphere
+* Ellippse
+* Grib
+* Box
+* Cube and Cuboid
+* Points
+* Plain
+* Strings
+
+Is also able to load model (via Assimp)  and render it.
+
+
+## Dependencies:
 
 * MPL       - https://github.com/thewoz/MPL
 * SOIL2 - https://bitbucket.org/SpartanJ/soil2/src/default/
@@ -13,5 +28,8 @@ OGL is minimal OpenGL library based on header files written in C++
 * OpenGL
 
 ## TODO
-* Sistemare glPrint 
+* Fix glPrint3D
+* Fix glQuad
+
+
 
