@@ -138,7 +138,6 @@ int main(int argc, char * const argv []) {
 #endif
   
   
-  
 #if(0)
   
   ogl::glWindow window;

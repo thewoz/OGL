@@ -126,12 +126,27 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // _render() - Render the model, and thus all its meshes
+    // render() - Render the model, and thus all its meshes
     //****************************************************************************/
     void render(const glCamera * camera, bool withMaterials = true) {
             
-      DEBUG_LOG("glModel::render(" + name + ")");
+      renderBegin(camera, withMaterials);
+      
+      for(std::size_t i=0; i<meshes.size(); ++i) {
+        meshes[i].render(shader, withMaterials);
+      }
+      
+      renderEnd();
+      
+    }
 
+    //****************************************************************************/
+    // renderBegin()
+    //****************************************************************************/
+    void renderBegin(const glCamera * camera, bool withMaterials = true){
+              
+      DEBUG_LOG("glModel::render(" + name + ")");
+      
       if(!isInited){
         fprintf(stderr, "glBox must be inited before render\n");
         abort();
@@ -144,29 +159,33 @@ namespace ogl {
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
-  
+      
       shader.setUniform("withShadow", false);
       
       light.setInShader(shader, camera->getView());
-
+      
       glEnable(GL_DEPTH_TEST);
-
+      
       glEnable(GL_CULL_FACE);
       
       glCullFace(GL_BACK);
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-      for(std::size_t i=0; i<meshes.size(); ++i) {
-        meshes[i].render(shader, withMaterials);
-      }
+      
+    }
+    
+    
+    //****************************************************************************/
+    // renderEnd()
+    //****************************************************************************/
+    void renderEnd() {
       
       glDisable(GL_CULL_FACE);
       
       glDisable(GL_DEPTH_TEST);
-
+      
     }
-
+    
     //****************************************************************************/
     // getBounds() - Compute the bounds of the model (center, size, radius)
     //****************************************************************************/
