@@ -70,9 +70,9 @@ namespace ogl {
     //***************************************************************************
     // glObject()
     //***************************************************************************
-    glObject() {
+    glObject(const std::string & _name = "") {
     
-      name = "glObject";
+      name = _name;
       
       _position = glm::vec3(0.0);
       _rotation = glm::vec3(0.0);
