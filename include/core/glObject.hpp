@@ -78,6 +78,10 @@ namespace ogl {
       _rotation = glm::vec3(0.0);
       _scale    = glm::vec3(1.0);
     
+      isInited = false;
+      isInitedInGpu = false;
+      isToUpdateInGpu = false;
+      
       updateModelMatrix();
       
     }
@@ -409,6 +413,10 @@ namespace ogl {
     inline bool isToInitInGpu() {
       
       DEBUG_LOG("glObject::isToInitInGpu(" + name + ")");
+      
+      int old = ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id;
+      
+      printf("%d %d %d", windowID, old, isInitedInGpu);
       
       if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) {
         cleanInGpu();
