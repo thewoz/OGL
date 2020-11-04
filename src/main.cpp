@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <random>
 
+#define DEBUG_OGL
 #include <ogl/ogl.hpp>
 
 #include <imgui/imgui.hpp>

@@ -413,11 +413,7 @@ namespace ogl {
     inline bool isToInitInGpu() {
       
       DEBUG_LOG("glObject::isToInitInGpu(" + name + ")");
-      
-      int old = ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id;
-      
-      printf("%d %d %d", windowID, old, isInitedInGpu);
-      
+                  
       if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) {
         cleanInGpu();
         isInitedInGpu   = false;

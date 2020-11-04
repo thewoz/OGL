@@ -45,7 +45,7 @@
 #include <mpl/stdio.hpp>
 
 // Debug
-#define DEBUG_OGL
+//#define DEBUG_OGL
 #include <ogl/utils/debug.hpp>
 
 // Utils
