@@ -102,6 +102,8 @@ namespace ogl {
       // Process ASSIMP's root node recursively
       processNode(scene->mRootNode, scene, directory);
       
+      isInited = true;
+
       normalize(sizeFactor, false);
       
       glm::vec3 modelCenter, modelSizeVec;
@@ -110,9 +112,7 @@ namespace ogl {
       
       //TODO: ci sta un problema su come mi calcolo il centro
       getBounds(modelCenter, modelSizeVec, modelRadius);
-            
-      isInited = true;
-      
+                  
     }
     
     //****************************************************************************/
@@ -148,7 +148,7 @@ namespace ogl {
       DEBUG_LOG("glModel::render(" + name + ")");
       
       if(!isInited){
-        fprintf(stderr, "glBox must be inited before render\n");
+        fprintf(stderr, "glModel must be inited before render\n");
         abort();
       }
       
@@ -190,6 +190,11 @@ namespace ogl {
     // getBounds() - Compute the bounds of the model (center, size, radius)
     //****************************************************************************/
     void getBounds(glm::vec3 & _center, glm::vec3 & size, float & radius) const {
+      
+      if(!isInited){
+        fprintf(stderr, "glModel must be inited before get bounds\n");
+        abort();
+      }
       
       _center = glm::vec3(0.0f);
       size    = glm::vec3(0.0f);

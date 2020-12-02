@@ -179,10 +179,9 @@ namespace ogl {
       
       DEBUG_LOG("glLine::update(" + name + ")");
 
-      vertices = _vertices;
-      
-      isInited = true;
-      
+      if(!isInited) init(_vertices, color);
+      else vertices = _vertices;
+
       isToUpdateInGpu = true;
       isInitedInGpu   = false;
       
