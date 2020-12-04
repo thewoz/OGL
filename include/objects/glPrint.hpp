@@ -75,14 +75,13 @@ namespace ogl {
     // glPrint()
     //****************************************************************************/
     glPrint(const std::string & _name = "") { name = _name; }
-  
     
     //****************************************************************************/
     // glPrint()
     //****************************************************************************/
-    glPrint(const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1, const std::string & _name = "") {
+    glPrint(float _x, float _y, const glm::vec3 & _color, float _scale = 1,  const std::string _text = "", const std::string & _name = "") {
       name = _name;
-      init(_text, _x, _y, _color, _scale);
+      init(_x, _y, _color, _scale, _text);
     }
     
     //****************************************************************************/
@@ -93,7 +92,7 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1) {
+    void init(float _x, float _y, const glm::vec3 & _color, float _scale = 1, const std::string _text = "") {
       
       DEBUG_LOG("glPrint::init(" + name + ")");
       
