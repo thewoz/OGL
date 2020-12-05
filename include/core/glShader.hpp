@@ -115,14 +115,6 @@ namespace ogl {
       init("/usr/local/include/ogl/shader/text2D.vs", "/usr/local/include/ogl/shader/text2D.fs");
       style = STYLE::TEXT;
     }
-
-    //****************************************************************************/
-    // initText3D
-    //****************************************************************************/
-    void initText3D() {
-      init("/usr/local/include/ogl/shader/text3D.vs", "/usr/local/include/ogl/shader/text.fs");
-      style = STYLE::TEXT;
-    }
     
     //****************************************************************************/
     // init - Constructor generates the shader on the fly

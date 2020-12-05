@@ -38,7 +38,7 @@
 // namespace ogl
 //****************************************************************************/
 namespace ogl {
-
+  
   //****************************************************************************/
   // Class glPrint3D
   //****************************************************************************/
@@ -51,9 +51,7 @@ namespace ogl {
     
     unsigned int textureID;
     
-    float x;
-    float y;
-    float z;
+    glm::vec3 coord;
 
     float scale;
     
@@ -73,43 +71,38 @@ namespace ogl {
   public:
     
     //****************************************************************************/
-    // glPrint3D
+    // glPrint3D()
     //****************************************************************************/
     glPrint3D(const std::string & _name = "") { name = _name; }
-  
     
     //****************************************************************************/
-    // glPrint3D
+    // glPrint()
     //****************************************************************************/
-    glPrint3D(const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1, const std::string & _name = "") {
-      
+    glPrint3D(const glm::vec3 & _coord, const glm::vec3 & _color, float _scale = 1,  const std::string _text = "", const std::string & _name = "") {
       name = _name;
-      init(_text, _x, _y, _z, _color, _scale);
-      
+      init(_coord, _color, _scale, _text);
     }
     
     //****************************************************************************/
-    // ~glPrint3D
+    // ~glPrint3D()
     //****************************************************************************/
     ~glPrint3D() { cleanInGpu(); }
     
     //****************************************************************************/
-    // init
+    // init()
     //****************************************************************************/
-    void init(const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1) {
+    void init(const glm::vec3 & _coord, const glm::vec3 & _color, float _scale = 1, const std::string _text = "") {
       
       DEBUG_LOG("glPrint3D::init(" + name + ")");
       
       shader.setName(name);
       
-      shader.initText3D();
+      shader.initText2D();
       
       text = _text;
       
-      x = _x;
-      y = _y;
-      z = _y;
-
+      coord = _coord;
+      
       color = _color;
       
       scale = _scale;
@@ -121,35 +114,34 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, const std::string & _text, float _x, float _y, float _z, const glm::vec3 & _color, float _scale = 1) {
+    void render(const glCamera * camera, const std::string & _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) {
       
       DEBUG_LOG("glPrint3D::render(" + name + ")");
-
+      
       text = _text;
       
-      x = _x;
-      y = _y;
-      z = _z;
-
+      coord = _coord;
+      
       color = _color;
       
       scale = _scale;
       
       _render(camera);
-
+      
     }
+      
     
     //****************************************************************************/
     // render()
     //****************************************************************************/
     void render(const glCamera * camera, const std::string & _text) {
-
+      
       DEBUG_LOG("glPrint3D::render(" + name + ")");
-
+      
       text = _text;
       
       _render(camera);
-
+      
     }
     
     //****************************************************************************/
@@ -158,20 +150,25 @@ namespace ogl {
     void render(const glCamera * camera) {
       
       DEBUG_LOG("glPrint3D::render(" + name + ")");
-
+      
       _render(camera);
       
     }
-   
+    
+    
   private:
     
     //****************************************************************************/
-    // _render
+    // _render()
     //****************************************************************************/
     void _render(const glCamera * camera) {
-
-      DEBUG_LOG("glPrint::_render(" + name + ")");
       
+      DEBUG_LOG("glPrint3D::_render(" + name + ")");
+      
+      glm::vec2 screen;
+      
+      if(!camera->screenPosition(coord, screen)) return;
+
       if(!isInited){
         shader.setName(name);
         shader.initText2D();
@@ -182,7 +179,7 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getLookAt(glm::vec3(x,y,z)));
+      shader.setUniform("projection", camera->getText2DOrthoProjection());
       shader.setUniform("color",      color);
       
       glEnable(GL_DEPTH_TEST);
@@ -200,8 +197,8 @@ namespace ogl {
       glEnableVertexAttribArray(0); // NB: MESSO DA ME
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      
-      float tmpX = x;
+          
+      float tmpX = screen.x;
       
       // iterate through all characters
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
@@ -209,7 +206,7 @@ namespace ogl {
         Character_t ch = Characters[*c];
         
         float xpos = tmpX + ch.Bearing.x * scale;
-        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+        float ypos = screen.y - (ch.Size.y - ch.Bearing.y) * scale;
         
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
@@ -256,10 +253,8 @@ namespace ogl {
       
     }
     
-  private:
-    
     //****************************************************************************/
-    // setInGpu
+    // setInGpu()
     //****************************************************************************/
     void setInGpu() {
       
@@ -331,17 +326,16 @@ namespace ogl {
       FT_Done_Face(face);
       FT_Done_FreeType(ft);
       
-      
       // configure VAO/VBO for texture quads
       glGenVertexArrays(1, &vao);
       glBindVertexArray(vao);
-
+      
       glGenBuffers(1, &vbo);
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
       
       glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
       
-      glEnableVertexAttribArray(0);
+      //glEnableVertexAttribArray(0);
       
       glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
       
@@ -352,7 +346,7 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // cleanInGpu() -
+    // cleanInGpu()
     //****************************************************************************/
     void cleanInGpu() {
       
@@ -362,7 +356,7 @@ namespace ogl {
         glDeleteVertexArrays(1, &vao);
         
         glDeleteTextures(1, &textureID);
-
+        
         isInitedInGpu = false;
         
       }
@@ -371,8 +365,8 @@ namespace ogl {
     
     
   };
-
-
+  
+  
 } /* namespace ogl */
 
 #endif /* _H_OGL_PRINT3D_H_ */

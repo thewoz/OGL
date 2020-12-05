@@ -116,7 +116,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, const std::string & _text, float _x, float _y, const glm::vec3 & _color, float _scale = 1) {
+    void render(const glCamera * camera, const std::string & _text, float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) {
       
       DEBUG_LOG("glPrint::render(" + name + ")");
 

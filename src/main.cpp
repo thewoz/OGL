@@ -30,7 +30,7 @@
 #include <algorithm>
 #include <random>
 
-#define DEBUG_OGL
+//#define DEBUG_OGL
 #include <ogl/ogl.hpp>
 
 #include <imgui/imgui.hpp>
@@ -39,7 +39,7 @@
 // main
 /* ****************************************************************************/
 int main(int argc, char * const argv []) {
-  
+
 #if(1)
   
   ogl::glWindow window;

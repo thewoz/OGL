@@ -241,7 +241,6 @@ namespace ogl {
     //****************************************************************************/
     inline MODE getMode() const { return mode; }
     
-    
     //****************************************************************************/
     // setSpeed() -
     //****************************************************************************/
@@ -280,7 +279,30 @@ namespace ogl {
       return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
     }
     
-    
+    //****************************************************************************/
+    // screenPosition()
+    //****************************************************************************/
+    bool screenPosition(const glm::vec3 & _coord, glm::vec2 & screen) const {
+            
+      glm::vec4 coord = glm::vec4(_coord, 1);
+      
+      coord = getProjection() * getView() * coord;
+      
+      coord.x /= coord.w;
+      coord.y /= coord.w;
+      coord.z /= coord.w;
+
+      coord.x = (coord.x + 1) * width  * 0.5;
+      coord.y = (coord.y + 1) * height * 0.5;
+      
+      screen.x = coord.x;
+      screen.y = coord.y;
+
+      if(coord.z < -1.0 || coord.z > 1.0) return false;
+      
+      return true;
+      
+    }
     
   private:
     

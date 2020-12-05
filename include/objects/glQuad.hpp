@@ -45,27 +45,17 @@ namespace ogl {
     GLuint vbo = -1;
     GLuint ebo = -1;
 
-//    float vertices[12] = {
-//      -0.5f, 0.5f, 0.0f,
-//       0.5,  0.5f, 0.0f,
-//       0.5, -0.5f, 0.0f,
-//      -0.5, -0.5f, 0.0f };
-//
     float vertices[18] = {
+       // first triangle
+       0.5f,  0.5f, 0.0f,  // top right
+       0.5f, -0.5f, 0.0f,  // bottom right
+      -0.5f,  0.5f, 0.0f,  // top left
+       // second triangle
+       0.5f, -0.5f, 0.0f,  // bottom right
+      -0.5f, -0.5f, 0.0f,  // bottom left
+      -0.5f,  0.5f, 0.0f   // top left
+    };
 
-    0.5f,  0.5f, 0.0f,  // top right
-    0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f,  0.5f, 0.0f,  // top left
-                         // second triangle
-    0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left
-     };
-//    unsigned int indices[6] = {
-//      0, 1, 3,   // first triangle
-//      1, 2, 3    // second triangle
-//    };
-    
     glm::vec3 color = glm::vec3(1.0);
     
   public:
@@ -81,7 +71,7 @@ namespace ogl {
       
       shader.setName(name);
       shader.initPlain();
-      
+
     }
     
     //****************************************************************************/
@@ -106,8 +96,7 @@ namespace ogl {
       shader.use();
       
       shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getLookAt(getTranslation()));
-      //shader.setUniform("view",       camera->getView());
+      shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("color",      color);
       

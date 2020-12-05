@@ -33,7 +33,6 @@
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AF045942472DBB100DBCC91 /* glColors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glColors.hpp; sourceTree = "<group>"; };
 		3AF50E472476DA6600BE42EF /* glPrint3D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPrint3D.hpp; sourceTree = "<group>"; };
-		3AF50E482476DCA500BE42EF /* text3D.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text3D.vs; sourceTree = "<group>"; };
 		3AFE1E9624742880006C81D8 /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		3AFE7ED5247164C7000E8463 /* sphere.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.fs; sourceTree = "<group>"; };
 		3AFE7ED6247164C7000E8463 /* model.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.fs; sourceTree = "<group>"; };
@@ -151,7 +150,6 @@
 				3AFE7EE1247164C7000E8463 /* model.vs */,
 				3AFE7EDF247164C7000E8463 /* text2D.fs */,
 				3AFE7EE4247164C7000E8463 /* text2D.vs */,
-				3AF50E482476DCA500BE42EF /* text3D.vs */,
 				3AFE7ED5247164C7000E8463 /* sphere.fs */,
 				3AFE7EE5247164C7000E8463 /* sphere.vs */,
 			);

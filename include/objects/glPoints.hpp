@@ -154,9 +154,8 @@ namespace ogl {
       glBindVertexArray(0);
 
       glDisable(GL_DEPTH_TEST);
-
+      
     }
-    
     
   private:
     

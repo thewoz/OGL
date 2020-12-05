@@ -70,7 +70,7 @@
 
 // Objects
 #include <ogl/objects/glLine.hpp>
-//#include <ogl/objects/glQuad.hpp>
+#include <ogl/objects/glQuad.hpp>
 #include <ogl/objects/glLines.hpp>
 #include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glEllipse.hpp>
@@ -81,7 +81,7 @@
 #include <ogl/objects/glReferenceAxes.hpp>
 #include <ogl/objects/glPoints.hpp>
 #include <ogl/objects/glPrint.hpp>
-//#include <ogl/objects/glPrint3D.hpp>
+#include <ogl/objects/glPrint3D.hpp>
 
 #endif /* _H_OGL_H_ */
 
