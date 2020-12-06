@@ -78,7 +78,7 @@ namespace ogl {
     //****************************************************************************/
     // glPrint()
     //****************************************************************************/
-    glPrint3D(const glm::vec3 & _coord, const glm::vec3 & _color, float _scale = 1,  const std::string _text = "", const std::string & _name = "") {
+    glPrint3D(const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1,  const std::string _text = "", const std::string & _name = "") {
       name = _name;
       init(_coord, _color, _scale, _text);
     }
@@ -91,7 +91,7 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const glm::vec3 & _coord, const glm::vec3 & _color, float _scale = 1, const std::string _text = "") {
+    void init(const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1, const std::string _text = "") {
       
       DEBUG_LOG("glPrint3D::init(" + name + ")");
       

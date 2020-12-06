@@ -59,7 +59,7 @@ int main(int argc, char * const argv []) {
   ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0)); box.translate(glm::vec3(-0.5));
   ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0)); cube.translate(glm::vec3(0.5));
   ogl::glLines lines({glm::vec3(0.0,0.0,0.0), glm::vec3(-1.0,-1.0,-1.0), glm::vec3(-1.0,1.0,1.0)}, glm::vec4(1.0));
-  ogl::glPrint text2D(10, 10, glm::vec3(1.0), 1, "OGL");
+  ogl::glPrint2D text2D(10, 10, glm::vec3(1.0), 1, "OGL");
   ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
   
   std::random_device rd;

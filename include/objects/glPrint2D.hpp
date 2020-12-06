@@ -40,9 +40,9 @@
 namespace ogl {
 
   //****************************************************************************/
-  // Class glPrint
+  // Class glPrint2D
   //****************************************************************************/
-  class glPrint : public glObject {
+  class glPrint2D : public glObject {
     
   private:
     
@@ -72,29 +72,29 @@ namespace ogl {
   public:
     
     //****************************************************************************/
-    // glPrint()
+    // glPrint2D()
     //****************************************************************************/
-    glPrint(const std::string & _name = "") { name = _name; }
+    glPrint2D(const std::string & _name = "") { name = _name; }
     
     //****************************************************************************/
-    // glPrint()
+    // glPrint2D()
     //****************************************************************************/
-    glPrint(float _x, float _y, const glm::vec3 & _color, float _scale = 1,  const std::string _text = "", const std::string & _name = "") {
+    glPrint2D(float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1,  const std::string _text = "", const std::string & _name = "") {
       name = _name;
       init(_x, _y, _color, _scale, _text);
     }
     
     //****************************************************************************/
-    // ~glPrint()
+    // ~glPrint2D()
     //****************************************************************************/
-    ~glPrint() { cleanInGpu(); }
+    ~glPrint2D() { cleanInGpu(); }
     
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(float _x, float _y, const glm::vec3 & _color, float _scale = 1, const std::string _text = "") {
+    void init(float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1, const std::string _text = "") {
       
-      DEBUG_LOG("glPrint::init(" + name + ")");
+      DEBUG_LOG("glPrint2D::init(" + name + ")");
       
       shader.setName(name);
       
@@ -118,7 +118,7 @@ namespace ogl {
     //****************************************************************************/
     void render(const glCamera * camera, const std::string & _text, float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) {
       
-      DEBUG_LOG("glPrint::render(" + name + ")");
+      DEBUG_LOG("glPrint2D::render(" + name + ")");
 
       text = _text;
       
@@ -138,7 +138,7 @@ namespace ogl {
     //****************************************************************************/
     void render(const glCamera * camera, const std::string & _text) {
       
-      DEBUG_LOG("glPrint::render(" + name + ")");
+      DEBUG_LOG("glPrint2D::render(" + name + ")");
 
       text = _text;
       
@@ -151,7 +151,7 @@ namespace ogl {
     //****************************************************************************/
     void render(const glCamera * camera) {
             
-      DEBUG_LOG("glPrint::render(" + name + ")");
+      DEBUG_LOG("glPrint2D::render(" + name + ")");
       
       _render(camera);
             
@@ -165,7 +165,7 @@ namespace ogl {
     //****************************************************************************/
     void _render(const glCamera * camera) {
       
-      DEBUG_LOG("glPrint::_render(" + name + ")");
+      DEBUG_LOG("glPrint2D::_render(" + name + ")");
       
       if(!isInited){
         shader.setName(name);
@@ -256,7 +256,7 @@ namespace ogl {
     //****************************************************************************/
     void setInGpu() {
       
-      DEBUG_LOG("glPrint::setInGpu(" + name + ")");
+      DEBUG_LOG("glPrint2D::setInGpu(" + name + ")");
       
       FT_Library ft;
       

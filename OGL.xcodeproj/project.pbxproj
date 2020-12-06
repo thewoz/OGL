@@ -71,7 +71,7 @@
 		3AFE7F01247164C8000E8463 /* glSphere.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glSphere.hpp; sourceTree = "<group>"; };
 		3AFE7F02247164C8000E8463 /* glQuad.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad.hpp; sourceTree = "<group>"; };
 		3AFE7F03247164C8000E8463 /* glGrid.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glGrid.hpp; sourceTree = "<group>"; };
-		3AFE7F04247164C8000E8463 /* glPrint.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPrint.hpp; sourceTree = "<group>"; };
+		3AFE7F04247164C8000E8463 /* glPrint2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPrint2D.hpp; sourceTree = "<group>"; };
 		3AFE7F05247164C8000E8463 /* glPoints.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPoints.hpp; sourceTree = "<group>"; };
 		3AFE7F06247164C8000E8463 /* glBox.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glBox.hpp; sourceTree = "<group>"; };
 		3AFE7F08247164C8000E8463 /* glShadow.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glShadow.hpp; sourceTree = "<group>"; };
@@ -259,7 +259,7 @@
 				3AFE7F03247164C8000E8463 /* glGrid.hpp */,
 				3AFE7F06247164C8000E8463 /* glBox.hpp */,
 				3AFE7EFD247164C8000E8463 /* glCuboid.hpp */,
-				3AFE7F04247164C8000E8463 /* glPrint.hpp */,
+				3AFE7F04247164C8000E8463 /* glPrint2D.hpp */,
 				3AF50E472476DA6600BE42EF /* glPrint3D.hpp */,
 				3AFE7F05247164C8000E8463 /* glPoints.hpp */,
 			);

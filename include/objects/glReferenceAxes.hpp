@@ -45,7 +45,11 @@ namespace ogl {
       GLuint vbo[3];
       
       glm::vec3 colors[3] = { glm::vec3(1.0f,0.0f,0.0f), glm::vec3(0.0f,1.0f,0.0f), glm::vec3(0.0f,0.0f,1.0f) };
-      
+    
+      //glPrint3D xlabel;
+      //glPrint3D ylabel;
+      //glPrint3D zlabel;
+
     public:
         
       //****************************************************************************/
@@ -73,6 +77,10 @@ namespace ogl {
         shader.initPlain();
         
         scale(glm::vec3(_scale));
+
+        //xlabel.init(glm::vec3(1,0,0), glm::vec3(1,1,1), 1, "x");
+        //ylabel.init(glm::vec3(0,1,0), glm::vec3(1,1,1), 1, "y");
+        //xlabel.init(glm::vec3(0,0,1), glm::vec3(1,1,1), 1, "z");
 
         isInited = true;
         
@@ -125,6 +133,10 @@ namespace ogl {
                 
         glDisable(GL_DEPTH_TEST);
 
+        //xlabel.render(camera);
+        //ylabel.render(camera);
+        //zlabel.render(camera);
+        
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
       }

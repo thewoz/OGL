@@ -69,6 +69,8 @@
 #include <ogl/model/glModel.hpp>
 
 // Objects
+#include <ogl/objects/glPrint2D.hpp>
+#include <ogl/objects/glPrint3D.hpp>
 #include <ogl/objects/glLine.hpp>
 #include <ogl/objects/glQuad.hpp>
 #include <ogl/objects/glLines.hpp>
@@ -80,8 +82,7 @@
 #include <ogl/objects/glAxes.hpp>
 #include <ogl/objects/glReferenceAxes.hpp>
 #include <ogl/objects/glPoints.hpp>
-#include <ogl/objects/glPrint.hpp>
-#include <ogl/objects/glPrint3D.hpp>
+
 
 #endif /* _H_OGL_H_ */
 
