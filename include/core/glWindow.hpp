@@ -367,10 +367,10 @@ namespace ogl {
         if(currentCamera->getMode() != glCamera::MODE::TARGET) {
         
           //Moves/alters the camera positions based on user input
-          if(keys[GLFW_KEY_W] || keys[GLFW_KEY_UP])    currentCamera->processKeyboard(glCamera::MOVEMENT::FORWARD, deltaTime);
-          if(keys[GLFW_KEY_S] || keys[GLFW_KEY_DOWN])  currentCamera->processKeyboard(glCamera::MOVEMENT::BACKWARD, deltaTime);
-          if(keys[GLFW_KEY_A] || keys[GLFW_KEY_LEFT])  currentCamera->processKeyboard(glCamera::MOVEMENT::LEFT, deltaTime);
-          if(keys[GLFW_KEY_D] || keys[GLFW_KEY_RIGHT]) currentCamera->processKeyboard(glCamera::MOVEMENT::RIGHT, deltaTime);
+          if(/*keys[GLFW_KEY_W] || */ keys[GLFW_KEY_UP])    currentCamera->processKeyboard(glCamera::MOVEMENT::FORWARD, deltaTime);
+          if(/*keys[GLFW_KEY_S] || */ keys[GLFW_KEY_DOWN])  currentCamera->processKeyboard(glCamera::MOVEMENT::BACKWARD, deltaTime);
+          if(/*keys[GLFW_KEY_A] || */ keys[GLFW_KEY_LEFT])  currentCamera->processKeyboard(glCamera::MOVEMENT::LEFT, deltaTime);
+          if(/*keys[GLFW_KEY_D] || */ keys[GLFW_KEY_RIGHT]) currentCamera->processKeyboard(glCamera::MOVEMENT::RIGHT, deltaTime);
           
         }
         
