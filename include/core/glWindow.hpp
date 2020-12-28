@@ -154,7 +154,6 @@ namespace ogl {
       glfwSetKeyCallback(window, keyCallback);
       glfwSetCursorEnterCallback(window, cursorEnterCallback);
 
-      // NOTE: Non sono sicuro che serva
       glfwSwapInterval(1);
       
       firstMouse = true;
@@ -191,8 +190,11 @@ namespace ogl {
       
       // Others Glfw options
       glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-      //glfwWindowHint(GLFW_SAMPLES, 4);
+      glfwWindowHint(GLFW_SAMPLES, 4);
       glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+      
+      // Funziona con OpenGL >= 4.3
+      // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
       
       // Create a GLFWwindow object that we can use for GLFW's functions
       window = glfwCreateWindow(_width, _height, "notitle", NULL, NULL);
@@ -205,35 +207,23 @@ namespace ogl {
       
       glfwMakeContextCurrent(window);
       
-      glfwGetFramebufferSize(window, &width, &height);
-      
-#ifdef GLFW_WITH_GLAD
       if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
-#endif
       
-#ifdef GLFW_WITH_GLEW
-      // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
-      glewExperimental = GL_TRUE;
       
-      // Initialize GLEW to setup the OpenGL Function pointers
-      if(GLEW_OK != glewInit( )) {
-        fprintf(stderr, "Failed to initialize GLEW\n");
-        abort();
-      }
-#endif
+      glfwGetFramebufferSize(window, &width, &height);
      
-//      glfwSetWindowUserPointer(window, this);
+      glfwSetWindowUserPointer(window, this);
       
-//      glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
-//      glfwSetWindowCloseCallback(window, windowCloseCallback);
-//      glfwSetCursorPosCallback(window, cursorPosCallback);
-//      glfwSetMouseButtonCallback(window, mouseButtonCallback);
-//      glfwSetScrollCallback(window, scrollCallback);
-//      glfwSetKeyCallback(window, keyCallback);
-//      glfwSetCursorEnterCallback(window, cursorEnterCallback);
+      glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+      glfwSetWindowCloseCallback(window, windowCloseCallback);
+      glfwSetCursorPosCallback(window, cursorPosCallback);
+      glfwSetMouseButtonCallback(window, mouseButtonCallback);
+      glfwSetScrollCallback(window, scrollCallback);
+      glfwSetKeyCallback(window, keyCallback);
+      glfwSetCursorEnterCallback(window, cursorEnterCallback);
 
       glfwSwapInterval(1);
       
@@ -252,6 +242,11 @@ namespace ogl {
       currentCamera = &cameras[currentCameraIndex];
       
       //inputDisable = false;
+      
+      // Funziona con OpenGL >= 4.3
+      // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
+      // glEnable(GL_DEBUG_OUTPUT);
+      // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
       
     }
     

@@ -20,7 +20,7 @@ Is also able to load model (via Assimp)  and render it.
 ## Dependencies:
 
 * MPL       - https://github.com/thewoz/MPL
-* SOIL2     - https://bitbucket.org/SpartanJ/soil2/src/default/
+* SOIL2     - https://github.com/SpartanJ/soil2
 * Assimp   - https://github.com/assimp/assimp
 * GFLW     - https://github.com/glfw/glfw
 * GLAD     - https://glad.dav1d.de
