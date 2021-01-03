@@ -46,7 +46,7 @@ clean:
 	@rm -rf ./bin
 
 
-Example:
+example:
 	@mkdir -p ~/bin
 	$(COMPILER) -march=native -Os -std=c++17 -o ~/bin/ogl $(INCLUDE) ./src/main.cpp $(LIBS)
 
