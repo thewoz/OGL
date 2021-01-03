@@ -18,7 +18,7 @@ ifeq "$(PLATFORM)" "Darwin"
 endif
 
 
-all: test
+all: example
 
 
 setup:
@@ -46,7 +46,7 @@ clean:
 	@rm -rf ./bin
 
 
-test:
-	@mkdir -p ./bin
-	$(COMPILER) -march=native -Os -std=c++17 -o ./bin/ogl $(INCLUDE) ./src/main.cpp $(LIBS)
+Example:
+	@mkdir -p ~/bin
+	$(COMPILER) -march=native -Os -std=c++17 -o ~/bin/ogl $(INCLUDE) ./src/main.cpp $(LIBS)
 
