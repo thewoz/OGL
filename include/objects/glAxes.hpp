@@ -66,6 +66,7 @@ namespace ogl {
         DEBUG_LOG("gAxes::init(" + name + ")");
 
         shader.setName(name);
+        
         shader.initPlain();
         
         scale(glm::vec3(_scale));
@@ -104,11 +105,11 @@ namespace ogl {
           
           //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
           
-          glEnableVertexAttribArray(0);
+          //glEnableVertexAttribArray(0);
           
-          glDrawArrays(GL_LINE_STRIP, 0, 2);
+          glDrawArrays(GL_LINES, 0, 2);
 
-          glDisableVertexAttribArray(0);
+          //glDisableVertexAttribArray(0);
 
           glBindVertexArray(0);
           
@@ -153,7 +154,7 @@ namespace ogl {
         glBindBuffer(GL_ARRAY_BUFFER,0);
         
         glBindVertexArray(0);
-        
+                
       }
     
   private:
