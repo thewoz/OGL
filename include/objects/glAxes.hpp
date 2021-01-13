@@ -40,12 +40,24 @@ namespace ogl {
       
       glm::vec3 colors[3] = { glm::vec3(1.0f,0.0f,0.0f), glm::vec3(0.0f,1.0f,0.0f), glm::vec3(0.0f,0.0f,1.0f) };
       
+      std::vector<std::vector<glm::vec3>> vertices;
+      
     public:
         
       //****************************************************************************/
       // glAxes()
       //****************************************************************************/
       glAxes(GLfloat _scale = 1.0, const std::string & _name = " ") {
+                
+        vertices = std::vector<std::vector<glm::vec3>>(3, std::vector<glm::vec3>(2));
+                
+        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
+        
+        vertices[0][1] = glm::vec3(1.0f,0.0f,0.0f);
+        vertices[1][1] = glm::vec3(0.0f,1.0f,0.0f);
+        vertices[2][1] = glm::vec3(0.0f,0.0f,1.0f);
                 
         name = _name;
         
@@ -97,20 +109,22 @@ namespace ogl {
         
         glEnable(GL_DEPTH_TEST);
         
-        for(size_t i=0; i<3; ++i) {
+        for(int i=0; i<3; ++i) {
           
           shader.setUniform("color", colors[i]);
           
           glBindVertexArray(vao[i]);
           
-          //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+          glCheckError();
           
-          glEnableVertexAttribArray(i);
+ 	  //glEnableVertexAttribArray(0);
+ 	  
+          //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
           
           glDrawArrays(GL_LINES, 0, 2);
 
-          glDisableVertexAttribArray(i);
-
+         // glDisableVertexAttribArray(0);
+                  
           glBindVertexArray(0);
           
         }
@@ -126,27 +140,21 @@ namespace ogl {
       //****************************************************************************/
       void setInGpu() {
         
+        printf("AAA %p\n", this);
+        
         DEBUG_LOG("glAxes::setInGpu(" + name + ")");
-        
-        std::vector<std::vector<glm::vec3>> vertices(3, std::vector<glm::vec3>(2));
-        
-        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
-        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
-        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
-        
-        vertices[0][1] = glm::vec3(1.0f,0.0f,0.0f);
-        vertices[1][1] = glm::vec3(0.0f,1.0f,0.0f);
-        vertices[2][1] = glm::vec3(0.0f,0.0f,1.0f);
         
         for(size_t i=0; i<3; ++i) {
           
           glGenVertexArrays(1, &vao[i]);
           glBindVertexArray(vao[i]);
           
+                    glCheckError();
+          
           glGenBuffers(1, &vbo[i]);
           glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
           glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(glm::vec3), &vertices[i][0], GL_STATIC_DRAW);
-          
+                glEnableVertexAttribArray(0);
           glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
           
         }
@@ -154,6 +162,8 @@ namespace ogl {
         glBindBuffer(GL_ARRAY_BUFFER,0);
         
         glBindVertexArray(0);
+        
+                  glCheckError();
                 
       }
     
@@ -165,6 +175,8 @@ namespace ogl {
     void cleanInGpu() {
       
       if(isInitedInGpu) {
+        
+        printf("pulisco %p\n", this);
         
         glDeleteBuffers(3, vbo);
         glDeleteVertexArrays(3, vao);
