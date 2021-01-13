@@ -102,11 +102,13 @@ namespace ogl {
           
           glBindVertexArray(vao[i]);
           
-          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+          //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
           
           glEnableVertexAttribArray(0);
           
-          glDrawArrays(GL_LINES, 0, 2);
+          glDrawArrays(GL_LINE_STRIP, 0, 2);
+
+          glDisableVertexAttribArray(0);
 
           glBindVertexArray(0);
           
@@ -125,7 +127,11 @@ namespace ogl {
         
         DEBUG_LOG("glAxes::setInGpu(" + name + ")");
         
-        std::vector<std::vector<glm::vec3>> vertices(3, std::vector<glm::vec3>(2, glm::vec3(0.0f)));
+        std::vector<std::vector<glm::vec3>> vertices(3, std::vector<glm::vec3>(2));
+        
+        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[0][0] = glm::vec3(0.0f,0.0f,0.0f);
         
         vertices[0][1] = glm::vec3(1.0f,0.0f,0.0f);
         vertices[1][1] = glm::vec3(0.0f,1.0f,0.0f);
