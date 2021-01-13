@@ -105,11 +105,11 @@ namespace ogl {
           
           //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
           
-          //glEnableVertexAttribArray(0);
+          glEnableVertexAttribArray(i);
           
           glDrawArrays(GL_LINES, 0, 2);
 
-          //glDisableVertexAttribArray(0);
+          glDisableVertexAttribArray(i);
 
           glBindVertexArray(0);
           
