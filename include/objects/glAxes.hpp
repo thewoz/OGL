@@ -110,60 +110,50 @@ namespace ogl {
         
         glEnable(GL_DEPTH_TEST);
         
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        
         glBindVertexArray(vao);
-
-        glCheckError();
-
-        glEnableVertexAttribArray(0);
-
-        glCheckError();
 
         for(int i=0; i<3; ++i) {
           
           shader.setUniform("color", colors[i]);
- 	  
-          //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-          
+ 	 
           glDrawArrays(GL_LINES, i, (i+1)*2);
 
         }
         
         glBindVertexArray(0);
 
-        // glDisableVertexAttribArray(0);
-
         glDisable(GL_DEPTH_TEST);
+        
+        glCheckError();
 
       }
-  
+   
     private:
       
       //****************************************************************************/
       // setInGpu()
       //****************************************************************************/
       void setInGpu() {
-        
-        printf("AAA %p\n", this);
-        
+   
         DEBUG_LOG("glAxes::setInGpu(" + name + ")");
                   
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
-          
-         glCheckError();
-          
+
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
+
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-                  
-        glBindBuffer(GL_ARRAY_BUFFER,0);
+        glEnableVertexAttribArray(0); 
         
+        glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+       
         glBindVertexArray(0);
         
         glCheckError();
-                
+        
       }
     
   private:
@@ -174,9 +164,7 @@ namespace ogl {
     void cleanInGpu() {
       
       if(isInitedInGpu) {
-        
-        printf("pulisco %p\n", this);
-        
+
         glDeleteBuffers(1, &vbo);
         glDeleteVertexArrays(1, &vao);
         

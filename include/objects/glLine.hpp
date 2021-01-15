@@ -36,7 +36,7 @@ namespace ogl {
     
   private:
     
-    GLuint vao = -1;
+    GLuint vao;
     GLuint vbo;
 
     glm::vec3 color;
@@ -111,18 +111,18 @@ namespace ogl {
       
       glEnable(GL_DEPTH_TEST);
       
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      
       glBindVertexArray(vao);
 
-      glEnableVertexAttribArray(0);
-      
       glDrawArrays(GL_LINE_STRIP, 0, (GLuint)vertices.size());
-      
-      glDisableVertexAttribArray(0);
-      
+     
       glBindVertexArray(0);
             
       glDisable(GL_DEPTH_TEST);
 
+      glCheckError();
+      
     }
     
     //****************************************************************************/
@@ -132,37 +132,29 @@ namespace ogl {
       
       DEBUG_LOG("glLine::setInGpu(" + name + ")");
 
-      if(isToUpdateInGpu && vao != -1) {
+      if(!isInitedInGpu) {
 
-        DEBUG_LOG("glLine::updateInGpu(" + name + ")");
-        
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size()*sizeof(glm::vec3), glm::value_ptr(vertices[0]));
-                
-        glBindBuffer(GL_ARRAY_BUFFER,0);
-        
-        isToUpdateInGpu = false;
-        
+      	glGenVertexArrays(1, &vao);
+      	glBindVertexArray(vao);
+      	
+      	glGenBuffers(1, &vbo);
+      	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      	        
       } else {
-        
-        DEBUG_LOG("glLine::setInGpu(" + name + ")");
-
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec3), vertices.data(), GL_DYNAMIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        //glEnableVertexAttribArray(0);
-
-        glBindBuffer(GL_ARRAY_BUFFER,0);
-        
-        glBindVertexArray(0);
-              
-        isInitedInGpu = true;
+     
+	glBindVertexArray(vao);
+		
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
       }
+      
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+      glEnableVertexAttribArray(0);
+      glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+        
+      glBindVertexArray(0);
+             
+      glCheckError();
           
     }
     
@@ -175,9 +167,8 @@ namespace ogl {
 
       if(!isInited) init(_vertices, color);
       else vertices = _vertices;
-
+      
       isToUpdateInGpu = true;
-      isInitedInGpu   = false;
       
     }
     
@@ -191,7 +182,7 @@ namespace ogl {
       DEBUG_LOG("glLine::cleanInGpu(" + name + ")");
 
       if(isInitedInGpu) {
-        
+
         glDeleteBuffers(1, &vbo);
         glDeleteVertexArrays(1, &vao);
               

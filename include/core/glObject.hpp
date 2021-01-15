@@ -410,7 +410,11 @@ namespace ogl {
                   
       if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) {
         cleanInGpu();
-        isInitedInGpu   = false;
+        isInitedInGpu = false;
+        return true;
+      }
+      
+      if(isToUpdateInGpu) {
         isToUpdateInGpu = false;
         return true;
       }
