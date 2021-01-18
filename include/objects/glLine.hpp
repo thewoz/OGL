@@ -148,6 +148,8 @@ namespace ogl {
 
       }
       
+      if(name[4] == 'S') printf("%f %f %f -  %f %f %f\n", vertices[0].x, vertices[0].y, vertices[0].z, vertices[1].x, vertices[1].y, vertices[1].z);
+      
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(0);
       
