@@ -106,9 +106,7 @@ namespace ogl {
         vector.y = mesh->mNormals[i].y;
         vector.z = mesh->mNormals[i].z;
         vertex.Normal = vector;
-        
-        //if(name == "cella_7") printf("%f %f %f\n", vertex.Normal.x, vertex.Normal.y, vertex.Normal.z);
-        
+                
         // Texture Coordinates
         if(mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
           
