@@ -102,7 +102,7 @@ namespace ogl {
       
       //glEnableVertexAttribArray(0);
 
-      //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
