@@ -29,6 +29,7 @@ Is also able to load model (via Assimp)  and render it.
 
 ## TODO
 * Fix glQuad
+* Finire label in references axes
 
 
 
