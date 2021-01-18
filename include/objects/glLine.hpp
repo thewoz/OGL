@@ -142,14 +142,15 @@ namespace ogl {
       	        
       } else {
      
-	glBindVertexArray(vao);
+        glBindVertexArray(vao);
 		
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
       }
       
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(0);
+      
       glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
         
       glBindVertexArray(0);

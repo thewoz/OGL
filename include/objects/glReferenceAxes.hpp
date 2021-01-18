@@ -35,11 +35,13 @@ namespace ogl {
     
     private:
       
-      GLuint vao[3];
-      GLuint vbo[3];
+      GLuint vao;
+      GLuint vbo;
       
       glm::vec3 colors[3] = { glm::vec3(1.0f,0.0f,0.0f), glm::vec3(0.0f,1.0f,0.0f), glm::vec3(0.0f,0.0f,1.0f) };
     
+      std::vector<glm::vec3> vertices;
+
       //glPrint3D xlabel;
       //glPrint3D ylabel;
       //glPrint3D zlabel;
@@ -72,10 +74,17 @@ namespace ogl {
         
         scale(glm::vec3(_scale));
 
-        //xlabel.init(glm::vec3(1,0,0), glm::vec3(1,1,1), 1, "x");
-        //ylabel.init(glm::vec3(0,1,0), glm::vec3(1,1,1), 1, "y");
-        //xlabel.init(glm::vec3(0,0,1), glm::vec3(1,1,1), 1, "z");
-
+        vertices.resize(6);
+        
+        vertices[0] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[1] = glm::vec3(1.0f,0.0f,0.0f);
+        
+        vertices[2] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[3] = glm::vec3(0.0f,1.0f,0.0f);
+        
+        vertices[4] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[5] = glm::vec3(0.0f,0.0f,1.0f);
+        
         isInited = true;
         
       }
@@ -106,30 +115,23 @@ namespace ogl {
                 
         glEnable(GL_DEPTH_TEST);
         
-        // https://vitaliburkov.wordpress.com/2016/09/17/simple-and-fast-high-quality-antialiased-lines-with-opengl/
-        //glLineWidth(lineWidth);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         
-        for(size_t i=0; i<3; ++i) {
+        glBindVertexArray(vao);
+        
+        for(int i=0; i<3; ++i) {
           
           shader.setUniform("color", colors[i]);
           
-          glBindVertexArray(vao[i]);
-          
-          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-          
-          glEnableVertexAttribArray(0);
-          
-          glDrawArrays(GL_LINES, 0, 2);
-          
-          glBindVertexArray(0);
+          glDrawArrays(GL_LINES, i, (i+1)*2);
           
         }
-                
+        
+        glBindVertexArray(0);
+        
         glDisable(GL_DEPTH_TEST);
-
-        //xlabel.render(camera);
-        //ylabel.render(camera);
-        //zlabel.render(camera);
+        
+        glCheckError();
         
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
@@ -145,28 +147,20 @@ namespace ogl {
         
         DEBUG_LOG("glReferenceAxes::setInGpu(" + name + ")");
         
-        std::vector<std::vector<glm::vec3>> vertices(3, std::vector<glm::vec3>(2, glm::vec3(0.0f)));
+        glGenVertexArrays(1, &vao);
+        glBindVertexArray(vao);
         
-        vertices[0][1] = glm::vec3(1.0f,0.0f,0.0f);
-        vertices[1][1] = glm::vec3(0.0f,1.0f,0.0f);
-        vertices[2][1] = glm::vec3(0.0f,0.0f,1.0f);
+        glGenBuffers(1, &vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
         
-        for(size_t i=0; i<3; ++i) {
-          
-          glGenVertexArrays(1, &vao[i]);
-          glBindVertexArray(vao[i]);
-          
-          glGenBuffers(1, &vbo[i]);
-          glBindBuffer(GL_ARRAY_BUFFER, vbo[i]);
-          glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(glm::vec3), &vertices[i][0], GL_STATIC_DRAW);
-          
-          glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-          
-        }
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(0);
         
-        glBindBuffer(GL_ARRAY_BUFFER,0);
+        glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
         
         glBindVertexArray(0);
+        
+        glCheckError();
                 
       }
     
@@ -179,8 +173,8 @@ namespace ogl {
       
       if(isInitedInGpu) {
         
-        glDeleteBuffers(3, vbo);
-        glDeleteVertexArrays(3, vao);
+        glDeleteBuffers(1, &vbo);
+        glDeleteVertexArrays(1, &vao);
         
         isInitedInGpu = false;
 

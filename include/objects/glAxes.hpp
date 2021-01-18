@@ -49,17 +49,6 @@ namespace ogl {
       //****************************************************************************/
       glAxes(GLfloat _scale = 1.0, const std::string & _name = " ") {
                 
-        vertices.resize(6);
-                
-        vertices[0] = glm::vec3(0.0f,0.0f,0.0f);
-        vertices[1] = glm::vec3(1.0f,0.0f,0.0f);
-
-        vertices[2] = glm::vec3(0.0f,0.0f,0.0f);
-        vertices[3] = glm::vec3(0.0f,1.0f,0.0f);
-
-        vertices[4] = glm::vec3(0.0f,0.0f,0.0f);
-        vertices[5] = glm::vec3(0.0f,0.0f,1.0f);
-                
         name = _name;
         
         init(_scale);
@@ -84,6 +73,17 @@ namespace ogl {
         
         scale(glm::vec3(_scale));
 
+        vertices.resize(6);
+        
+        vertices[0] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[1] = glm::vec3(1.0f,0.0f,0.0f);
+        
+        vertices[2] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[3] = glm::vec3(0.0f,1.0f,0.0f);
+        
+        vertices[4] = glm::vec3(0.0f,0.0f,0.0f);
+        vertices[5] = glm::vec3(0.0f,0.0f,1.0f);
+        
         isInited = true;
         
       }

@@ -159,16 +159,18 @@ namespace ogl {
       glGenBuffers(2, vbo);
 
       glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+      
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(0);
+      
+      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
       
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 
       glBindVertexArray(0);
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//      glBindBuffer(GL_ARRAY_BUFFER, 0);
+//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
       
     }
     
