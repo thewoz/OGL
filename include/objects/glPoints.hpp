@@ -132,7 +132,7 @@ namespace ogl {
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
-      shader.setUniform("pointSize", radius);
+      shader.setUniform("pointSize",  radius);
       
       if(to == -1) to = (int) points.size();
 
