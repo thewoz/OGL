@@ -62,15 +62,17 @@ namespace ogl {
     //****************************************************************************//
     // getColor
     //****************************************************************************//
-    static const glm::vec4 & get(const std::string & str) {
+    static const glm::vec4 & get(const std::string & str, bool createColor = false) {
          
       if(isInited) init();
       
       std::map<std::string, glm::vec4>::iterator color;
       
-      if((color = colors.find(str)) == colors.end()) {
+      if((color = colors.find(str)) == colors.end() && !createColor) {
         fprintf(stderr, "error not found glColor\n");
         abort();
+      } else {
+        colors[str] = getRandom();
       }
       
       return color->second;
