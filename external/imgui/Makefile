@@ -3,7 +3,7 @@ LIBRARY_INSTALL_PATH=/usr/local/lib
 
 LIBRARY_NAME=imgui
 
-all: compile
+all: install
 
 compile:
 	@mkdir -p ./build/lib
