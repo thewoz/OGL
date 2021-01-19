@@ -10,5 +10,5 @@ all: install
 install:
 	@cp -r ./include/* $(INCLUDE_INSTALL_PATH)
 	$(COMPILER) -march=native -Os -c -I/usr/local/include ./src/glad.c -o glad.o
-	ar rcs $(LIBRARY_INSTALL_PATH)/glad.a glad.o
+	ar rcs $(LIBRARY_INSTALL_PATH)/libglad.a glad.o
 	@rm glad.o
