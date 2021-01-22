@@ -38,7 +38,7 @@ namespace ogl {
   public:
     
     // Tipi di telecamera
-    enum MODE { FREE, TARGET };
+    enum MODE { FREE, TARGET, BILLBOARD };
     
     // Tipi di movimento della camera
     enum MOVEMENT { FORWARD, BACKWARD, LEFT, RIGHT };
@@ -105,9 +105,7 @@ namespace ogl {
     // init() - Inizializatore di una camera
     //****************************************************************************/
     void init(GLsizei _width, GLsizei _height, float _fov, float _zNear, float _zFar, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
-      
-      //printf("%d %d %f %f %f\n", _width, _height, fov, zNear, zFar);
-      
+            
       position = _position;
       target   = _target;
 
@@ -128,9 +126,7 @@ namespace ogl {
       zFar  = _zFar;
       
       projection = glm::perspective(glm::radians(fov), width/(float)height, zNear, zFar);
-      
-     // std::cout << "Camera projection matrix: " << glm::to_string(projection) << std::endl;
-      
+            
       updateCameraVectors();
       
     }
@@ -158,7 +154,7 @@ namespace ogl {
     //****************************************************************************/
     void processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true) {
       
-      if(mode == FREE){
+      if(mode == FREE || mode == BILLBOARD) {
 
         xOffset *= SENSITIVTY;
         yOffset *= SENSITIVTY;
@@ -168,7 +164,7 @@ namespace ogl {
         
         // Make sure that when pitch is out of bounds, screen doesn't get flipped
         if(constrainPitch) {
-          if(pitch >  89.0f) pitch = 89.0f;
+          if(pitch >  89.0f) pitch =  89.0f;
           if(pitch < -89.0f) pitch = -89.0f;
         }
                 
@@ -182,7 +178,7 @@ namespace ogl {
     //****************************************************************************/
     // processMouseScroll() -
     //****************************************************************************/
-    void processMouseScroll(GLfloat yOffset) { }
+    void processMouseScroll(GLfloat yOffset) { updatePosition(0.0, 0.0, yOffset); }
     
     //****************************************************************************/
     // setSensorSize() - Setto la grandezza in pixel del sensore
@@ -199,41 +195,67 @@ namespace ogl {
     // setPosition() - Aggiorno la posizione della camera
     //****************************************************************************/
     void setPosition(const glm::vec3 & _position) { /*if(mode!=FREE)*/ position = _position; }
-    //void initPosition(const glm::vec3 & _position) { position = _position; }
 
+    //****************************************************************************/
+    // updatePosition() - Aggiorno la posizione della camera
+    //****************************************************************************/
+    void updatePosition(float dx, float dy, float dz) { position.x += dx; position.y += dy; position.z += dz; }
     
     glm::vec3 getPosition() { return position; }
 
     inline void setPitch(float _pitch) { pitch = _pitch; updateCameraVectors(); }
-    inline void setYaw(float _yaw) { yaw = _yaw; updateCameraVectors(); }
+    inline void setYaw(float _yaw)     { yaw = _yaw;     updateCameraVectors(); }
 
     inline float getPitch() { return pitch; }
-    inline float getYaw() { return yaw; }
+    inline float getYaw()   { return yaw;   }
     
     //****************************************************************************/
     // setTarget() - Aggiorno la posizione del target
     //****************************************************************************/
-    void setTarget(const glm::vec3 & _target) { if(mode!=FREE) target = _target; }
-    
-    void setFront(const glm::vec3 & _front) { if(mode==FREE) front = _front; }
+    void setTarget(const glm::vec3 & _target) { if(mode==TARGET || mode==BILLBOARD) target = _target; }
+
+    //****************************************************************************/
+    // setFront() - Aggiorno la posizione del target
+    //****************************************************************************/
+    void setFront(const glm::vec3 & _front)   { if(mode==FREE) front = _front;   }
     
     //****************************************************************************/
-    // Get projection and view matrixs
+    // Get projection matrixs
     //****************************************************************************/
     inline glm::mat4 getProjection() const { return projection; }
+    
+    //****************************************************************************/
+    // Get view matrixs
+    //****************************************************************************/
     inline glm::mat4 getView()       const {
       if(mode == FREE)   return glm::lookAt(position, position + front, up);
       if(mode == TARGET) return glm::lookAt(position, target          , up);
+      if(mode == BILLBOARD) {
+        
+        glm::mat4 t1(1.0f); t1[3] = glm::vec4(glm::vec3( target.x+position.x,  target.y+position.y, target.z+position.z), 1.0f);
+        glm::mat4 t2(1.0f); t2[3] = glm::vec4(glm::vec3(-target.x           , -target.y,           -target.z)           , 1.0f);
+        glm::mat4 r = rotation(pitch, yaw, 0);
+
+        return t1 * r * t2;
+        
+      }
       abort();
     }
-    inline glm::mat4 getLookAt(const glm::vec3 & _target) const {
-      return glm::lookAt(position, _target , up);
-    }
+    
+    //****************************************************************************/
+    // Get lookAt
+    //****************************************************************************/
+    inline glm::mat4 getLookAt(const glm::vec3 & _target) const { return glm::lookAt(position, _target , up); }
     
     //****************************************************************************/
     // getMode() - Camera mode
     //****************************************************************************/
     inline MODE getMode() const { return mode; }
+    
+    //****************************************************************************/
+    // setMode() - Camera mode
+    //****************************************************************************/
+    inline void setMode(MODE _mode) { mode = _mode; }
     
     //****************************************************************************/
     // setSpeed() -
@@ -256,7 +278,7 @@ namespace ogl {
     // setzNearFar()
     //****************************************************************************/
     inline float getzNear() { return zNear; }
-    inline float getzFar() { return zFar; }
+    inline float getzFar()  { return zFar;  }
 
     //****************************************************************************/
     // get3DOrthoProjection()
@@ -320,6 +342,19 @@ namespace ogl {
       
       // Normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
       up = glm::normalize(glm::cross(right, front));
+      
+    }
+    
+    //****************************************************************************//
+    // rotation
+    //****************************************************************************//
+    glm::mat4 rotation(float _pitch, float _roll, float _yaw) const {
+            
+      glm::mat4 RX = glm::rotate(glm::mat4(1.0f), _pitch, glm::vec3(1,0,0));
+      glm::mat4 RY = glm::rotate(glm::mat4(1.0f), _roll,  glm::vec3(0,1,0));
+      glm::mat4 RZ = glm::rotate(glm::mat4(1.0f), _yaw,   glm::vec3(0,0,1));
+      
+      return RX * RY * RZ;
       
     }
     
