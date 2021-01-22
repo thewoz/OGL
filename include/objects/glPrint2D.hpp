@@ -174,9 +174,7 @@ namespace ogl {
       
       shader.setUniform("projection", camera->getText2DOrthoProjection());
       shader.setUniform("color",      color);
-            
-      glEnable(GL_DEPTH_TEST);
-      
+                  
       glEnable(GL_CULL_FACE);
       
       glEnable(GL_BLEND);
@@ -187,8 +185,6 @@ namespace ogl {
       
       glBindVertexArray(vao);
       
-      //glEnableVertexAttribArray(0); // NB: MESSO DA ME
-
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
       float tmpX = x;
@@ -221,9 +217,7 @@ namespace ogl {
         // update content of VBO memory
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
-        
-        //glBindBuffer(GL_ARRAY_BUFFER, 0); // NB: TOLTO DA ME
-        
+                
         // render quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
         
@@ -238,8 +232,6 @@ namespace ogl {
       
       glBindTexture(GL_TEXTURE_2D, 0);
       
-      glDisable(GL_DEPTH_TEST);
-
       glDisable(GL_CULL_FACE);
       
       glDisable(GL_BLEND);
@@ -327,14 +319,14 @@ namespace ogl {
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
       
       glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-      
       glEnableVertexAttribArray(0);
 
       glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-      
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      
+            
       glBindVertexArray(0);
+      
+      glCheckError();
+
       
     }
     

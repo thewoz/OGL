@@ -94,21 +94,15 @@ namespace ogl {
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("color",      color);
       
-      glEnable(GL_DEPTH_TEST);
-
       glDisable(GL_CULL_FACE);
 
       glBindVertexArray(vao);
       
-      //glEnableVertexAttribArray(0);
-
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
       glBindVertexArray(0);
-
-      glDisable(GL_DEPTH_TEST);
             
     }
     
@@ -131,7 +125,8 @@ namespace ogl {
       glEnableVertexAttribArray(0);
 
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      
+
+      glCheckError();
 
       glBindVertexArray(0);
       

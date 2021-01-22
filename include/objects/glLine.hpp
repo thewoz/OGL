@@ -108,9 +108,7 @@ namespace ogl {
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("color",      color);
-      
-      glEnable(GL_DEPTH_TEST);
-      
+            
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       
       glBindVertexArray(vao);
@@ -119,10 +117,6 @@ namespace ogl {
      
       glBindVertexArray(0);
             
-      glDisable(GL_DEPTH_TEST);
-
-      glCheckError();
-      
     }
     
     //****************************************************************************/

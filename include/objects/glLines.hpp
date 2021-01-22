@@ -133,16 +133,13 @@ namespace ogl {
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
-      
-      glEnable(GL_DEPTH_TEST);
-                  
+                        
       // https://vitaliburkov.wordpress.com/2016/09/17/simple-and-fast-high-quality-antialiased-lines-with-opengl/
       //glLineWidth(lineWidth);
       
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
       glBindVertexArray(vao);
-      
-      //glEnableVertexAttribArray(0);
-      //glEnableVertexAttribArray(1);
       
       if(to == -1) to = (int) vertices.size();
       
@@ -159,8 +156,6 @@ namespace ogl {
 
       glBindVertexArray(0);
       
-      glDisable(GL_DEPTH_TEST);
-
     }
     
     
@@ -192,10 +187,10 @@ namespace ogl {
         glEnableVertexAttribArray(1);
         
         glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec4), colors.data(), GL_STATIC_DRAW);
-
-        //glBindBuffer(GL_ARRAY_BUFFER,0);
         
         glBindVertexArray(0);
+        
+        glCheckError();
         
       }
       

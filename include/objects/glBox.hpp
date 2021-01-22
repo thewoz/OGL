@@ -101,9 +101,7 @@ namespace ogl {
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("color",      color);
-      
-      glEnable(GL_DEPTH_TEST);
-            
+                  
       glBindVertexArray(vao);
         
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -112,8 +110,6 @@ namespace ogl {
      
       glBindVertexArray(0);
       
-      glDisable(GL_DEPTH_TEST);
-
     }
     
     private:
@@ -169,8 +165,8 @@ namespace ogl {
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
 
       glBindVertexArray(0);
-//      glBindBuffer(GL_ARRAY_BUFFER, 0);
-//      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+      glCheckError();
       
     }
     

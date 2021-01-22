@@ -138,16 +138,11 @@ namespace ogl {
 
       glBindVertexArray(vao);
 
-      //glEnableVertexAttribArray(0);
-      //glEnableVertexAttribArray(1);
-      
       glDrawArrays(GL_POINTS, from, to);
 
       glDisable(GL_PROGRAM_POINT_SIZE);
 
       glBindVertexArray(0);
-
-      glDisable(GL_DEPTH_TEST);
       
     }
     
@@ -184,6 +179,8 @@ namespace ogl {
         glBindBuffer(GL_ARRAY_BUFFER,0);
         
         glBindVertexArray(0);
+        
+        glCheckError();
         
       }
     

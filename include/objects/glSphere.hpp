@@ -108,30 +108,18 @@ namespace ogl {
         shader.setUniform("view",       camera->getView());
         shader.setUniform("model",      modelMatrix);
         shader.setUniform("color",      color);
-        
-        glEnable(GL_DEPTH_TEST);
-        
+                
         glDisable(GL_CULL_FACE);
         
         glBindVertexArray(vao);
-        
-//        glEnableVertexAttribArray(0);
-//        glEnableVertexAttribArray(1);
-//        glEnableVertexAttribArray(2);
         
         if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         
         glDrawElements(GL_TRIANGLES, (slices * stacks + slices) * 6, GL_UNSIGNED_INT, nullptr);
-        
-//        glDisableVertexAttribArray(2);
-//        glDisableVertexAttribArray(1);
-//        glDisableVertexAttribArray(0);
-        
+
         glBindVertexArray(0);
         
-        glDisable(GL_DEPTH_TEST);
-
       }
       
     private:
@@ -226,9 +214,9 @@ namespace ogl {
           glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(GLuint), indicies.data(), GL_STATIC_DRAW);
           
           glBindVertexArray(0);
-//          glBindBuffer(GL_ARRAY_BUFFER, 0);
-//          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
        
+          glCheckError();
+
         }
         
         isInitedInGpu = true;

@@ -81,10 +81,10 @@ int main(int argc, char * const argv []) {
       box.render(window.getCurrentCamera()); glCheckError();
       cube.render(window.getCurrentCamera()); glCheckError();
       referenceAxes.render(window.getCurrentCamera()); glCheckError();
-      text2D.render(window.getCurrentCamera()); glCheckError();
       points.render(window.getCurrentCamera()); glCheckError();
       lines.render(window.getCurrentCamera()); glCheckError();
       model.render(window.getCurrentCamera()); glCheckError();
+      text2D.render(window.getCurrentCamera()); glCheckError();
     window.renderEnd();
         
   }
