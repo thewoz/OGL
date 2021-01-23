@@ -1,9 +1,21 @@
-#version 150
+#version 330 core
 
 uniform vec3 color;
 
-out vec4 out_color;
+//uniform float lineWidth;
+//uniform float blendFactor;
+
+//in vec2 lineCenter;
+
+out vec4 outColor;
 
 void main() {
-  out_color = vec4(color, 1.0);
+
+//  float dist = length(lineCenter-gl_PointCoord);
+//
+//  if(dist > lineWidth) discard;
+//  else outColor = vec4(color, 1.0) * pow(float((lineWidth-dist)/lineWidth), blendFactor);
+ 
+  outColor = vec4(color, 1.0);
+
 }

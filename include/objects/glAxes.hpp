@@ -38,10 +38,13 @@ namespace ogl {
       GLuint vao;
       GLuint vbo;
       
-      glm::vec3 colors[3] = { glm::vec3(1.0f,0.0f,0.0f), glm::vec3(0.0f,1.0f,0.0f), glm::vec3(0.0f,0.0f,1.0f) };
-      
       std::vector<glm::vec3> vertices;
+      std::vector<glm::vec3> colors;
       
+      glPrint3D xAxeLabel;
+      glPrint3D yAxeLabel;
+      glPrint3D zAxeLabel;
+
     public:
         
       //****************************************************************************/
@@ -84,6 +87,16 @@ namespace ogl {
         vertices[4] = glm::vec3(0.0f,0.0f,0.0f);
         vertices[5] = glm::vec3(0.0f,0.0f,1.0f);
         
+        colors.resize(3);
+        
+        colors[0] = glm::vec3(1.0f,0.0f,0.0f);
+        colors[1] = glm::vec3(0.0f,1.0f,0.0f);
+        colors[2] = glm::vec3(0.0f,0.0f,1.0f);
+    
+        xAxeLabel.init(glm::vec3(1.01f,0.01f,0.01f), glm::vec3(1.0f), 0.5, "x");
+        yAxeLabel.init(glm::vec3(0.01f,1.01f,0.01f), glm::vec3(1.0f), 0.5, "y");
+        zAxeLabel.init(glm::vec3(0.01f,0.01f,1.01f), glm::vec3(1.0f), 0.5, "z");
+
         isInited = true;
         
       }
@@ -122,6 +135,10 @@ namespace ogl {
         
         glBindVertexArray(0);
 
+        xAxeLabel.render(camera);
+        yAxeLabel.render(camera);
+        zAxeLabel.render(camera);
+
       }
    
     private:
@@ -142,7 +159,7 @@ namespace ogl {
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(0); 
         
-        glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
        
         glBindVertexArray(0);
         

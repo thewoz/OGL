@@ -12,7 +12,7 @@ uniform float pointSize;
 //uniform mat4 mvp;
 
 out vec4 frag_color;
-out vec2 pointCoord;
+//out vec2 pointCoord;
 
 void main() {
   
@@ -24,7 +24,7 @@ void main() {
   
   gl_PointSize = pointSize / Z;
   
-  pointCoord = gl_Position.xy / gl_Position.w;
+  //pointCoord = gl_Position.xy / gl_Position.w;
   
   frag_color = in_color;
 

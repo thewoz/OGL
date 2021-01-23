@@ -172,7 +172,7 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getText2DOrthoProjection());
+      shader.setUniform("projection", camera->getOrthoProjection());
       shader.setUniform("color",      color);
                   
       glEnable(GL_CULL_FACE);
@@ -181,21 +181,29 @@ namespace ogl {
       
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                   
-      glActiveTexture(GL_TEXTURE0);
-      
       glBindVertexArray(vao);
+
+      glActiveTexture(GL_TEXTURE0);
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
       float tmpX = x;
+      float tmpY = y;
 
       // iterate through all characters
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
         
-        Character_t ch = Characters[*c];
+        if(*c == '\n') {
+          const Character_t & ch = Characters['a'];
+          tmpX  = x;
+          tmpY += ch.Size.y * scale;
+          continue;
+        }
         
+        const Character_t & ch = Characters[*c];
+                
         float xpos = tmpX + ch.Bearing.x * scale;
-        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+        float ypos = tmpY - (ch.Size.y - ch.Bearing.y) * scale;
         
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
@@ -228,9 +236,9 @@ namespace ogl {
         
       }
       
-      glBindVertexArray(0);
-      
       glBindTexture(GL_TEXTURE_2D, 0);
+      
+      glBindVertexArray(0);
       
       glDisable(GL_CULL_FACE);
       
@@ -275,8 +283,7 @@ namespace ogl {
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
         
-        glTexImage2D(
-                     GL_TEXTURE_2D,
+        glTexImage2D(GL_TEXTURE_2D,
                      0,
                      GL_RED,
                      face->glyph->bitmap.width,
@@ -284,8 +291,7 @@ namespace ogl {
                      0,
                      GL_RED,
                      GL_UNSIGNED_BYTE,
-                     face->glyph->bitmap.buffer
-                     );
+                     face->glyph->bitmap.buffer);
         
         // set texture options
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

@@ -181,7 +181,7 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getText2DOrthoProjection());
+      shader.setUniform("projection", camera->getOrthoProjection());
       shader.setUniform("color",      color);
             
       glEnable(GL_CULL_FACE);
@@ -201,7 +201,7 @@ namespace ogl {
       // iterate through all characters
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
         
-        Character_t ch = Characters[*c];
+        const Character_t & ch = Characters[*c];
         
         float xpos = tmpX + ch.Bearing.x * scale;
         float ypos = screen.y - (ch.Size.y - ch.Bearing.y) * scale;

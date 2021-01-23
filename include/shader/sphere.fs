@@ -1,7 +1,7 @@
 #version 330 core
 
 in vec4 frag_color;
-in vec2 pointCoord;
+//in vec2 pointCoord;
 
 out vec4 out_color;
 

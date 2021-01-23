@@ -97,11 +97,14 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getView());
-      shader.setUniform("model",      modelMatrix);
-      shader.setUniform("color",      color);
-                  
+      shader.setUniform("projection",  camera->getProjection());
+      shader.setUniform("view",        camera->getView());
+      shader.setUniform("model",       modelMatrix);
+      shader.setUniform("color",       color);
+      //shader.setUniform("viewport",    camera->getViewport());
+      //shader.setUniform("lineWidth",   2.0f);
+      //shader.setUniform("blendFactor", 0.1f);
+      
       glBindVertexArray(vao);
         
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -158,7 +161,7 @@ namespace ogl {
       
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(0);
-      
+            
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
       
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
