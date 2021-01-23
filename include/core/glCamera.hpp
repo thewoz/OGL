@@ -177,7 +177,18 @@ namespace ogl {
     //****************************************************************************/
     // processMouseScroll() -
     //****************************************************************************/
-    void processMouseScroll(GLfloat yOffset) { updatePosition(0.0, 0.0, yOffset); }
+    void processMouseScroll(GLfloat yOffset, bool controlKey, bool altKey) {
+      
+      if(mode == BILLBOARD) {
+      
+             if(controlKey == GLFW_PRESS) updatePosition(0.0, yOffset, 0.0);
+        else if(altKey == GLFW_PRESS)     updatePosition(yOffset, 0.0, 0.0);
+        else                              updatePosition(0.0, 0.0, yOffset);
+        
+      }
+      
+      
+    }
     
     //****************************************************************************/
     // setSensorSize() - Setto la grandezza in pixel del sensore

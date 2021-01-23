@@ -66,10 +66,10 @@ namespace ogl {
     
     bool isProcessMouseMovement = true;
     
-  public:
-    
-    GLint width;
-    GLint height;
+//  public:
+//
+//    GLint width;
+//    GLint height;
     
   protected:
     
@@ -113,7 +113,7 @@ namespace ogl {
     /*****************************************************************************/
     // create() - Crea una nuova finestra
     /*****************************************************************************/
-    void create(GLint _width, GLint _height, const char * title = "OpenGL window") {
+    void create(GLint width, GLint height, const char * title = "OpenGL window") {
       
       DEBUG_LOG("glWindow::create() windowID " + std::to_string(windowsCounter));
       
@@ -127,7 +127,7 @@ namespace ogl {
       // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
       // Create a GLFWwindow object that we can use for GLFW's functions
-      window = glfwCreateWindow(_width, _height, title, NULL, NULL);
+      window = glfwCreateWindow(width, height, title, NULL, NULL);
       
       if(window == NULL) {
         fprintf(stderr, "Failed to create GLFW window\n");
@@ -141,6 +141,8 @@ namespace ogl {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
+      
+      //int width, height;
       
       glfwGetFramebufferSize(window, &width, &height);
       
@@ -182,7 +184,7 @@ namespace ogl {
     /*****************************************************************************/
     // createOffscreen() - Crea una nuova finestra
     /*****************************************************************************/
-    void createOffscreen(GLint _width, GLint _height) {
+    void createOffscreen(GLint width, GLint height) {
       
       DEBUG_LOG("glWindow::createOffscreen() windowID " + std::to_string(windowsCounter));
 
@@ -197,7 +199,7 @@ namespace ogl {
       // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
       
       // Create a GLFWwindow object that we can use for GLFW's functions
-      window = glfwCreateWindow(_width, _height, "notitle", NULL, NULL);
+      window = glfwCreateWindow(width, height, "notitle", NULL, NULL);
       
       if(window == NULL) {
         fprintf(stderr, "Failed to create GLFW window\n");
@@ -211,7 +213,6 @@ namespace ogl {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
-      
       
       glfwGetFramebufferSize(window, &width, &height);
      
@@ -337,7 +338,21 @@ namespace ogl {
         cameras[i].setSensorSize(width, height);
     }
     
-    inline void scrollCallback(double xoffset, double yoffset) { scroll(xoffset, yoffset); }
+    inline void scrollCallback(double xoffset, double yoffset) {
+      
+      bool controllKey = GLFW_RELEASE;
+      if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+        controllKey = GLFW_PRESS;
+      
+      bool altKey = GLFW_RELEASE;
+      if(glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS)
+        altKey = GLFW_PRESS;
+      
+      currentCamera->processMouseScroll(yoffset, controllKey, altKey);
+      
+      scroll(xoffset, yoffset);
+      
+    }
         
     inline void keyCallback(int key, int scancode, int action, int mods) {
                   
@@ -479,23 +494,19 @@ namespace ogl {
     /*****************************************************************************/
     inline glm::mat4 getProjection() const { return currentCamera->getProjection(); }
     
-    inline glm::mat4 getOrthoProjection() const {
+    inline glm::mat4 getOrthoProjection() const { return currentCamera->getOrthoProjection(); }
       
-      float aspect = static_cast<float>(width) / static_cast<float>(height);
-      return glm::ortho(-aspect, aspect, -1.0f, 1.0f, currentCamera->getzNear(), currentCamera->getzFar());
-      
-      //return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height), currentCamera->getzNear(), currentCamera->getzFar());
-      
-    }
-      
-    inline glm::mat4 getOrthoProjectionText() const {
-      
-     // float aspect = static_cast<float>(width) / static_cast<float>(height);
-     // return glm::ortho(-aspect, aspect, -1.0f, 1.0f, currentCamera->getzNear(), currentCamera->getzFar());
-      
-      return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
-      
-    }
+//    inline glm::mat4 getOrthoProjectionText() const {
+//      
+//     // float aspect = static_cast<float>(width) / static_cast<float>(height);
+//     // return glm::ortho(-aspect, aspect, -1.0f, 1.0f, currentCamera->getzNear(), currentCamera->getzFar());
+//      
+//      return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+//      
+//    }
+    
+    inline glm::vec2 getViewport() const { return currentCamera->getViewport(); }
+
     
     inline glm::mat4 getView() const { return currentCamera->getView(); }
 
