@@ -67,6 +67,7 @@
 #include <ogl/objects/glPrint3D.hpp>
 #include <ogl/objects/glLine.hpp>
 #include <ogl/objects/glQuad.hpp>
+#include <ogl/objects/glQuad2D.hpp>
 #include <ogl/objects/glLines.hpp>
 #include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glEllipse.hpp>

@@ -55,7 +55,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { PLAIN, MODEL, SPHERE, TEXT, ADVANCED, ORTO, CUSTOM };
+    enum STYLE { PLAIN, PLAIN2D, MODEL, SPHERE, TEXT, ADVANCED, ORTO, CUSTOM };
 
     int style;
     
@@ -84,6 +84,14 @@ namespace ogl {
     void initPlain() {
       init("/usr/local/include/ogl/shader/plain.vs", "/usr/local/include/ogl/shader/plain.fs");
       style = STYLE::PLAIN;
+    }
+    
+    //****************************************************************************/
+    // initPlain2D
+    //****************************************************************************/
+    void initPlain2D() {
+      init("/usr/local/include/ogl/shader/plain2D.vs", "/usr/local/include/ogl/shader/plain2D.fs");
+      style = STYLE::PLAIN2D;
     }
 
     //****************************************************************************/
@@ -335,6 +343,10 @@ namespace ogl {
     inline void setUniform(GLint location, const int   & value) const { glUniform1ui(location, value); }
     inline void setUniform(GLint location, const float & value) const { glUniform1f(location, value); }
     inline void setUniform(GLint location, const glm::vec3 & value) const { glUniform3fv(location, 1, &value[0]); }
+    
+    inline void setUniform(GLint location, const glm::vec4 & value) const { glUniform4fv(location, 1, &value[0]); }
+
+    inline void setUniform(GLint location, const glm::vec2 & value) const { glUniform2fv(location, 1, &value[0]); }
     inline void setUniform(GLint location, const glm::mat4 & value) const { glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value)); }
     
   };

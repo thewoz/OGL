@@ -70,7 +70,6 @@ namespace ogl {
     GLsizei width;
     GLsizei height;
     
-    
     GLfloat fov;
     GLfloat zNear;
     GLfloat zFar;
@@ -191,6 +190,18 @@ namespace ogl {
     inline GLsizei getWidth()  const { return width;  }
     inline GLsizei getHeight() const { return height; }
     
+    inline glm::vec2 getViewport() const { return glm::vec2(width,height); }
+    
+    inline void setViewport(float _width, float _height) {
+      
+      width = _width;
+      height = _height;
+      
+      projection = glm::perspective(glm::radians(fov), width/(float)height, zNear, zFar);
+
+      
+    }
+
     //****************************************************************************/
     // setPosition() - Aggiorno la posizione della camera
     //****************************************************************************/
@@ -289,9 +300,9 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // getText2DOrthoProjection()
+    // getOrthoProjection()
     //****************************************************************************/
-    inline glm::mat4 getText2DOrthoProjection() const {
+    inline glm::mat4 getOrthoProjection() const {
       return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
     }
     
