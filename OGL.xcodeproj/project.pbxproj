@@ -31,6 +31,8 @@
 		3A996DAA247AC96C00EF032F /* orto.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = orto.fs; sourceTree = "<group>"; };
 		3A996DAB247AC97700EF032F /* orto.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = orto.vs; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AC9A7BB25BC550800509908 /* plain2D.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.fs; sourceTree = "<group>"; };
+		3AC9A7BC25BC550800509908 /* plain2D.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.vs; sourceTree = "<group>"; };
 		3AF045942472DBB100DBCC91 /* glColors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glColors.hpp; sourceTree = "<group>"; };
 		3AF50E472476DA6600BE42EF /* glPrint3D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPrint3D.hpp; sourceTree = "<group>"; };
 		3AFE1E9624742880006C81D8 /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
@@ -142,6 +144,8 @@
 				3AFE7EE3247164C7000E8463 /* depth.vs */,
 				3AFE7EE0247164C7000E8463 /* plain.fs */,
 				3AFE7EE2247164C7000E8463 /* plain.vs */,
+				3AC9A7BB25BC550800509908 /* plain2D.fs */,
+				3AC9A7BC25BC550800509908 /* plain2D.vs */,
 				3A996DAA247AC96C00EF032F /* orto.fs */,
 				3A996DAB247AC97700EF032F /* orto.vs */,
 				3A4DA33E247464F800714407 /* advanced.fs */,
