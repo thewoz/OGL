@@ -66,6 +66,8 @@ namespace ogl {
     
     bool isProcessMouseMovement = true;
     
+    bool isFullscreen;
+    
 //  public:
 //
 //    GLint width;
@@ -162,6 +164,8 @@ namespace ogl {
 
       onFocus = false;
 
+      isFullscreen = false;
+      
       id = windowsCounter++;
 
       background = glm::vec3(0.0f, 0.1f, 0.2f);
@@ -626,6 +630,45 @@ namespace ogl {
       
     }
  
+    //****************************************************************************
+    // toggleFullscreen()
+    //****************************************************************************
+    void toggleFullscreen() {
+      
+      static int oldWidth;
+      static int oldHeight;
+
+      GLFWmonitor * monitor = glfwGetPrimaryMonitor();
+      
+      const GLFWvidmode * mode = glfwGetVideoMode(monitor);
+      
+      if(!isFullscreen) {
+        
+        getCurrentCamera()->getViewport(oldWidth, oldHeight);
+        
+        glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+        
+        int width, height;
+        
+        glfwGetFramebufferSize(window, &width, &height);
+        
+        getCurrentCamera()->setViewport(width, height);
+                
+      } else {
+        
+        glfwSetWindowMonitor(window, monitor, 0, 0, oldWidth, oldHeight, mode->refreshRate);
+
+        glfwGetFramebufferSize(window, &oldWidth, &oldHeight);
+        
+        getCurrentCamera()->setViewport(oldWidth, oldHeight);
+        
+      }
+      
+      isFullscreen = !isFullscreen;
+      
+    }
+    
+    
     /*****************************************************************************/
     // changeCamera()
     /*****************************************************************************/
