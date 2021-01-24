@@ -136,9 +136,9 @@ namespace ogl {
     //****************************************************************************
     // setName()
     //****************************************************************************
-    inline void setName(std::string _name) { name = _name; }
+    inline void setName(std::string _name) { name = _name; }  
     
-  private:
+  protected:
     
     //****************************************************************************
     // updateModelMatrix()
@@ -156,8 +156,6 @@ namespace ogl {
       modelMatrix  = glm::rotate(modelMatrix, _rotation.z, glm::vec3(0, 0, 1)); // where x, y, z is axis of rotation (e.g. 0 1 0)
       
     }
-    
-  protected:
     
     //****************************************************************************
     // setInGpu

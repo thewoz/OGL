@@ -151,24 +151,32 @@ namespace ogl {
     //****************************************************************************/
     // processMouseMovement() - Processa il moviemento del mouse
     //****************************************************************************/
-    void processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true) {
+    void processMouseMovement(GLfloat xOffset, GLfloat yOffset, bool mods, GLboolean constrainPitch = true) {
             
       if(mode == FREE || mode == BILLBOARD) {
 
-        xOffset *= SENSITIVTY;
-        yOffset *= SENSITIVTY;
+        if(!mods) {
         
-        yaw   += xOffset;
-        pitch += yOffset;
+          xOffset *= SENSITIVTY;
+          yOffset *= SENSITIVTY;
         
-        // Make sure that when pitch is out of bounds, screen doesn't get flipped
-        if(constrainPitch) {
-          if(pitch >  89.0f) pitch =  89.0f;
-          if(pitch < -89.0f) pitch = -89.0f;
-        }
+          yaw   += xOffset;
+          pitch += yOffset;
+        
+          // Make sure that when pitch is out of bounds, screen doesn't get flipped
+          if(constrainPitch) {
+            if(pitch >  89.0f) pitch =  89.0f;
+            if(pitch < -89.0f) pitch = -89.0f;
+          }
                 
-        // Update Front, Right and Up Vectors using the updated Eular angles
-        updateCameraVectors();
+          // Update Front, Right and Up Vectors using the updated Eular angles
+          updateCameraVectors();
+        
+        } else {
+          
+          updatePosition(xOffset, yOffset, 0);
+          
+        }
         
       }
       
@@ -177,15 +185,9 @@ namespace ogl {
     //****************************************************************************/
     // processMouseScroll() -
     //****************************************************************************/
-    void processMouseScroll(GLfloat yOffset, bool controlKey, bool altKey) {
+    void processMouseScroll(GLfloat yOffset) {
       
-      if(mode == BILLBOARD) {
-      
-             if(controlKey == GLFW_PRESS) updatePosition(0.0, yOffset, 0.0);
-        else if(altKey == GLFW_PRESS)     updatePosition(yOffset, 0.0, 0.0);
-        else                              updatePosition(0.0, 0.0, yOffset);
-        
-      }
+      if(mode == BILLBOARD) updatePosition(0.0, 0.0, yOffset);
       
     }
     
@@ -254,12 +256,9 @@ namespace ogl {
       if(mode == FREE)   return glm::lookAt(position, position + front, up);
       if(mode == TARGET) return glm::lookAt(position, target          , up);
       if(mode == BILLBOARD) {
-        printf("target %f %f %f\n", target.x, target.y, target.z);
-        printf("positi %f %f %f\n", position.x, position.y, position.z);
-
         glm::mat4 t1(1.0f); t1[3] = glm::vec4( target.x-position.x,  target.y-position.y,  target.z+position.z, 1.0f);
         glm::mat4 t2(1.0f); t2[3] = glm::vec4(-target.x, -target.y, -target.z           , 1.0f);
-        glm::mat4 r = glm::mat4(1.0f);//rotation(pitch, yaw, 0);
+        glm::mat4 r = rotation(pitch, yaw, 0);
         return t1 * r * t2;
       }
       abort();
@@ -321,11 +320,11 @@ namespace ogl {
     //****************************************************************************/
     // screenPosition()
     //****************************************************************************/
-    bool screenPosition(const glm::vec3 & _coord, glm::vec2 & screen) const {
+    bool screenPosition(const glm::vec3 & _coord, const glm::mat4 & model, glm::vec2 & screen) const {
             
       glm::vec4 coord = glm::vec4(_coord, 1);
       
-      coord = getProjection() * getView() * coord;
+      coord = getProjection() * getView() * model * coord;
       
       if(coord.w <= 0) return false;
       

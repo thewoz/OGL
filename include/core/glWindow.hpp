@@ -344,15 +344,7 @@ namespace ogl {
     
     inline void scrollCallback(double xoffset, double yoffset) {
       
-      bool controllKey = GLFW_RELEASE;
-      if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
-        controllKey = GLFW_PRESS;
-      
-      bool altKey = GLFW_RELEASE;
-      if(glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS)
-        altKey = GLFW_PRESS;
-      
-      currentCamera->processMouseScroll(yoffset, controllKey, altKey);
+      currentCamera->processMouseScroll(yoffset);
       
       scroll(xoffset, yoffset);
       
@@ -413,7 +405,11 @@ namespace ogl {
         lastX = xPos;
         lastY = yPos;
         
-        if(isProcessMouseMovement) currentCamera->processMouseMovement(xOffset, yOffset);
+        bool controllKey = GLFW_RELEASE;
+        if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
+          controllKey = GLFW_PRESS;
+        
+        if(isProcessMouseMovement) currentCamera->processMouseMovement(xOffset, yOffset, controllKey);
         
         cursorPos(lastX, lastY, xOffset, yOffset);
       
@@ -575,11 +571,11 @@ namespace ogl {
     /*****************************************************************************/
     // snapshot()
     /*****************************************************************************/
-    void snapshot(const char * filename) {
+    void snapshot(const std::string & filename) {
       
       glReadBuffer(GL_BACK);
       
-      tiff::snapshot(currentCamera->getWidth(), currentCamera->getHeight(), filename);
+      tiff::snapshot(currentCamera->getWidth(), currentCamera->getHeight(), filename.c_str());
       
     }
     
