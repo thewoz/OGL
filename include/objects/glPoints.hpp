@@ -127,14 +127,15 @@ namespace ogl {
       
       shader.use();
       
-      glEnable(GL_PROGRAM_POINT_SIZE);
 
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("pointSize",  radius);
-      
+            
       if(to == -1) to = (int) points.size();
+
+      glEnable(GL_PROGRAM_POINT_SIZE);
 
       glBindVertexArray(vao);
 
@@ -176,7 +177,7 @@ namespace ogl {
         
         glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec4), colors.data(), GL_STATIC_DRAW);
       
-        glBindBuffer(GL_ARRAY_BUFFER,0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         
         glBindVertexArray(0);
         
