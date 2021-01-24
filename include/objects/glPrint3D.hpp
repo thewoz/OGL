@@ -169,7 +169,7 @@ namespace ogl {
       
       glm::vec2 screen;
       
-      if(!camera->screenPosition(coord, screen)) return;
+      if(!camera->screenPosition(coord, getModelMatrix(), screen)) return;
 
       if(!isInited){
         shader.setName(name);

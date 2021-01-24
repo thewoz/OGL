@@ -141,6 +141,22 @@ namespace ogl {
 
       }
    
+      //****************************************************************************/
+      // translate()
+      //****************************************************************************/
+      inline void translate(const glm::vec3 & value) {
+        
+        _position = value;
+        
+        xAxeLabel.translate(_position);
+        yAxeLabel.translate(_position);
+        zAxeLabel.translate(_position);
+        
+        updateModelMatrix();
+        
+      }
+
+    
     private:
       
       //****************************************************************************/
