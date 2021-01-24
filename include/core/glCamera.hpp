@@ -152,7 +152,7 @@ namespace ogl {
     // processMouseMovement() - Processa il moviemento del mouse
     //****************************************************************************/
     void processMouseMovement(GLfloat xOffset, GLfloat yOffset, GLboolean constrainPitch = true) {
-      
+            
       if(mode == FREE || mode == BILLBOARD) {
 
         xOffset *= SENSITIVTY;
@@ -187,7 +187,6 @@ namespace ogl {
         
       }
       
-      
     }
     
     //****************************************************************************/
@@ -203,13 +202,14 @@ namespace ogl {
     
     inline glm::vec2 getViewport() const { return glm::vec2(width,height); }
     
-    inline void setViewport(float _width, float _height) {
+    inline void getViewport(int & _width, int & _height ) const { _width = width; _height = height; }
+
+    inline void setViewport(int _width, int _height) {
       
       width = _width;
       height = _height;
       
       projection = glm::perspective(glm::radians(fov), width/(float)height, zNear, zFar);
-
       
     }
 
@@ -217,6 +217,7 @@ namespace ogl {
     // setPosition() - Aggiorno la posizione della camera
     //****************************************************************************/
     void setPosition(const glm::vec3 & _position) { /*if(mode!=FREE)*/ position = _position; }
+    void setPosition(float x, float y, float z)   { /*if(mode!=FREE)*/ position = glm::vec3(x,y,z); }
 
     //****************************************************************************/
     // updatePosition() - Aggiorno la posizione della camera
@@ -253,13 +254,13 @@ namespace ogl {
       if(mode == FREE)   return glm::lookAt(position, position + front, up);
       if(mode == TARGET) return glm::lookAt(position, target          , up);
       if(mode == BILLBOARD) {
-        
-        glm::mat4 t1(1.0f); t1[3] = glm::vec4(glm::vec3( target.x+position.x,  target.y+position.y, target.z+position.z), 1.0f);
-        glm::mat4 t2(1.0f); t2[3] = glm::vec4(glm::vec3(-target.x           , -target.y,           -target.z)           , 1.0f);
-        glm::mat4 r = rotation(pitch, yaw, 0);
+        printf("target %f %f %f\n", target.x, target.y, target.z);
+        printf("positi %f %f %f\n", position.x, position.y, position.z);
 
+        glm::mat4 t1(1.0f); t1[3] = glm::vec4( target.x-position.x,  target.y-position.y,  target.z+position.z, 1.0f);
+        glm::mat4 t2(1.0f); t2[3] = glm::vec4(-target.x, -target.y, -target.z           , 1.0f);
+        glm::mat4 r = glm::mat4(1.0f);//rotation(pitch, yaw, 0);
         return t1 * r * t2;
-        
       }
       abort();
     }
@@ -325,6 +326,8 @@ namespace ogl {
       glm::vec4 coord = glm::vec4(_coord, 1);
       
       coord = getProjection() * getView() * coord;
+      
+      if(coord.w <= 0) return false;
       
       coord.x /= coord.w;
       coord.y /= coord.w;
