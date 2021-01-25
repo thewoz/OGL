@@ -49,9 +49,9 @@ namespace ogl {
     MODE mode;
     
     // Constanti
-    GLfloat SPEED      =  2.00f;
-    GLfloat SENSITIVTY =  0.25f;
-    
+    GLfloat speed       =  2.00f;
+    GLfloat sensitivity =  0.25f;
+
     // Camera Attributes
     glm::vec3 position;
     glm::vec3 front;
@@ -73,6 +73,7 @@ namespace ogl {
     GLfloat fov;
     GLfloat zNear;
     GLfloat zFar;
+    
     
   public:
     
@@ -123,7 +124,7 @@ namespace ogl {
       
       zNear = _zNear;
       zFar  = _zFar;
-      
+            
       projection = glm::perspective(glm::radians(fov), width/(float)height, zNear, zFar);
             
       updateCameraVectors();
@@ -137,7 +138,7 @@ namespace ogl {
       
       if(mode == FREE){
 
-        GLfloat velocity = SPEED * deltaTime;
+        GLfloat velocity = speed * deltaTime;
         
         if(direction == FORWARD)  position += front * velocity;
         if(direction == BACKWARD) position -= front * velocity;
@@ -157,8 +158,8 @@ namespace ogl {
 
         if(!mods) {
         
-          xOffset *= SENSITIVTY;
-          yOffset *= SENSITIVTY;
+          xOffset *= sensitivity;
+          yOffset *= sensitivity;
         
           yaw   += xOffset;
           pitch += yOffset;
@@ -282,7 +283,12 @@ namespace ogl {
     //****************************************************************************/
     // setSpeed() -
     //****************************************************************************/
-    inline void setSpeed(GLfloat speed) { SPEED = speed; }
+    inline void setSpeed(GLfloat _speed) { speed = _speed; }
+    
+    //****************************************************************************/
+    // setSensitivity() -
+    //****************************************************************************/
+    inline void setSensitivity(GLfloat _sensitivity) { sensitivity = _sensitivity; }
     
     //****************************************************************************/
     // setzNearFar() -

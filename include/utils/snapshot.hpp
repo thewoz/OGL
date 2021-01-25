@@ -31,6 +31,38 @@
   #include <GL/gl.h>
 #endif
 
+//#ifdef OPENCV_ALL_HPP
+#ifdef OGL_TEST_SNAPSHOT
+
+//****************************************************************************//
+// namespace cv
+//****************************************************************************//
+namespace cv {
+  
+  //****************************************************************************//
+  // snapshot
+  //****************************************************************************//
+  void snapshot(int width, int height, const char * outputfile) {
+    
+    cv::Mat image(width, height, CV_8UC3);
+    
+    glPixelStorei(GL_PACK_ALIGNMENT, (image.step & 3) ? 1 : 4);
+    
+    glPixelStorei(GL_PACK_ROW_LENGTH, (int)image.step/image.elemSize());
+    
+    glReadPixels(0, 0, image.cols, image.rows, GL_BGR, GL_UNSIGNED_BYTE, image.data);
+    
+    cv::flip(image, image, 0);
+
+    cv::imwrite(outputfile, image);
+    
+  }
+  
+}
+
+#else
+
+
 //****************************************************************************//
 // namespace tiff
 //****************************************************************************//
@@ -101,5 +133,7 @@ namespace tiff {
   }
   
 } /* namespace tiff */
+
+#endif
 
 #endif /* _H_OGL_TIFF_H_ */

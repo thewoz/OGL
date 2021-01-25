@@ -43,7 +43,7 @@ int main(int argc, char * const argv []) {
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
   
   window.makeContextCurrent();
-  
+    
   ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0));
   ogl::glAxes axes;
   ogl::glReferenceAxes referenceAxes;

@@ -103,7 +103,7 @@ namespace ogl {
       shader.setUniform("color",       color);
       //shader.setUniform("viewport",    camera->getViewport());
       //shader.setUniform("lineWidth",   2.0f);
-      //shader.setUniform("blendFactor", 0.1f);
+      //shader.setUniform("blendFactor", 0.0f);
       
       glBindVertexArray(vao);
         

@@ -44,7 +44,7 @@
 
 // Utils
 #include <ogl/utils/glfw.hpp>
-#include <ogl/utils/tiff.hpp>
+#include <ogl/utils/snapshot.hpp>
 #include <ogl/utils/error.hpp>
 
 // Core

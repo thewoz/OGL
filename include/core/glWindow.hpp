@@ -575,7 +575,12 @@ namespace ogl {
       
       glReadBuffer(GL_BACK);
       
+//#ifdef OPENCV_ALL_HPP
+#ifdef OGL_TEST_SNAPSHOT
+      cv::snapshot(currentCamera->getWidth(), currentCamera->getHeight(), filename.c_str());
+#else
       tiff::snapshot(currentCamera->getWidth(), currentCamera->getHeight(), filename.c_str());
+#endif
       
     }
     
@@ -641,7 +646,11 @@ namespace ogl {
       if(!isFullscreen) {
         
         getCurrentCamera()->getViewport(oldWidth, oldHeight);
-        
+
+#ifdef __APPLE__
+        oldWidth  *= 0.5; oldHeight *= 0.5;
+#endif
+
         glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
         
         int width, height;
@@ -649,10 +658,12 @@ namespace ogl {
         glfwGetFramebufferSize(window, &width, &height);
         
         getCurrentCamera()->setViewport(width, height);
+        
+        glfwFocusWindow(window);
                 
       } else {
         
-        glfwSetWindowMonitor(window, monitor, 0, 0, oldWidth, oldHeight, mode->refreshRate);
+        glfwSetWindowMonitor(window, NULL, 0, 0, oldWidth, oldHeight, 0);
 
         glfwGetFramebufferSize(window, &oldWidth, &oldHeight);
         
@@ -661,7 +672,7 @@ namespace ogl {
       }
       
       isFullscreen = !isFullscreen;
-      
+            
     }
     
     
