@@ -1,9 +1,8 @@
 #version 330 core
 
 in vec4 fragColor;
-//in vec3 pointCoord;
 
-out vec4 out_color;
+out vec4 outColor;
 
   void main() {
     
@@ -26,8 +25,9 @@ out vec4 out_color;
     alpha = 1.0 - smoothstep(1.0 - delta, 1.0 + delta, r);
     
     out_color = fragColor * alpha * diffuse;
+    outColor = fragColor * alpha * diffuse;
     
-    out_color = vec4(vec3(gl_FragCoord.w), 1.0);
+    //outColor = vec4(vec3(gl_FragCoord.w), 1.0);
 
 }
 
