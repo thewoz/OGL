@@ -24,7 +24,6 @@ out vec4 outColor;
     float delta = fwidth(r);
     alpha = 1.0 - smoothstep(1.0 - delta, 1.0 + delta, r);
     
-    out_color = fragColor * alpha * diffuse;
     outColor = fragColor * alpha * diffuse;
     
     //outColor = vec4(vec3(gl_FragCoord.w), 1.0);
