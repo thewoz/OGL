@@ -6,30 +6,37 @@ The libray is able to draw:
 
 * Line
 * Sphere
-* Ellippse
-* Grib
+* Ellipse
+* Grid
 * Box
 * Cube and Cuboid
 * Points
 * Plain
 * Strings
+* Model 
 
-Is also able to load model (via Assimp)  and render it.
 
 
 ## Dependencies:
 
-* MPL       - https://github.com/thewoz/MPL
-* SOIL2     - https://github.com/SpartanJ/soil2
-* Assimp   - https://github.com/assimp/assimp
-* GFLW     - https://github.com/glfw/glfw
+in the external folder a script will automatically install the following libraries:
+
+* SOIL2     - https://github.com/SpartanJ/soil2  (needed only for glTexture.hpp and glModel.hpp)
+* Assimp   - https://github.com/assimp/assimp (needed only for glModel.hpp)
+* GLFW     - https://github.com/glfw/glfw
+* GLM       - https://github.com/g-truc/glm
 * GLAD     - https://glad.dav1d.de
-* OpenCV - https://github.com/opencv/opencv (Only for glPoints.hpp)
+* ImGui     - https://github.com/ocornut/imgui
+
+while these dependencies have to be installed manually:
+
+* OpenCV - https://github.com/opencv/opencv (needed only for glPoints.hpp)
 * OpenGL
+* MPL       - https://github.com/thewoz/MPL
+
+
 
 ## TODO
-* Fix glQuad
-* Finire label in references axes
-
-
-
+* glQuad
+* Label in references axes
+w
