@@ -9,7 +9,7 @@ uniform mat4 view;
 uniform mat4 projection;
 uniform float pointSize;
 
-out vec4 frag_color;
+out vec4 fragColor;
 //out vec2 pointCoord;
 
 void main() {
@@ -21,10 +21,10 @@ void main() {
   float Z = length(posEye);
   
   gl_PointSize = pointSize / Z;
-  
+    
   //pointCoord = gl_Position.xy / gl_Position.w;
   
-  frag_color = color;
+  fragColor = color;
 
 }
 

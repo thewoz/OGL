@@ -543,10 +543,12 @@ namespace ogl {
       deltaTime = currentTime - lastTime;
       lastTime  = currentTime;
                   
-      glClearColor(background.r, background.g, background.b, 1.0f);
-
       glViewport(0, 0, currentCamera->getWidth(), currentCamera->getHeight());
+
+      glClearColor(background.r, background.g, background.b, 1.0f);
       
+      glClearDepth(1.0f); // set to -1.0 for GL_GREATER
+
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       
       glEnable(GL_DEPTH_TEST);

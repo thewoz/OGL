@@ -101,10 +101,7 @@ namespace ogl {
       shader.setUniform("view",        camera->getView());
       shader.setUniform("model",       modelMatrix);
       shader.setUniform("color",       color);
-      //shader.setUniform("viewport",    camera->getViewport());
-      //shader.setUniform("lineWidth",   2.0f);
-      //shader.setUniform("blendFactor", 0.0f);
-      
+     
       glBindVertexArray(vao);
         
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -112,7 +109,7 @@ namespace ogl {
       glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, nullptr);
      
       glBindVertexArray(0);
-      
+            
     }
     
     private:

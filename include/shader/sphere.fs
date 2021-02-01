@@ -1,13 +1,13 @@
 #version 330 core
 
-in vec4 frag_color;
-//in vec2 pointCoord;
+in vec4 fragColor;
+//in vec3 pointCoord;
 
 out vec4 out_color;
 
   void main() {
     
-    if(frag_color.w<0.999) discard;
+    if(fragColor.w<0.999) discard;
     
     vec2 cxy = 2.0 * gl_PointCoord - 1.0;
     
@@ -25,8 +25,10 @@ out vec4 out_color;
     float delta = fwidth(r);
     alpha = 1.0 - smoothstep(1.0 - delta, 1.0 + delta, r);
     
-    out_color = frag_color * alpha * diffuse;
+    out_color = fragColor * alpha * diffuse;
     
+    out_color = vec4(vec3(gl_FragCoord.w), 1.0);
+
 }
 
 // OLD GAUSSIAN
