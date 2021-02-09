@@ -514,7 +514,28 @@ namespace ogl {
     inline float getYaw() { return currentCamera->getYaw(); }
     inline glm::vec3 getCameraPosition() { return currentCamera->getPosition(); }
 
-    
+    bool isOnRetinaDysplay() {
+      
+      int wWidth, wHeight;
+      int fWidth, fHeight;
+
+      glfwGetWindowSize(window, &wWidth, &wHeight);
+      
+      glfwGetFramebufferSize(window, &fWidth, &fHeight);
+
+      double xScale = fWidth  / (double)wWidth;
+      double yScale = fHeight / (double)wHeight;
+
+      //glfwGetWindowContentScale(window, &xScale, &yScale);
+      
+      if(xScale != yScale) {
+        fprintf(stderr, "errore");
+        abort();
+      }
+      
+      return (xScale == 2);
+      
+    }
     
     /*****************************************************************************/
     // makeContextCurrent()
