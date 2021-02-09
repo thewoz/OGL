@@ -86,25 +86,25 @@ namespace ogl {
     // glCamera() - Constructor of a easy camera
     //****************************************************************************/
     glCamera(GLsizei _width, GLsizei _height, glm::vec3 _position = glm::vec3(0.0f)) {
-      init(_width, _height, 45.0f, 0.01f, 100.0f, _position);
+      init(_width, _height, 45.0f, _position);
     }
     
     //****************************************************************************/
     // glCamera() - Constructor of a full camera
     //****************************************************************************/
-    glCamera(GLsizei _width, GLsizei _height, float _fov, float _zNear, float _zFar, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
-      init(_width, _height, _fov, _zNear, _zFar, _position, _mode, _target);
+    glCamera(GLsizei _width, GLsizei _height, float _fov, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
+      init(_width, _height, _fov, _position, _mode, _target);
     }
     
     //****************************************************************************/
     // init() - Inizializatore of a easy camera
     //****************************************************************************/
-    void init(GLsizei _width, GLsizei _height, glm::vec3 _position = glm::vec3(0.0f)) { init(_width, _height, 45.0f, 0.01f, 10.0f, _position); }
+    void init(GLsizei _width, GLsizei _height, glm::vec3 _position = glm::vec3(0.0f)) { init(_width, _height, 45.0f, _position); }
     
     //****************************************************************************/
     // init() - Inizializatore di una camera
     //****************************************************************************/
-    void init(GLsizei _width, GLsizei _height, float _fov, float _zNear, float _zFar, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
+    void init(GLsizei _width, GLsizei _height, float _fov, glm::vec3 _position = glm::vec3(0.0f), MODE _mode = FREE, glm::vec3 _target = glm::vec3(0.0f)) {
             
       position = _position;
       target   = _target;
@@ -122,8 +122,8 @@ namespace ogl {
       
       fov = _fov;
       
-      zNear = _zNear;
-      zFar  = _zFar;
+      zNear = 0.1;
+      zFar  = 10;
             
       projection = glm::perspective(glm::radians(fov), width/(float)height, zNear, zFar);
             

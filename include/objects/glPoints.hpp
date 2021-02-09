@@ -127,7 +127,6 @@ namespace ogl {
       
       shader.use();
       
-
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);

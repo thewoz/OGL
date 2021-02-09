@@ -273,9 +273,9 @@ namespace ogl {
     //****************************************************************************//
     // updateCurrentCamera() -
     //****************************************************************************//
-    void updateCurrentCamera(float fov, float zNear, float zFar, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::MODE::FREE, glm::vec3 target = glm::vec3(0.0f)) {
+    void updateCurrentCamera(float fov, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::MODE::FREE, glm::vec3 target = glm::vec3(0.0f)) {
       
-      currentCamera->init(currentCamera->getWidth(), currentCamera->getHeight(), fov, zNear, zFar, position, mode, target);
+      currentCamera->init(currentCamera->getWidth(), currentCamera->getHeight(), fov, position, mode, target);
       
     }
     
@@ -484,8 +484,8 @@ namespace ogl {
     //****************************************************************************//
     // addCamera()
     //****************************************************************************//
-    inline void addCamera(float fov, float zNear, float zFar, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::FREE, glm::vec3 target = glm::vec3(0.0f)) {
-      cameras.push_back(glCamera(currentCamera->getWidth(), currentCamera->getHeight(), fov, zNear, zFar, position, mode, target));
+    inline void addCamera(float fov, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::FREE, glm::vec3 target = glm::vec3(0.0f)) {
+      cameras.push_back(glCamera(currentCamera->getWidth(), currentCamera->getHeight(), fov, position, mode, target));
       currentCamera = &cameras[currentCameraIndex];
     }
     

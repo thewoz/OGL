@@ -25,9 +25,8 @@ out vec4 outColor;
     alpha = 1.0 - smoothstep(1.0 - delta, 1.0 + delta, r);
     
     outColor = fragColor * alpha * diffuse;
-    
     //outColor = vec4(vec3(gl_FragCoord.w), 1.0);
-
+    
 }
 
 // OLD GAUSSIAN
