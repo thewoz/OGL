@@ -196,7 +196,7 @@ namespace ogl {
         if(*c == '\n') {
           const Character_t & ch = Characters['a'];
           tmpX  = x;
-          tmpY += ch.Size.y * scale;
+          tmpY -= 2 * (ch.Size.y * scale);
           continue;
         }
         
