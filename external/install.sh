@@ -11,6 +11,7 @@ else
   apt-get install libsdl2-dev
   apt-get install libassimp-dev
   apt-get install libglm-dev
+  apt-get install premake4
 
 fi
 
@@ -24,7 +25,7 @@ if [ ! -d "/usr/local/include/SOIL2/" ]; then
   cd make/*/
   make config=release soil2-static-lib
   cd ../../lib/*
-  sudo cp libsoil2.a /usr/local/lin
+  sudo cp libsoil2.a /usr/local/lib
   cd ../../src/SOIL2/
   sudo mkdir /usr/local/include/SOIL2
   cp *.h /usr/local/include/SOIL2
