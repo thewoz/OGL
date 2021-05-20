@@ -39,39 +39,64 @@ namespace ogl {
     GLuint vbo = -1;
     GLuint ebo = -1;
 
-    float vertices[18] = {
-       // first triangle
-       0.5f,  0.5f, 0.0f,  // top right
-       0.5f, -0.5f, 0.0f,  // bottom right
-      -0.5f,  0.5f, 0.0f,  // top left
-       // second triangle
-       0.5f, -0.5f, 0.0f,  // bottom right
-      -0.5f, -0.5f, 0.0f,  // bottom left
-      -0.5f,  0.5f, 0.0f   // top left
-    };
+    std::vector<glm::vec3> vertices;
 
-    glm::vec3 color = glm::vec3(1.0);
+    glm::vec3 color;
     
   public:
     
     //****************************************************************************/
     // glQuad - Constructor
     //****************************************************************************/
-    glQuad(const std::string & _name = "") {
-      
+    glQuad(const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
       name = _name;
-      
-      isInited = true;
-      
-      shader.setName(name);
-      shader.initPlain();
-
+      std::vector<glm::vec3> _vertices {// first triangle
+        glm::vec3( 0.5f,  0.5f, 0.0f),  // top right
+        glm::vec3( 0.5f, -0.5f, 0.0f),  // bottom right
+        glm::vec3(-0.5f,  0.5f, 0.0f),  // top left
+                                        // second triangle
+        glm::vec3( 0.5f, -0.5f, 0.0f),  // bottom right
+        glm::vec3(-0.5f, -0.5f, 0.0f),  // bottom left
+        glm::vec3(-0.5f,  0.5f, 0.0f)}; // top left
+      init(_vertices, _color);
     }
     
+    //****************************************************************************/
+    // glQuad - Constructor
+    //****************************************************************************/
+    glQuad(const std::vector<glm::vec3> & _vertices, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+      name = _name;
+      init(_vertices, _color);
+    }
+ 
     //****************************************************************************/
     // ~glQuad
     //****************************************************************************/
     ~glQuad() { cleanInGpu(); }
+    
+    //****************************************************************************/
+    // setColor()
+    //****************************************************************************/
+    void setColor(const glm::vec3 & _color) { color = _color; }
+    
+    //****************************************************************************/
+    // init()
+    //****************************************************************************/
+    void init(const std::vector<glm::vec3> & _vertices, const glm::vec3 & _color = glm::vec3(1.0)) {
+      
+      DEBUG_LOG("glQuad::init(" + name + ")");
+      
+      vertices = _vertices;
+      
+      shader.setName(name);
+      
+      shader.initPlain();
+      
+      color = _color;
+      
+      isInited = true;
+      
+    }
     
     //****************************************************************************/
     // render
@@ -124,7 +149,7 @@ namespace ogl {
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
       glEnableVertexAttribArray(0);
 
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+      glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
 
       glCheckError();
 

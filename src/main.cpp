@@ -39,7 +39,8 @@ int main(int argc, char * const argv []) {
   ogl::glWindow window;
   
   window.create(800, 600, "ModelView");
-  
+  //window.createToTexture(800, 600);
+
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
   
   window.makeContextCurrent();
@@ -55,6 +56,7 @@ int main(int argc, char * const argv []) {
   ogl::glLines lines({glm::vec3(0.0,0.0,0.0), glm::vec3(-1.0,-1.0,-1.0), glm::vec3(-1.0,1.0,1.0)}, glm::vec4(1.0));
   ogl::glPrint2D text2D(10, 10, glm::vec3(1.0), 1, "OGL");
   ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
+  //ogl::glQuad quad;
   
   std::random_device rd;
   std::mt19937 gen = std::mt19937(rd());
@@ -85,6 +87,7 @@ int main(int argc, char * const argv []) {
       lines.render(window.getCurrentCamera()); glCheckError();
       model.render(window.getCurrentCamera()); glCheckError();
       text2D.render(window.getCurrentCamera()); glCheckError();
+      //quad.render(window.getCurrentCamera()); glCheckError();
     window.renderEnd();
         
   }
