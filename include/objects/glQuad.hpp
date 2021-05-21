@@ -96,9 +96,6 @@ namespace ogl {
       
       isInited = true;
       
-      printf("%f %f %f\n", color[0], color[1], color[2]);
-      printf("%f %f %f\n", vertices[0][0], vertices[0][1], vertices[0][2]);
-
     }
     
     //****************************************************************************/
