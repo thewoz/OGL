@@ -21,9 +21,9 @@ if [ ! -d "/usr/local/include/SOIL2/" ]; then
 
   git clone https://github.com/SpartanJ/SOIL2.git
   cd SOIL2
-  premake4 gmake
+  premake5 gmake
   cd make/*/
-  make config=release soil2-static-lib
+  make config=release_x86_64 soil2-static-lib
   cd ../../lib/*
   sudo cp libsoil2.a /usr/local/lib
   cd ../../src/SOIL2/

@@ -18,7 +18,7 @@ ifeq "$(PLATFORM)" "Darwin"
 endif
 
 
-all: example
+all: install example
 
 
 setup:
@@ -27,15 +27,11 @@ setup:
 development:
 	@rm -rf $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)
 	@ln -s $(shell pwd)/include $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)
-#	@cp mpl.pc /usr/share/pkgconfig/
-#	@cp mpl.pc /usr/local/lib/pkgconfig/
 
 
 install:
 	@mkdir -p $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)/
 	@cp -r ./include/* $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)/
-#	@cp mpl.pc /usr/share/pkgconfig/
-#	@cp mpl.pc /usr/local/lib/pkgconfig/
 
 
 uninstall:
