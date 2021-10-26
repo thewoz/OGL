@@ -149,9 +149,9 @@ namespace ogl {
 
       } else {
         
-        for(int i=0; i<=strip; ++i)
+        for(int i=0; i<=strip; ++i) {
           glDrawArrays(GL_LINE_STRIP, (i*stripOffset)+from, to);
-
+        }
       }
 
       glBindVertexArray(0);
@@ -197,8 +197,6 @@ namespace ogl {
       isInitedInGpu = true;
       
     }
-    
-  private:
     
     //****************************************************************************/
     // cleanInGpu()

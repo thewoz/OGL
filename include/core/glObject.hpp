@@ -150,7 +150,7 @@ namespace ogl {
       modelMatrix = glm::translate(modelMatrix, _position); // Translate it down a bit so it's at the center of the scene
       
       modelMatrix = glm::scale(modelMatrix, _scale);
-      
+
       modelMatrix  = glm::rotate(modelMatrix, _rotation.x, glm::vec3(1, 0, 0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
       modelMatrix  = glm::rotate(modelMatrix, _rotation.y, glm::vec3(0, 1, 0)); // where x, y, z is axis of rotation (e.g. 0 1 0)
       modelMatrix  = glm::rotate(modelMatrix, _rotation.z, glm::vec3(0, 0, 1)); // where x, y, z is axis of rotation (e.g. 0 1 0)
