@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ `uname` == "Darwin" ]; then
 
   brew install glfw3
@@ -21,14 +23,14 @@ if [ ! -d "/usr/local/include/SOIL2/" ]; then
 
   git clone https://github.com/SpartanJ/SOIL2.git
   cd SOIL2
-  premake5 gmake
+  premake4 gmake
   cd make/*/
-  make config=release_x86_64 soil2-static-lib
+  make config=release soil2-static-lib
   cd ../../lib/*
   sudo cp libsoil2.a /usr/local/lib
   cd ../../src/SOIL2/
   sudo mkdir /usr/local/include/SOIL2
-  cp *.h /usr/local/include/SOIL2
+  sudo cp *.h /usr/local/include/SOIL2
   cd ../../..
   rm -rf SOIL2
 
