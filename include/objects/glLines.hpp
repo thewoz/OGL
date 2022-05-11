@@ -142,6 +142,7 @@ namespace ogl {
       glBindVertexArray(vao);
       
       if(to == -1) to = (int) vertices.size();
+      else to += 1;
       
       if(strip == -1) {
         
