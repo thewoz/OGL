@@ -462,7 +462,7 @@ namespace ogl {
         cameras[i].setSensorSize(width, height);
     }
     
-    inline void setBackgournd(const glm::vec3 & _background){
+    inline void setBackground(const glm::vec3 & _background){
       background = _background;
     }
     
