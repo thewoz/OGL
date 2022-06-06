@@ -136,7 +136,7 @@ namespace ogl {
     //****************************************************************************/
     void processKeyboard(MOVEMENT direction, GLfloat deltaTime) {
       
-      if(mode == FREE){
+      if(mode == FREE) {
 
         GLfloat velocity = speed * deltaTime;
         
@@ -145,6 +145,17 @@ namespace ogl {
         if(direction == LEFT)     position -= right * velocity;
         if(direction == RIGHT)    position += right * velocity;
       
+      }
+      
+      if(mode == BILLBOARD) {
+        
+        GLfloat velocity = speed * deltaTime;
+        
+        if(direction == FORWARD)  position[1] += velocity;
+        if(direction == BACKWARD) position[1] -= velocity;
+        if(direction == LEFT)     position[0] -= velocity;
+        if(direction == RIGHT)    position[0] += velocity;
+        
       }
       
     }
