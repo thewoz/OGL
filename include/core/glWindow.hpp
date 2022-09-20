@@ -68,6 +68,8 @@ namespace ogl {
     
     bool isFullscreen;
     
+    bool keybord = false;
+    
 //  public:
 //
 //    GLint width;
@@ -352,6 +354,8 @@ namespace ogl {
         
     inline void keyCallback(int key, int scancode, int action, int mods) {
                   
+      if(!keybord) return;
+                  
       if(GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
         setShouldClose(GL_TRUE);
       }
@@ -363,8 +367,8 @@ namespace ogl {
         } else if (action == GLFW_RELEASE) {
           keys[key] = false;
         }
-        
-        if(currentCamera->getMode() != glCamera::MODE::TARGET) {
+
+        if(currentCamera->getMode() == glCamera::MODE::FREE || (currentCamera->getMode() == glCamera::MODE::BILLBOARD && mods == GLFW_MOD_CONTROL)) {
         
           //Moves/alters the camera positions based on user input
           if(/*keys[GLFW_KEY_W] || */ keys[GLFW_KEY_UP])    currentCamera->processKeyboard(glCamera::MOVEMENT::FORWARD, deltaTime);
@@ -469,7 +473,12 @@ namespace ogl {
     //inline void disableInput() { inputDisable = true; }
     //inline void enableInput() { inputDisable = false; }
 
-    
+    /*****************************************************************************/
+    // disable/enable Keybord
+    /*****************************************************************************/
+    void disableKeybord() { keybord = false; }
+    void enableKeybord()  { keybord = true;  }
+
     /*****************************************************************************/
     // disable/enable mouseOnCamera() -
     /*****************************************************************************/
@@ -588,6 +597,8 @@ namespace ogl {
       glEnable(GL_DEPTH_TEST);
       
       glDepthFunc(GL_LEQUAL);
+      
+      keybord = true;
 
     }
     
