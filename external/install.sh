@@ -14,7 +14,8 @@ else
   apt-get install libassimp-dev
   apt-get install libglm-dev
   apt-get install premake4
-
+  apt-get install libtiff-dev
+  apt-get install libfreetype-dev
 fi
 
 
