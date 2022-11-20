@@ -368,7 +368,7 @@ namespace ogl {
           keys[key] = false;
         }
 
-        if(currentCamera->getMode() == glCamera::MODE::FREE || (currentCamera->getMode() == glCamera::MODE::BILLBOARD && mods == GLFW_MOD_CONTROL)) {
+        if(currentCamera->getMode() == glCamera::MODE::FREE || (currentCamera->getMode() == glCamera::MODE::BILLBOARD && mods == GLFW_MOD_SHIFT)) {
         
           //Moves/alters the camera positions based on user input
           if(/*keys[GLFW_KEY_W] || */ keys[GLFW_KEY_UP])    currentCamera->processKeyboard(glCamera::MOVEMENT::FORWARD, deltaTime);
