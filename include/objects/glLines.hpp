@@ -117,7 +117,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, int from = 0, int to = -1, int strip = -1, int stripOffset = -1) {
+    void render(const glCamera * camera, int from = 0, int to = -1, int strip = -1, int stripOffset = -1, int index = -1) {
       
       DEBUG_LOG("glLines::render(" + name + ")");
           
@@ -142,7 +142,6 @@ namespace ogl {
       glBindVertexArray(vao);
       
       if(to == -1) to = (int) vertices.size();
-      else to += 1;
       
       if(strip == -1) {
         
@@ -151,8 +150,10 @@ namespace ogl {
       } else {
         
         for(int i=0; i<=strip; ++i) {
+          if(index != -1 && i != index) continue;
           glDrawArrays(GL_LINE_STRIP, (i*stripOffset)+from, to);
         }
+        
       }
 
       glBindVertexArray(0);

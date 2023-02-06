@@ -114,7 +114,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, int from = 0, int to = -1) {
+    void render(const glCamera * camera, int from = 0, int to = -1, int index = -1) {
             
       DEBUG_LOG("glPoints::render(" + name + ")");
 
@@ -133,7 +133,9 @@ namespace ogl {
       shader.setUniform("pointSize",  radius);
             
       if(to == -1) to = (int) points.size();
-
+      
+      if(index != -1) { from += index; to = 1; }
+      
       glEnable(GL_PROGRAM_POINT_SIZE);
 
       glBindVertexArray(vao);

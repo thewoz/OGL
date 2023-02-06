@@ -250,6 +250,7 @@ namespace ogl {
     // setTarget() - Aggiorno la posizione del target
     //****************************************************************************/
     void setTarget(const glm::vec3 & _target) { if(mode==TARGET || mode==BILLBOARD) target = _target; }
+    void setTarget(float x, float y, float z) { if(mode==TARGET || mode==BILLBOARD) target = glm::vec3(x,y,z); }
 
     //****************************************************************************/
     // setFront() - Aggiorno la posizione del target

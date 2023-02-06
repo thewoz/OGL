@@ -164,7 +164,7 @@ namespace ogl {
       
       firstMouse = true;
 
-      onFocus = false;
+      onFocus = true;
 
       isFullscreen = false;
       
@@ -231,7 +231,8 @@ namespace ogl {
       glfwSetScrollCallback(window, scrollCallback);
       glfwSetKeyCallback(window, keyCallback);
       glfwSetCursorEnterCallback(window, cursorEnterCallback);
-
+      //glfwSetWindowFocusCallback(window, windowFocusCallback);
+      
       glfwSwapInterval(1);
       
       firstMouse = true;
@@ -320,6 +321,10 @@ namespace ogl {
       ((glWindow*)glfwGetWindowUserPointer(window))->cursorEnter(entered);
     }
     
+    //static inline void  windowFocusCallback(GLFWwindow* window, int focused) {
+    //  ((glWindow*)glfwGetWindowUserPointer(window))->focus(focused);
+    //}
+        
     //****************************************************************************//
     // External callback interfaces
     //****************************************************************************//
@@ -327,10 +332,8 @@ namespace ogl {
     inline void virtual keyboard(int key, int scancode, int action, int mods) { };
     inline void virtual cursorPos(double xPos, double yPos, double xoffset, double yoffset) { };
     inline void virtual mouseButton(int button, int action, int mods) { };
-    inline void virtual cursorEnter(int entered) {
-      if(entered) { onFocus = true; /*firstMouse = true;*/ } else { onFocus = false; }
-    }
-    
+    inline void virtual cursorEnter(int entered) { if(entered) { onFocus = true; } else { onFocus = false; } }
+    //inline void virtual focus(int focused) { if(focused) { onFocus = true; } else { onFocus = false; } }
     
     //****************************************************************************//
     // Callback
