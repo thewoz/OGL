@@ -8,12 +8,12 @@ all: install
 compile:
 	@mkdir -p ./build/lib
 	@mkdir -p ./build/include
-	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_draw.cpp -o ./build/imgui_draw.o
-	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_widgets.cpp -o ./build/imgui_widgets.o
-	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_tables.cpp -o ./build/imgui_tables.o
-	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_impl_opengl3.cpp -o ./build/imgui_impl_opengl3.o
-	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_impl_glfw.cpp -o ./build/imgui_impl_glfw.o
-	g++ -march=native -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui.cpp -o ./build/imgui.o
+	g++ -march=native --std=c++11 -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_draw.cpp -o ./build/imgui_draw.o
+	g++ -march=native --std=c++11 -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_widgets.cpp -o ./build/imgui_widgets.o
+	g++ -march=native --std=c++11 -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_tables.cpp -o ./build/imgui_tables.o
+	g++ -march=native --std=c++11 -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_impl_opengl3.cpp -o ./build/imgui_impl_opengl3.o
+	g++ -march=native --std=c++11 -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_impl_glfw.cpp -o ./build/imgui_impl_glfw.o
+	g++ -march=native --std=c++11 -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui.cpp -o ./build/imgui.o
 	@ar rcs ./build/lib/libimgui.a ./build/*.o
 	@cp ./code/imgui.h ./build/include
 	@cp ./code/imconfig.h ./build/include
