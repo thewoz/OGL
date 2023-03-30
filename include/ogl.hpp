@@ -38,6 +38,12 @@
 
 #include <mpl/stdio.hpp>
 
+#define OGL_WITH_IMGUI
+
+#ifdef OGL_WIHT_IMGUI
+  #include <imgui/imgui.hpp>
+#endif
+
 // Debug
 //#define DEBUG_OGL
 #include <ogl/utils/debug.hpp>

@@ -109,9 +109,15 @@ namespace ogl {
     /*****************************************************************************/
     ~glWindow() {
       DEBUG_LOG("glWindow::destroy() windowID " + std::to_string(id));
+      #ifdef OGL_WITH_IMGUI
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+      #endif
       if(window != NULL) { glfwDestroyWindow(window); window = NULL; }
       if(image  != NULL) { free(image); image = NULL; }
       if(windowsCounter == 0) { glfw::close(); }
+      
     }
     
     /*****************************************************************************/
@@ -145,9 +151,7 @@ namespace ogl {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
-      
-      //int width, height;
-      
+            
       glfwGetFramebufferSize(window, &width, &height);
       
       glfwSetWindowUserPointer(window, this);
@@ -184,6 +188,15 @@ namespace ogl {
       // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
       // glEnable(GL_DEBUG_OUTPUT);
       // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+      
+      #ifdef OGL_WITH_IMGUI
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 150");
+        ImGui::StyleColorsDark();
+      #endif
       
     }
     
@@ -568,7 +581,7 @@ namespace ogl {
     inline void  makeContextCurrent() {
       
        glfwMakeContextCurrent(window);
-       gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); //NOTE: non sono sicuro che serva
+       //gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); //NOTE: non sono sicuro che serva
 
     }
     
@@ -603,13 +616,24 @@ namespace ogl {
       
       keybord = true;
 
+      #ifdef OGL_WITH_IMGUI
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+      #endif
+      
     }
     
-    /*****************************************************************************/
+    //*****************************************************************************/
     // renderEnd()
-    /*****************************************************************************/
+    //*****************************************************************************/
     inline void renderEnd() {
       
+      #ifdef OGL_WITH_IMGUI
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+      #endif
+
       glDisable(GL_DEPTH_TEST);
       
       glfwPollEvents();
