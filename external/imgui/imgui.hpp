@@ -27,7 +27,11 @@
 #define _H_IMGUI_H_
 
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imstb_truetype.h"
+#include "imstb_rectpack.h"
+#include "imstb_textedit.h"
 
 #endif
