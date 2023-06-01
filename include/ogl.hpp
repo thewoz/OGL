@@ -40,7 +40,7 @@
 
 #define OGL_WITH_IMGUI
 
-#ifdef OGL_WIHT_IMGUI
+#ifdef OGL_WITH_IMGUI
   #include <imgui/imgui.hpp>
 #endif
 
