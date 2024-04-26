@@ -123,14 +123,14 @@ namespace ogl {
     //*****************************************************************************/
     // create() - Crea una nuova finestra
     //*****************************************************************************/
-    void create(GLint width, GLint height, const char * title = "OpenGL window") {
+    void create(GLint width, GLint height, bool resizable = false, const char * title = "OpenGL window") {
       
       DEBUG_LOG("glWindow::create() windowID " + std::to_string(windowsCounter));
       
       glfw::init();
             
       // Others Glfw options
-      glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+      glfwWindowHint(GLFW_RESIZABLE, resizable);
       glfwWindowHint(GLFW_SAMPLES, 4);
       
       // Funziona con OpenGL >= 4.3
@@ -156,14 +156,15 @@ namespace ogl {
       
       glfwSetWindowUserPointer(window, this);
 
-      glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+      //glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
       glfwSetWindowCloseCallback(window, windowCloseCallback);
       glfwSetCursorPosCallback(window, cursorPosCallback);
       glfwSetMouseButtonCallback(window, mouseButtonCallback);
       glfwSetScrollCallback(window, scrollCallback);
       glfwSetKeyCallback(window, keyCallback);
       glfwSetCursorEnterCallback(window, cursorEnterCallback);
-
+      glfwSetWindowSizeCallback(window, sizeCallback);
+      
       glfwSwapInterval(1);
       
       firstMouse = true;
@@ -237,15 +238,16 @@ namespace ogl {
      
       glfwSetWindowUserPointer(window, this);
       
-      glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+      //glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
       glfwSetWindowCloseCallback(window, windowCloseCallback);
       glfwSetCursorPosCallback(window, cursorPosCallback);
       glfwSetMouseButtonCallback(window, mouseButtonCallback);
       glfwSetScrollCallback(window, scrollCallback);
       glfwSetKeyCallback(window, keyCallback);
       glfwSetCursorEnterCallback(window, cursorEnterCallback);
-      //glfwSetWindowFocusCallback(window, windowFocusCallback);
-      
+      //glfwSetWindowFocusCallback(window, framebufferSizeCallback);
+      glfwSetWindowSizeCallback(window, sizeCallback);
+
       glfwSwapInterval(1);
       
       firstMouse = true;
@@ -310,9 +312,9 @@ namespace ogl {
       ((glWindow*)glfwGetWindowUserPointer(window))->windowCloseCallback();
     }
     
-    static inline void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-      ((glWindow*)glfwGetWindowUserPointer(window))->framebufferSizeCallback(width, height);
-    }
+    //static inline void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    //  ((glWindow*)glfwGetWindowUserPointer(window))->framebufferSizeCallback(width, height);
+    //}
     
     static inline void cursorPosCallback(GLFWwindow* window, double xPos, double yPos) {
       ((glWindow*)glfwGetWindowUserPointer(window))->cursorPosCallback(xPos, yPos);
@@ -330,9 +332,14 @@ namespace ogl {
       ((glWindow*)glfwGetWindowUserPointer(window))->keyCallback(key, scancode, action, mods);
     }
     
-    static inline void  cursorEnterCallback(GLFWwindow* window, int entered) {
+    static inline void cursorEnterCallback(GLFWwindow* window, int entered) {
       ((glWindow*)glfwGetWindowUserPointer(window))->cursorEnter(entered);
     }
+    
+    static inline void sizeCallback(GLFWwindow* window, int width, int height) {
+      ((glWindow*)glfwGetWindowUserPointer(window))->sizeCallback(width, height);
+    }
+    
     
     //static inline void  windowFocusCallback(GLFWwindow* window, int focused) {
     //  ((glWindow*)glfwGetWindowUserPointer(window))->focus(focused);
@@ -355,10 +362,15 @@ namespace ogl {
       glfwSetWindowShouldClose(window, GL_TRUE);
     }
     
-    inline void framebufferSizeCallback(int width, int height) {
+    inline void sizeCallback(int width, int height) {
       for(std::size_t i=0; i<cameras.size(); ++i)
         cameras[i].setSensorSize(width, height);
     }
+    
+//    inline void framebufferSizeCallback(int width, int height) {
+//      for(std::size_t i=0; i<cameras.size(); ++i)
+//        cameras[i].setSensorSize(width, height);
+//    }
     
     inline void scrollCallback(double xoffset, double yoffset) {
       
