@@ -38,7 +38,7 @@ int main(int argc, char * const argv []) {
   
   ogl::glWindow window;
   
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
   //window.createToTexture(800, 600);
 
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
@@ -99,7 +99,7 @@ int main(int argc, char * const argv []) {
   
   ogl::glWindow window;
   
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
   
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
   
@@ -140,7 +140,7 @@ int main(int argc, char * const argv []) {
   
   ogl::glWindow window;
   
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
   
   //window.setCursorInputMode(GLFW_CURSOR_DISABLED);
   
@@ -216,7 +216,7 @@ int main(int argc, char * const argv []) {
   
   ogl::glWindow window;
   
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
   
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
   
@@ -240,7 +240,7 @@ int main(int argc, char * const argv []) {
   
   ogl::glWindow window;
     
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
 
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
 
@@ -279,7 +279,7 @@ int main(int argc, char * const argv []) {
   
   ogl::glWindow window;
 
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
 
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
   
@@ -338,7 +338,7 @@ int main(int argc, char * const argv []) {
 
   ogl::glWindow window;
 
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
   
   window.makeContextCurrent();
       
@@ -378,7 +378,7 @@ int main(int argc, char * const argv []) {
   
   ogl::glWindow window;
   
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
   
   window.makeContextCurrent();
   
@@ -417,7 +417,7 @@ int main(int argc, char * const argv []) {
 
   ogl::glWindow window;
     
-  window.create(800, 600, "ModelView");
+  window.create(800, 600);
   
   window.makeContextCurrent();
   
@@ -451,7 +451,7 @@ int main(int argc, char * const argv []) {
 
   ogl::glWindow window1;
   
-  window1.create(800, 600, "ModelView");
+  window1.create(800, 600);
   
   window1.makeContextCurrent();
   
