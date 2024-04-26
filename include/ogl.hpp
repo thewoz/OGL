@@ -41,6 +41,7 @@
 #define OGL_WITH_IMGUI
 
 #ifdef OGL_WITH_IMGUI
+  #define IMGUI_DEFINE_MATH_OPERATORS
   #include <imgui/imgui.hpp>
 #endif
 
