@@ -36,8 +36,6 @@
 
 #include <SOIL2/SOIL2.h>
 
-#include <mpl/stdio.hpp>
-
 #ifdef OGL_WITH_IMGUI
   #define IMGUI_DEFINE_MATH_OPERATORS
   #include <imgui/imgui.hpp>
