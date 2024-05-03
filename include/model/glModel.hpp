@@ -65,14 +65,14 @@ namespace ogl {
     //****************************************************************************/
     void init(std::string path, GLfloat sizeFactor = 1.0f) {
                 
-      name = mpl::io::name(path);
+      name = ogl::io::name(path);
       
       DEBUG_LOG("glModel::init(" + name + ")");
 
       shader.setName(name);
       shader.initModel();
       
-      mpl::io::expandPath(path);
+      ogl::io::expandPath(path);
 
       // ASSIMP reader file
       Assimp::Importer importer;

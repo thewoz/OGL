@@ -134,8 +134,8 @@ namespace ogl {
       gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
       // expand path file
-      mpl::io::expandPath(vertexPath);
-      mpl::io::expandPath(fragmentPath);
+      ogl::io::expandPath(vertexPath);
+      ogl::io::expandPath(fragmentPath);
 
       try {
         
@@ -160,7 +160,7 @@ namespace ogl {
         // if geometry shader path is present, also load a geometry shader
         if(!geometryPath.empty()) {
           
-          mpl::io::expandPath(geometryPath);
+          ogl::io::expandPath(geometryPath);
 
           gShaderFile.open(geometryPath.c_str());
           std::stringstream gShaderStream;

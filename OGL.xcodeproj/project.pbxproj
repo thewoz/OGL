@@ -30,6 +30,7 @@
 		3A5EBD9D247925A200F2C146 /* glReferenceAxes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glReferenceAxes.hpp; sourceTree = "<group>"; };
 		3A996DAA247AC96C00EF032F /* orto.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = orto.fs; sourceTree = "<group>"; };
 		3A996DAB247AC97700EF032F /* orto.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = orto.vs; sourceTree = "<group>"; };
+		3A9B07A12BE4E9CD00A97FB5 /* stdio.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stdio.hpp; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AC9A7BB25BC550800509908 /* plain2D.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.fs; sourceTree = "<group>"; };
 		3AC9A7BC25BC550800509908 /* plain2D.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.vs; sourceTree = "<group>"; };
@@ -302,6 +303,7 @@
 				3AFE7F16247164C8000E8463 /* tiff.hpp */,
 				3AFE7F17247164C8000E8463 /* glfw.hpp */,
 				3AFE7F192471681F000E8463 /* error.hpp */,
+				3A9B07A12BE4E9CD00A97FB5 /* stdio.hpp */,
 			);
 			path = utils;
 			sourceTree = "<group>";
