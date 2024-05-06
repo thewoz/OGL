@@ -39,7 +39,41 @@ int main(int argc, char * const argv []) {
   ogl::glWindow window;
   
   window.create(800, 600);
-  //window.createToTexture(800, 600);
+
+  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+  
+  window.makeContextCurrent();
+    
+  window.getCurrentCamera()->setPosition(0.538431, 0.416719, 0.91360);
+  window.getCurrentCamera()->setYaw(-122);
+  window.getCurrentCamera()->setPitch(-11);
+
+  ogl::glAxes axes;
+  ogl::glReferenceAxes referenceAxes;
+  ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0));
+  ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0)); box.translate(glm::vec3(-0.5));
+  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
+  ogl::glPrint2D text2D(10, 10, glm::vec3(1.0), 0.5, "FPS: ");
+
+  while(!window.shouldClose()) {
+    
+    window.renderBegin();
+      axes.render(window.getCurrentCamera()); glCheckError();
+      grid.render(window.getCurrentCamera()); glCheckError();
+      referenceAxes.render(window.getCurrentCamera()); glCheckError();
+      model.render(window.getCurrentCamera()); glCheckError();
+      text2D.render(window.getCurrentCamera(), "FPS: " + std::to_string(window.getFPS())); glCheckError();
+    window.renderEnd();
+        
+  }
+  
+#endif
+  
+#if(0)
+  
+  ogl::glWindow window;
+  
+  window.create(800, 600);
 
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
   

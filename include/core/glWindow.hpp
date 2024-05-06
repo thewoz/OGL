@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include <deque>
 #include <vector>
 #include <string>
 
@@ -513,11 +514,40 @@ namespace ogl {
     void disableMouseOnCamera() { isProcessMouseMovement = false; }
     void enableMouseOnCamera()  { isProcessMouseMovement = true;  }
     
-    
     inline void hide() { glfwHideWindow(window); }
     inline void show() { glfwShowWindow(window); }
     inline void iconify() { glfwIconifyWindow(window); }
 
+    //*****************************************************************************/
+    // FPS
+    //*****************************************************************************/
+    inline int getFPS() {
+      
+      static std::deque<double> deltas;
+
+      static double lastFrameTimestamp = glfwGetTime();
+    
+      double currentFrameTimestamp = glfwGetTime();
+      
+      double delta = currentFrameTimestamp - lastFrameTimestamp;
+      
+      lastFrameTimestamp = currentFrameTimestamp;
+      
+      if(deltas.size() < 60) deltas.push_back(delta);
+      else {
+        deltas.pop_front();
+        deltas.push_back(delta);
+      }
+      
+      double sum = 0;
+      
+      for(int i=0; i<deltas.size(); ++i)
+        sum += deltas[i];
+      
+      return 1.0 / (sum / (double) deltas.size());
+      
+    }
+    
     //****************************************************************************//
     // addCamera()
     //****************************************************************************//

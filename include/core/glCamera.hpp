@@ -157,7 +157,7 @@ namespace ogl {
         if(direction == RIGHT)    position[0] += velocity;
         
       }
-      
+            
     }
     
     //****************************************************************************/
@@ -183,7 +183,7 @@ namespace ogl {
                 
           // Update Front, Right and Up Vectors using the updated Eular angles
           updateCameraVectors();
-        
+                  
         } else {
           
           updatePosition(xOffset, yOffset, 0);
