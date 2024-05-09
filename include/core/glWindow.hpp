@@ -70,12 +70,7 @@ namespace ogl {
     bool isFullscreen;
     
     bool keybord = false;
-    
-//  public:
-//
-//    GLint width;
-//    GLint height;
-    
+
   protected:
     
     // Contatore del numero di finestre create
