@@ -18,7 +18,7 @@ ifeq "$(PLATFORM)" "Darwin"
 endif
 
 
-all: install example
+all: example
 
 
 setup:

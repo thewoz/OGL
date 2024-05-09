@@ -32,6 +32,7 @@
 		3A996DAB247AC97700EF032F /* orto.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = orto.vs; sourceTree = "<group>"; };
 		3A9B07A12BE4E9CD00A97FB5 /* stdio.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stdio.hpp; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AC0E10A2BECD242007F423C /* colors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = colors.hpp; sourceTree = "<group>"; };
 		3AC9A7BB25BC550800509908 /* plain2D.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.fs; sourceTree = "<group>"; };
 		3AC9A7BC25BC550800509908 /* plain2D.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.vs; sourceTree = "<group>"; };
 		3AF045942472DBB100DBCC91 /* glColors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glColors.hpp; sourceTree = "<group>"; };
@@ -88,7 +89,6 @@
 		3AFE7F11247164C8000E8463 /* glMaterial.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glMaterial.hpp; sourceTree = "<group>"; };
 		3AFE7F12247164C8000E8463 /* glModel.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glModel.hpp; sourceTree = "<group>"; };
 		3AFE7F15247164C8000E8463 /* opengl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = opengl.hpp; sourceTree = "<group>"; };
-		3AFE7F16247164C8000E8463 /* tiff.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = tiff.hpp; sourceTree = "<group>"; };
 		3AFE7F17247164C8000E8463 /* glfw.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glfw.hpp; sourceTree = "<group>"; };
 		3AFE7F1824716691000E8463 /* ogl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ogl.hpp; sourceTree = "<group>"; };
 		3AFE7F192471681F000E8463 /* error.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
@@ -300,10 +300,10 @@
 			isa = PBXGroup;
 			children = (
 				3AFE1E9624742880006C81D8 /* debug.hpp */,
-				3AFE7F16247164C8000E8463 /* tiff.hpp */,
 				3AFE7F17247164C8000E8463 /* glfw.hpp */,
 				3AFE7F192471681F000E8463 /* error.hpp */,
 				3A9B07A12BE4E9CD00A97FB5 /* stdio.hpp */,
+				3AC0E10A2BECD242007F423C /* colors.hpp */,
 			);
 			path = utils;
 			sourceTree = "<group>";
