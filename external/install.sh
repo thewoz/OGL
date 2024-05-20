@@ -9,13 +9,13 @@ if [ `uname` == "Darwin" ]; then
 
 else
 
-  apt-get install libglfw3-dev
-  apt-get install libsdl2-dev
-  apt-get install libassimp-dev
-  apt-get install libglm-dev
-  apt-get install premake4
-  apt-get install libtiff-dev
-  apt-get install libfreetype-dev
+  apt -y install libglfw3-dev
+  apt -y install libsdl2-dev
+  apt -y install libassimp-dev
+  apt -y install libglm-dev
+  apt -y install premake4
+  apt -y install libtiff-dev
+  apt -y install libfreetype-dev
 fi
 
 
