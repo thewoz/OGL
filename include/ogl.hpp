@@ -36,9 +36,12 @@
 
 #include <SOIL2/SOIL2.h>
 
-#ifdef OGL_WITH_IMGUI
+#ifndef OGL_WITHOUT_IMGUI
   #define IMGUI_DEFINE_MATH_OPERATORS
   #include <imgui/imgui.hpp>
+  #ifndef OGL_WITHOUT_ICONS_FONT_AWESOME
+    #include <ogl/utils/IconsFontAwesome6.h>
+  #endif
 #endif
 
 // Debug

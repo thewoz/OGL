@@ -105,7 +105,7 @@ namespace ogl {
     //*****************************************************************************/
     ~glWindow() {
       DEBUG_LOG("glWindow::destroy() windowID " + std::to_string(id));
-      #ifdef OGL_WITH_IMGUI
+      #ifndef OGL_WITHOUT_IMGUI
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
@@ -186,7 +186,7 @@ namespace ogl {
       // glEnable(GL_DEBUG_OUTPUT);
       // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
       
-      #ifdef OGL_WITH_IMGUI
+      #ifndef OGL_WITHOUT_IMGUI
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -250,6 +250,8 @@ namespace ogl {
       
       onFocus = false;
       
+      isFullscreen = false;
+
       id = windowsCounter++;
       
       background = glm::vec3(0.0f, 0.1f, 0.2f);
@@ -653,7 +655,7 @@ namespace ogl {
       
       keybord = true;
 
-      #ifdef OGL_WITH_IMGUI
+      #ifndef OGL_WITHOUT_IMGUI
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -666,7 +668,7 @@ namespace ogl {
     //*****************************************************************************/
     inline void renderEnd() {
       
-      #ifdef OGL_WITH_IMGUI
+      #ifndef OGL_WITHOUT_IMGUI
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
       #endif
