@@ -33,5 +33,6 @@
 #include "imstb_truetype.h"
 #include "imstb_rectpack.h"
 #include "imstb_textedit.h"
+#include "imgui_neo_sequencer.h"
 
 #endif
