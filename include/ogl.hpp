@@ -53,7 +53,6 @@
 #include <ogl/utils/glfw.hpp>
 #include <ogl/utils/snapshot.hpp>
 #include <ogl/utils/error.hpp>
-#include <ogl/utils/colors.hpp>
 
 // Core
 #include <ogl/core/glCamera.hpp>
