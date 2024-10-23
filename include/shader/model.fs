@@ -101,7 +101,7 @@ void main() {
   // Specular shading
   vec3 camera_direction = normalize(-fragPos);
   vec3 reflected_light  = normalize(reflect(-camera_direction, fragNormal));
-  float specularFactor = pow(max(dot(camera_direction, reflected_light), 0.0), material.shininess);
+  float specularFactor  = pow(max(dot(camera_direction, reflected_light), 0.0), material.shininess);
   
   // Get base colors
   vec3 ambientBaseColor  = (material.haveAmbientTexture)  ? vec3(texture(material.diffuseTexture,  fragTexCoord)) : material.ambientColor;
@@ -120,7 +120,7 @@ void main() {
     //vec3 linearColor = (ambient + (1.0 - shadow) * (diffuse + specular));
     //color = vec4(linearColor, 1.0f);
 
-    if(shadow == 1){
+    if(shadow == 1) {
       
       color = vec4(1.0,0.0,0.0,1.0f);
       
