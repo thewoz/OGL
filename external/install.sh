@@ -6,6 +6,7 @@ if [ `uname` == "Darwin" ]; then
   brew install sdl2
   brew install assimp
   brew install glm
+  brew install premake
 
 else
 
@@ -13,7 +14,7 @@ else
   apt -y install libsdl2-dev
   apt -y install libassimp-dev
   apt -y install libglm-dev
-  apt -y install premake4
+  apt -y install premake5
   apt -y install libtiff-dev
   apt -y install libfreetype-dev
 fi
@@ -24,9 +25,9 @@ if [ ! -d "/usr/local/include/SOIL2/" ]; then
 
   git clone https://github.com/SpartanJ/SOIL2.git
   cd SOIL2
-  premake4 gmake
+  premake5 gmake
   cd make/*/
-  make config=release soil2-static-lib
+  make soil2-static-lib config=release_x86_64
   cd ../../lib/*
   sudo cp libsoil2.a /usr/local/lib
   cd ../../src/SOIL2/
