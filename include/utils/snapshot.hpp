@@ -82,13 +82,13 @@ namespace tiff {
       exit(EXIT_FAILURE);
     }
     
-    GLubyte * image = (GLubyte *) malloc(width * height * sizeof (GLubyte) * 3);
+    GLubyte * image = (GLubyte*) malloc(width * height * sizeof(GLubyte) * 3);
     
     if(image==NULL){
       fprintf(stderr, "file '%s' line %d function '%s': error in malloc %s\n", __FILE__, __LINE__, __func__, strerror(errno));
       abort();
     }
-    
+   
     /* OpenGL's default 4 byte pack alignment would leave extra bytes at the
      end of each image row so that each full row contained a number of bytes
      divisible by 4.  Ie, an RGB row with 3 pixels and 8-bit componets would
@@ -100,10 +100,10 @@ namespace tiff {
     
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
     
-    // TODO: controllare il valore di ritorno di glReadPixels
+    glCheckError();
     
-    TIFFSetField(file, TIFFTAG_IMAGEWIDTH, (uint32_t) width);
-    TIFFSetField(file, TIFFTAG_IMAGELENGTH, (uint32_t) height);
+    TIFFSetField(file, TIFFTAG_IMAGEWIDTH,  width);
+    TIFFSetField(file, TIFFTAG_IMAGELENGTH, height);
     TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
     TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS);
     TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
@@ -121,8 +121,8 @@ namespace tiff {
         fprintf(stderr, "file '%s' line %d function '%s': error in TIFFWriteScanline\n", __FILE__, __LINE__, __func__);
         abort();
       }
-      
-      p += width * sizeof (GLubyte) * 3;
+ 
+      p += width * sizeof(GLubyte) * 3;
       
     }
     
