@@ -617,10 +617,10 @@ namespace ogl {
     //*****************************************************************************/
     // makeContextCurrent()
     //*****************************************************************************/
-    inline void  makeContextCurrent() {
+    inline void makeContextCurrent() {
       
-       glfwMakeContextCurrent(window);
-       //gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); //NOTE: non sono sicuro che serva
+      glfwMakeContextCurrent(window);
+      gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); //NOTE: non sono sicuro che serva
 
     }
     
@@ -636,11 +636,15 @@ namespace ogl {
       
       glfwMakeContextCurrent(window);
       
+      glfwPollEvents();
+      
       GLfloat currentTime = glfwGetTime();
       
       deltaTime = currentTime - lastTime;
       lastTime  = currentTime;
                   
+      //printf("%d %d\n", currentCamera->getWidth(), currentCamera->getHeight());
+      
       glViewport(0, 0, currentCamera->getWidth(), currentCamera->getHeight());
 
       glClearColor(background.r, background.g, background.b, 1.0f);
@@ -674,9 +678,7 @@ namespace ogl {
       #endif
 
       glDisable(GL_DEPTH_TEST);
-      
-      glfwPollEvents();
-
+    
       glfwSwapBuffers(window);
       
     }
@@ -715,6 +717,8 @@ namespace ogl {
       
       glReadPixels(0, 0, currentCamera->getWidth(), currentCamera->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, image);
       
+      glCheckError();
+
       rbg = glm::vec3(0);
       
       size_t counter = 0;
@@ -761,7 +765,7 @@ namespace ogl {
         getCurrentCamera()->getViewport(oldWidth, oldHeight);
 
 #ifdef __APPLE__
-        oldWidth  *= 0.5; oldHeight *= 0.5;
+        oldWidth *= 0.5; oldHeight *= 0.5;
 #endif
 
         glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
