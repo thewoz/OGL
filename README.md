@@ -30,10 +30,8 @@ in the external folder a script will automatically install the following librari
 
 while these dependencies have to be installed manually:
 
-* OpenCV - https://github.com/opencv/opencv (needed only for glPoints.hpp)
+* OpenCV - https://github.com/opencv/opencv
 * OpenGL
-* MPL       - https://github.com/thewoz/MPL
-
 
 
 ## TODO
