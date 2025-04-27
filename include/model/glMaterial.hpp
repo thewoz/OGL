@@ -186,6 +186,7 @@ namespace ogl {
       shader.setUniform("material.refraction", ni);
       shader.setUniform("material.opacity",     d);
             
+      // TODO: questo rallenta molto
       for(GLuint i=0; i<textures.size(); i++)
         glTextures::get(textures[i]).setInShader(shader, i);
       
