@@ -424,7 +424,6 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
-					/usr/local/include/opencv4,
 					/usr/local/include/freetype2/,
 				);
 				OTHER_LDFLAGS = (
@@ -458,7 +457,6 @@
 				DEAD_CODE_STRIPPING = YES;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include/,
-					/usr/local/include/opencv4,
 					/usr/local/include/freetype2/,
 				);
 				OTHER_LDFLAGS = (
