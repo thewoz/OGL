@@ -26,11 +26,12 @@
 #include <string>
 #include <iostream>
 
-
 //****************************************************************************/
 // glCheckError() -
 //****************************************************************************/
 GLenum glCheckError_(const char *file, int line) {
+  
+#ifndef NDEBUG
   
   GLenum errorCode = GL_NO_ERROR;
   
@@ -58,6 +59,14 @@ GLenum glCheckError_(const char *file, int line) {
   if(getError) { fflush(stdout); abort(); }
   
   return errorCode;
+  
+#else
+  
+  return GL_NO_ERROR;
+  
+#endif
+  
+
   
 }
 
