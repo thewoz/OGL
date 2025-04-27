@@ -76,9 +76,17 @@ namespace ogl {
     //****************************************************************************/
     // glPrint2D()
     //****************************************************************************/
-    glPrint2D(float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1,  const std::string _text = "", const std::string & _name = "") {
+    glPrint2D(const std::string & _text, float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1, const std::string & _name = "") {
       name = _name;
-      init(_x, _y, _color, _scale, _text);
+      init(_text, _x, _y, _color, _scale);
+    }
+    
+    //****************************************************************************/
+    // glPrint2D()
+    //****************************************************************************/
+    glPrint2D(float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1, const std::string & _name = "") {
+      name = _name;
+      init("", _x, _y, _color, _scale);
     }
     
     //****************************************************************************/
@@ -89,7 +97,12 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1, const std::string _text = "") {
+    void init(float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) { init("", _x, _y, _color, _scale); }
+    
+    //****************************************************************************/
+    // init()
+    //****************************************************************************/
+    void init(const std::string & _text, float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) {
       
       DEBUG_LOG("glPrint2D::init(" + name + ")");
       
