@@ -38,10 +38,10 @@ You will need the following libraries installed:
 - [GLM](https://github.com/g-truc/glm)
 - [GLAD](https://glad.dav1d.de)
 - [ImGui](https://github.com/ocornut/imgui) *(optional)*
-- [SOIL2](https://github.com/SpartanJ/soil2) *(only for `glTexture.hpp` and `glModel.hpp`)*
-- [Assimp](https://github.com/assimp/assimp) *(only for `glModel.hpp`)*
-- [Freetype2](https://gitlab.freedesktop.org/freetype/freetype) *(for text rendering)*
-- [libtiff](http://www.simplesystems.org/libtiff/) *(for screenshots)*
+- [SOIL2](https://github.com/SpartanJ/soil2)
+- [Assimp](https://github.com/assimp/assimp)
+- [Freetype2](https://gitlab.freedesktop.org/freetype/freetype)
+- [libtiff](http://www.simplesystems.org/libtiff/)
 
 ---
 
@@ -147,7 +147,8 @@ int main(int argc, char* const argv[]) {
 - Add shadow support
 - Add lighting for objects like cuboids, spheres, ellipses
 - Add render-to-texture support
-- Add axis labels (X, Y, Z) and a background rectangle to `glReferenceAxes` for better visualization
+- Add axis labels (X,Y,Z) and a background rectangle to `glReferenceAxes` for better visualization
+- Include an example with ImGui
 
 ---
 
