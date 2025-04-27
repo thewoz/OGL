@@ -127,8 +127,7 @@ namespace ogl {
             
       // Others Glfw options
       glfwWindowHint(GLFW_RESIZABLE, resizable);
-      glfwWindowHint(GLFW_SAMPLES, 4);
-      
+
       // Funziona con OpenGL >= 4.3
       // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
@@ -148,6 +147,8 @@ namespace ogl {
         abort();
       }
             
+      glEnable(GL_MULTISAMPLE);
+
       glfwGetFramebufferSize(window, &width, &height);
       
       glfwSetWindowUserPointer(window, this);
@@ -179,7 +180,7 @@ namespace ogl {
 
       currentCamera = &cameras[currentCameraIndex];
 
-      //inputDisable = false;
+      // inputDisable = false;
         
       // Funziona con OpenGL >= 4.3
       // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
@@ -208,7 +209,6 @@ namespace ogl {
       
       // Others Glfw options
       glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
-      glfwWindowHint(GLFW_SAMPLES, 4);
       glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
       
       // Funziona con OpenGL >= 4.3
@@ -229,6 +229,8 @@ namespace ogl {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
+      
+      glEnable(GL_MULTISAMPLE);
       
       glfwGetFramebufferSize(window, &width, &height);
      
@@ -613,17 +615,7 @@ namespace ogl {
 //      return (xScale == 2);
       
     }
-    
-    //*****************************************************************************/
-    // makeContextCurrent()
-    //*****************************************************************************/
-    inline void makeContextCurrent() {
-      
-      glfwMakeContextCurrent(window);
-      gladLoadGLLoader((GLADloadproc) glfwGetProcAddress); //NOTE: non sono sicuro che serva
 
-    }
-    
     //*****************************************************************************/
     // renderBegin()
     //*****************************************************************************/
@@ -642,9 +634,7 @@ namespace ogl {
       
       deltaTime = currentTime - lastTime;
       lastTime  = currentTime;
-                  
-      //printf("%d %d\n", currentCamera->getWidth(), currentCamera->getHeight());
-      
+                        
       glViewport(0, 0, currentCamera->getWidth(), currentCamera->getHeight());
 
       glClearColor(background.r, background.g, background.b, 1.0f);

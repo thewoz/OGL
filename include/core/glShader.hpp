@@ -55,7 +55,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { PLAIN, PLAIN2D, MODEL, SPHERE, TEXT, ADVANCED, ORTO, CUSTOM };
+    enum STYLE { PLAIN, MODEL, SPHERE, TEXT, ADVANCED };
 
     int style;
     
@@ -85,14 +85,6 @@ namespace ogl {
       init("/usr/local/include/ogl/shader/plain.vs", "/usr/local/include/ogl/shader/plain.fs");
       style = STYLE::PLAIN;
     }
-    
-    //****************************************************************************/
-    // initPlain2D
-    //****************************************************************************/
-    void initPlain2D() {
-      init("/usr/local/include/ogl/shader/plain2D.vs", "/usr/local/include/ogl/shader/plain2D.fs");
-      style = STYLE::PLAIN2D;
-    }
 
     //****************************************************************************/
     // initAdvanced
@@ -111,10 +103,10 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // initText2D
+    // initText
     //****************************************************************************/
-    void initText2D() {
-      init("/usr/local/include/ogl/shader/text2D.vs", "/usr/local/include/ogl/shader/text2D.fs");
+    void initText() {
+      init("/usr/local/include/ogl/shader/text.vs", "/usr/local/include/ogl/shader/text.fs");
       style = STYLE::TEXT;
     }
     
@@ -176,9 +168,7 @@ namespace ogl {
       }
       
       isInited = true;
-      
-      style = STYLE::CUSTOM;
-      
+            
     }
     
     //****************************************************************************/

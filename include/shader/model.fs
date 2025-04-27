@@ -104,7 +104,7 @@ void main() {
   float specularFactor  = pow(max(dot(camera_direction, reflected_light), 0.0), material.shininess);
   
   // Get base colors
-  vec3 ambientBaseColor  = (material.haveAmbientTexture)  ? vec3(texture(material.diffuseTexture,  fragTexCoord)) : material.ambientColor;
+  vec3 ambientBaseColor  = (material.haveAmbientTexture)  ? vec3(texture(material.ambientTexture,  fragTexCoord)) : material.ambientColor;
   vec3 diffuseBaseColor  = (material.haveDiffuseTexture)  ? vec3(texture(material.diffuseTexture,  fragTexCoord)) : material.diffuseColor;
   vec3 specularBaseColor = (material.haveSpecularTexture) ? vec3(texture(material.specularTexture, fragTexCoord)) : material.specularColor;
   
@@ -139,7 +139,7 @@ void main() {
     color = vec4(linearColor, 1.0f);
     
   }
-  
+    
 }
 
 /*****************************************************************************/

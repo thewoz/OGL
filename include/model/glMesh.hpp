@@ -155,73 +155,67 @@ namespace ogl {
     //****************************************************************************//
     // render
     //****************************************************************************//
-    void render(const glShader & shader, bool withMaterials = true) {
-            
-      //fprintf(stderr, "DEBUG DRAW MESH (%d) VAO: %d %s\n", id, VAO, (withMaterials) ? "with materials" : "without materials");
-      
+    void render(const glShader & shader) {
+                 
       if(!isInited){
         fprintf(stderr, "model must be inited before render\n");
         abort();
       }
       
-      if(!isInitedInGpu) setInGpu();
-      
-      if(withMaterials) {
-        material.setInShader(shader);
-        material.bindTextures(shader);
-      }
-            
+      if(!isInitedInGpu) { setInGpu(); }
+
+      setInShader(shader);
+              
       glBindVertexArray(vao);
       
       glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, 0);
       
       glBindVertexArray(0);
       
-      if(withMaterials) {
-        material.unbindTexture(shader.get());
-      }
-      
+      glCheckError();
+            
     }
     
     //****************************************************************************//
     // bounds
     //****************************************************************************//
     void bounds(glm::vec3 & center, glm::vec3 & size, float & radius) const {
-      
+          
       double xMax = std::numeric_limits<double>::lowest();
       double yMax = std::numeric_limits<double>::lowest();
       double zMax = std::numeric_limits<double>::lowest();
-      
+        
       double xMin = std::numeric_limits<double>::max();
       double yMin = std::numeric_limits<double>::max();
       double zMin = std::numeric_limits<double>::max();
-      
+        
       for(std::size_t i=0; i<vertices.size(); ++i) {
         
-        if(vertices[i].Position.x < xMin) xMin = vertices[i].Position.x;
-        if(vertices[i].Position.x > xMax) xMax = vertices[i].Position.x;
+        const glm::vec3& pos = vertices[i].Position;
+
+        if(pos.x < xMin) xMin = pos.x;
+        if(pos.x > xMax) xMax = pos.x;
         
-        if(vertices[i].Position.y < yMin) yMin = vertices[i].Position.y;
-        if(vertices[i].Position.y > yMax) yMax = vertices[i].Position.y;
+        if(pos.y < yMin) yMin = pos.y;
+        if(pos.y > yMax) yMax = pos.y;
         
-        if(vertices[i].Position.z < zMin) zMin = vertices[i].Position.z;
-        if(vertices[i].Position.z > zMax) zMax = vertices[i].Position.z;
+        if(pos.z < zMin) zMin = pos.z;
+        if(pos.z > zMax) zMax = pos.z;
         
       }
-      
+        
       center.x = (xMin + xMax) * 0.5f;
       center.y = (yMin + yMax) * 0.5f;
       center.z = (zMin + zMax) * 0.5f;
-      
+        
       size.x = xMax - xMin;
       size.y = yMax - yMin;
       size.z = zMax - zMin;
+        
+      radius = 0.5f * glm::length(size);
       
-      //radius = sqrt(size.x*size.x + size.y*size.y + size.z+size.z);
-      //radius = std::max(std::max(size.x, size.y), size.z);
-      radius = std::max(std::max(size.x+center.x, size.y+center.y), size.z+center.z);
-
     }
+
     
     //****************************************************************************//
     // scale
@@ -238,7 +232,7 @@ namespace ogl {
     //****************************************************************************//
     // setInShader
     //****************************************************************************//
-    void setInShader(const ogl::glShader & program) const { material.setInShader(program); }
+    void setInShader(const ogl::glShader & program) { material.setInShader(program); }
     
     //****************************************************************************//
     // setInGpu - Initializes all the buffer objects/arrays
@@ -280,6 +274,7 @@ namespace ogl {
                             /* normalize = */ GL_FALSE,
                             /* stride    = */ sizeof(ogl::glVertex),
                             /* offset    = */ reinterpret_cast<void *>(offset));
+      
       glEnableVertexAttribArray(0);
             
       offset += sizeof(float) * 3;
@@ -291,6 +286,7 @@ namespace ogl {
                             /* normalize = */ GL_FALSE,
                             /* stride    = */ sizeof(ogl::glVertex),
                             /* offset    = */ reinterpret_cast<void *>(offset));
+      
       glEnableVertexAttribArray(1);
       
       offset += sizeof(float) * 3;
@@ -302,20 +298,26 @@ namespace ogl {
                             /* normalize = */ GL_FALSE,
                             /* stride    = */ sizeof(ogl::glVertex),
                             /* offset    = */ reinterpret_cast<void *>(offset));
+      
       glEnableVertexAttribArray(2);
       
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       
-      material.initInGpu();
+      glCheckError();
+
+      material.setInGpu();
       
       isInitedInGpu = true;
+      
+      glCheckError();
 
     }
     
     //****************************************************************************//
     // getVertices
     //****************************************************************************//
-    const std::vector<glVertex> & getVertices() { return vertices; }
+    const std::vector<glVertex> & getVertices() const { return vertices; }
     
     //****************************************************************************//
     // cleanInGpu() -

@@ -93,9 +93,9 @@ namespace ogl {
         colors[1] = glm::vec3(0.0f,1.0f,0.0f);
         colors[2] = glm::vec3(0.0f,0.0f,1.0f);
     
-        xAxeLabel.init(glm::vec3(1.01f,0.01f,0.01f), glm::vec3(1.0f), 0.5, "x");
-        yAxeLabel.init(glm::vec3(0.01f,1.01f,0.01f), glm::vec3(1.0f), 0.5, "y");
-        zAxeLabel.init(glm::vec3(0.01f,0.01f,1.01f), glm::vec3(1.0f), 0.5, "z");
+        xAxeLabel.init("x", glm::vec3(1.01f,0.01f,0.01f), glm::vec3(1.0f), 0.5);
+        yAxeLabel.init("y", glm::vec3(0.01f,1.01f,0.01f), glm::vec3(1.0f), 0.5);
+        zAxeLabel.init("z", glm::vec3(0.01f,0.01f,1.01f), glm::vec3(1.0f), 0.5);
 
         isInited = true;
         
@@ -125,6 +125,8 @@ namespace ogl {
         
         glBindVertexArray(vao);
 
+        glDisable(GL_CULL_FACE);
+
         for(int i=0; i<3; ++i) {
           
           shader.setUniform("color", colors[i]);
@@ -134,6 +136,8 @@ namespace ogl {
         }
         
         glBindVertexArray(0);
+
+        glCheckError();
 
         xAxeLabel.render(camera);
         yAxeLabel.render(camera);
@@ -172,11 +176,12 @@ namespace ogl {
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
         glEnableVertexAttribArray(0); 
         
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
        
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
         
         glCheckError();

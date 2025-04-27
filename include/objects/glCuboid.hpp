@@ -27,170 +27,201 @@
 // namespace ogl
 //****************************************************************************/
 namespace ogl {
-  
+
   //****************************************************************************/
   // Class glCuboid
   //****************************************************************************/
   class glCuboid : public glObject {
-    
+
   private:
+
+      GLuint vao = -1;
+      GLuint vbo[4];
     
-    GLuint vao = -1;
-    GLuint vbo[2];
-    
-    glm::vec3 color;
+      glm::vec3 color;
+      glm::vec3 size;
 
   public:
-        
+
     //****************************************************************************/
-    // glCuboid()
+    // Class glCuboid
     //****************************************************************************/
     glCuboid(const std::string & _name = "") { name = _name; }
-    
+
     //****************************************************************************/
-    // glCuboid()
+    // Class glCuboid
     //****************************************************************************/
-    glCuboid(const glm::vec3 & _scale, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+    glCuboid(const glm::vec3 & _size, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
       name = _name;
-      init(_scale, _style, _color);
+      init(_size, _style, _color);
     }
-    
+
     //****************************************************************************/
-    // ~glCuboid()
+    // ~glCuboid
     //****************************************************************************/
     ~glCuboid() { cleanInGpu(); }
-    
+
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const glm::vec3 & _scale, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
+    void init(const glm::vec3 & _size, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0f)) {
 
       DEBUG_LOG("glCuboid::init(" + name + ")");
 
       shader.setName(name);
-      
       shader.initPlain();
-      
-      scale(_scale);
-      
+
+      size = _scale;
       style = _style;
-      
       color = _color;
-      
+
       isInited = true;
       
     }
-    
+
     //****************************************************************************/
-    // render()
+    // init()
     //****************************************************************************/
     void render(const glCamera * camera) {
-            
+
       DEBUG_LOG("glCuboid::render(" + name + ")");
 
-      if(!isInited){
+      if(!isInited) {
         fprintf(stderr, "glCuboid must be inited before render\n");
         abort();
       }
-      
+
       if(isToInitInGpu()) initInGpu();
-      
+
       shader.use();
-      
+
       shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getView());
-      shader.setUniform("model",      modelMatrix);
-      shader.setUniform("color",      color);
-            
-      glDisable(GL_CULL_FACE);
+      shader.setUniform("view", camera->getView());
+      shader.setUniform("model", modelMatrix);
+      shader.setUniform("color", color);
 
       glBindVertexArray(vao);
-      
-      if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      
-      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_SHORT, nullptr);
-            
-      glBindVertexArray(0);
-      
-    }
-    
-  private:
 
-    //****************************************************************************/
-    // setInGpu()
-    //****************************************************************************/
-    void setInGpu() {
-      
-      DEBUG_LOG("glCuboid::setInGpu(" + name + ")");
-      
-      static const GLfloat vertices[] = {
-        // front
-        -0.5,  0.5,  0.5,
-        0.5,  0.5,  0.5,
-        0.5, -0.5,  0.5,
-        -0.5, -0.5,  0.5,
-        // back
-        -0.5,  0.5,  -0.5,
-        0.5,  0.5,  -0.5,
-        0.5, -0.5,  -0.5,
-        -0.5, -0.5, -0.5,
-      };
-      
-      static const GLushort indicies[] = {
-        0, 1, 3,
-        1, 2, 3,
-        2, 3, 7,
-        2, 7, 6,
-        1, 5, 2,
-        2, 5, 6,
-        0, 7, 3,
-        0, 4, 7,
-        5, 7, 6,
-        5, 4, 7,
-        0, 4, 1,
-        4, 5, 2
-      };
-      
-      glGenVertexArrays(1, &vao);
-      glBindVertexArray(vao);
-      
-      glGenBuffers(2, vbo);
+      if(style == glObject::STYLE::WIREFRAME) {
+        glDisable(GL_CULL_FACE);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      } else {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      }
 
-      glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-      glEnableVertexAttribArray(0);
-      
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indicies), indicies, GL_STATIC_DRAW);
+      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
 
       glBindVertexArray(0);
 
       glCheckError();
       
     }
+
+  private:
     
+    //****************************************************************************/
+    // setInGpu()
+    //****************************************************************************/
+    void setInGpu() {
+
+      DEBUG_LOG("glCuboid::setInGpu(" + name + ")");
+
+      std::vector<glm::vec3> positions = {
+          {-0.5f,  0.5f,  0.5f},
+          { 0.5f,  0.5f,  0.5f},
+          { 0.5f, -0.5f,  0.5f},
+          {-0.5f, -0.5f,  0.5f},
+          {-0.5f,  0.5f, -0.5f},
+          { 0.5f,  0.5f, -0.5f},
+          { 0.5f, -0.5f, -0.5f},
+          {-0.5f, -0.5f, -0.5f}
+      };
+
+      for(auto & v : positions) v *= size;
+
+      std::vector<glm::vec3> normals = {
+          { 0,  0,  1}, // Front
+          { 1,  0,  0}, // Right
+          { 0,  0, -1}, // Back
+          {-1,  0,  0}, // Left
+          { 0,  1,  0}, // Top
+          { 0, -1,  0}  // Bottom
+      };
+
+      std::vector<GLuint> indices = {
+        // Front face
+           0, 3, 2, 2, 1, 0,
+           // Right face
+           1, 2, 6, 6, 5, 1,
+           // Back face
+           5, 6, 7, 7, 4, 5,
+           // Left face
+           4, 7, 3, 3, 0, 4,
+           // Top face
+           4, 0, 1, 1, 5, 4,
+           // Bottom face
+           3, 7, 6, 6, 2, 3
+      };
+    
+      glGenVertexArrays(1, &vao);
+      glBindVertexArray(vao);
+
+      glGenBuffers(4, vbo);
+
+      // Positions
+      glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+      glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_STATIC_DRAW);
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+      glEnableVertexAttribArray(0);
+
+      // Normals (fake: repeat per face for now if you want per-vertex)
+      std::vector<glm::vec3> expandedNormals;
+      for(int i=0; i<6; ++i) {
+        expandedNormals.push_back(normals[i]);
+        expandedNormals.push_back(normals[i]);
+        expandedNormals.push_back(normals[i]);
+        expandedNormals.push_back(normals[i]);
+      }
+
+      glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+      glBufferData(GL_ARRAY_BUFFER, expandedNormals.size() * sizeof(glm::vec3), expandedNormals.data(), GL_STATIC_DRAW);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
+      glEnableVertexAttribArray(1);
+
+      // TexCoords (dummy for now, optional)
+      std::vector<glm::vec2> texcoords(positions.size(), glm::vec2(0.0f));
+      glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+      glBufferData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(glm::vec2), texcoords.data(), GL_STATIC_DRAW);
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+      glEnableVertexAttribArray(2);
+
+      // Indices
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBindVertexArray(0);
+
+      isInitedInGpu = true;
+      
+    }
+
     //****************************************************************************/
     // cleanInGpu()
     //****************************************************************************/
     void cleanInGpu() {
-      
-      if(isInitedInGpu) {
-        
-        glDeleteBuffers(2, vbo);
-        glDeleteVertexArrays(1, &vao);
-        
-        isInitedInGpu = false;
 
+      if(isInitedInGpu) {
+        glDeleteBuffers(4, vbo);
+        glDeleteVertexArrays(1, &vao);
+        isInitedInGpu = false;
       }
-      
     }
     
   };
-  
+
 } /* namespace ogl */
 
 #endif /* _H_OGL_CUBOID_H_ */
-
-

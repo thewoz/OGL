@@ -139,6 +139,9 @@ namespace ogl {
       glEnable(GL_PROGRAM_POINT_SIZE);
 
       glBindVertexArray(vao);
+      
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_BACK);
 
       glDrawArrays(GL_POINTS, from, to);
 
@@ -146,6 +149,8 @@ namespace ogl {
 
       glBindVertexArray(0);
       
+      glCheckError();
+
     }
     
   private:
@@ -177,9 +182,8 @@ namespace ogl {
         glEnableVertexAttribArray(1);
         
         glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec4), colors.data(), GL_STATIC_DRAW);
-      
+              
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        
         glBindVertexArray(0);
         
         glCheckError();

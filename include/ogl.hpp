@@ -29,6 +29,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
 
 #include <assimp/scene.h>
 #include <assimp/Importer.hpp>
@@ -43,6 +45,8 @@
     #include <ogl/utils/IconsFontAwesome6.h>
   #endif
 #endif
+
+#define OGL_LIB_VERSION "OGL Lib v2.0"
 
 // Debug
 //#define DEBUG_OGL
@@ -61,7 +65,6 @@
 #include <ogl/core/glTexture.hpp>
 #include <ogl/core/glObject.hpp>
 #include <ogl/core/glColors.hpp>
-//#include "glShadow.hpp"
 
 // Model
 #include <ogl/model/glLight.hpp>
@@ -73,19 +76,15 @@
 #include <ogl/objects/glPrint2D.hpp>
 #include <ogl/objects/glPrint3D.hpp>
 #include <ogl/objects/glLine.hpp>
-#include <ogl/objects/glQuad.hpp>
-#include <ogl/objects/glQuad2D.hpp>
 #include <ogl/objects/glLines.hpp>
 #include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glEllipse.hpp>
 #include <ogl/objects/glGrid.hpp>
 #include <ogl/objects/glBox.hpp>
 #include <ogl/objects/glCuboid.hpp>
+#include <ogl/objects/glQuad.hpp>
 #include <ogl/objects/glAxes.hpp>
 #include <ogl/objects/glReferenceAxes.hpp>
 #include <ogl/objects/glPoints.hpp>
 
-
 #endif /* _H_OGL_H_ */
-
-

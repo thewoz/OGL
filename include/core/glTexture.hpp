@@ -24,18 +24,22 @@
 #include <cstdio>
 
 #include <string>
+#include <unordered_map>
 
 //****************************************************************************/
 // namespace ogl
 //****************************************************************************/
 namespace ogl {
-  
+
   //****************************************************************************/
   // glTexture
   //****************************************************************************/
   class glTexture {
     
-  protected:
+  private:
+    
+    /* texture id */
+    GLuint id;
     
     /* texture name */
     std::string name;
@@ -43,59 +47,6 @@ namespace ogl {
     /* texture init flags */
     bool isInited;
     bool isInitedInGpu;
-    
-    /* texture id */
-    GLuint id;
-    
-    //****************************************************************************/
-    // glTexture - Empty constructor
-    //****************************************************************************/
-    glTexture() : isInited(false), isInitedInGpu(false) { }
-    
-  public:
-    
-    inline GLuint getId() const { return id; }
-    
-    //****************************************************************************/
-    // cleanInGpu() -
-    //****************************************************************************/
-    void cleanInGpu() {
-      
-      if(isInitedInGpu) {
-        
-        DEBUG_LOG("glTexture::cleanInGpu(" + name + ")");
-
-        glDeleteTextures(1, &id);
-        
-        isInitedInGpu = false;
-        
-      }
-      
-    }
-    
-  protected:
-    
-    //****************************************************************************/
-    // activate
-    //****************************************************************************/
-    inline void _activate(GLenum target, GLenum unit) const {
-      
-      // Active proper texture unit before binding
-      glActiveTexture(GL_TEXTURE0 + unit);
-      
-      //And finally bind the texture
-      glBindTexture(target, id);
-      
-    }
-    
-  };
-  
-  //****************************************************************************/
-  // glTexture2D
-  //****************************************************************************/
-  class glTexture2D : public glTexture {
-    
-  private:
     
     /* texture type */
     std::string type;
@@ -112,30 +63,30 @@ namespace ogl {
   public:
     
     //****************************************************************************/
-    // glTexture2D
+    // glTexture
     //****************************************************************************/
-    glTexture2D() { }
+    glTexture() : isInited(false), isInitedInGpu(false) { }
     
     //****************************************************************************/
-    // glTexture2D
+    // glTexture
     //****************************************************************************/
-    glTexture2D(const std::string & _type, const std::string & filename, const std::string & directory) {
+    glTexture(const std::string & _type, const std::string & filename, const std::string & directory) : isInited(false), isInitedInGpu(false) {
       init(_type, filename, directory);
     }
     
     //****************************************************************************/
-    // ~glTexture2D
+    // ~glTexture
     //****************************************************************************/
-    ~glTexture2D() { cleanInGpu(); }
+    ~glTexture() { cleanInGpu(); }
     
     //****************************************************************************/
     // init
     //****************************************************************************/
     void init(const std::string & _type, const std::string & filename, const std::string & directory){
       
-      //Generate texture ID and load texture data
+      // Generate texture ID and load texture data
       
-      name  = filename;
+      name = filename;
       
       path = directory + '/' + filename;
             
@@ -159,9 +110,9 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // initInGpu
+    // setInGpu
     //****************************************************************************/
-    void initInGpu() {
+    void setInGpu() {
       
       if(!isInited){
          fprintf(stderr, "Error glTexture: the texture must be initialized before being set into the GPU\n");
@@ -193,20 +144,46 @@ namespace ogl {
      
       isInitedInGpu = true;
       
+      glCheckError();
+      
     }
     
     //****************************************************************************/
-    // activate
+    // setInShader
     //****************************************************************************/
-    inline void activate(GLenum unit) const {
+    inline void setInShader(const ogl::glShader & shader, GLenum unit) const {
       
       if(!isInitedInGpu) {
         fprintf(stderr, "Error glTexture: the texture must be initialized in the GPU before being used\n");
         abort();
       }
+            
+      // Active proper texture unit before binding
+      glActiveTexture(GL_TEXTURE0 + unit);
       
-      _activate(GL_TEXTURE_2D, unit);
+      // And finally bind the texture
+      glBindTexture(GL_TEXTURE_2D, id);
       
+      shader.setUniform(type, unit);
+
+      glCheckError();
+            
+    }
+    
+    //****************************************************************************/
+    // cleanInGpu() -
+    //****************************************************************************/
+    void cleanInGpu() {
+      
+      if(isInitedInGpu) {
+        
+        DEBUG_LOG("glTexture::cleanInGpu(" + name + ")");
+
+        glDeleteTextures(1, &id);
+        
+        isInitedInGpu = false;
+        
+      }
       
     }
     
@@ -218,162 +195,46 @@ namespace ogl {
   };
 
 
-  
-  /*****************************************************************************/
-  // glTextureDepthMap
-  /*****************************************************************************/
-  class glTextureDepthMap : public glTexture {
+  //****************************************************************************/
+  // glTextures
+  //****************************************************************************/
+  class glTextures {
     
-  private:
-    
-    GLuint width;
-    GLuint height;
-        
-  public:
-    
-    /*****************************************************************************/
-    // glTextureDepthMap
-    /*****************************************************************************/
-    glTextureDepthMap() { }
-    
-    /*****************************************************************************/
-    // TextureDepthMap
-    /*****************************************************************************/
-    glTextureDepthMap(GLuint _width, GLuint _height) { init(_width, _height); }
-    
-    /*****************************************************************************/
-    // ~glTextureDepthMap
-    /*****************************************************************************/
-    ~glTextureDepthMap() { cleanInGpu(); }
-    
-    /*****************************************************************************/
-    // init
-    /*****************************************************************************/
-    void init(GLuint _width, GLuint _height) {
-      
-      width  = _width;
-      height = _height;
-      
-      glGenTextures(1, &id);
-      
-      glBindTexture(GL_TEXTURE_2D, id);
-      
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-      
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-      
-      glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, id, 0);
-      
-      if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        abort();
-      }
+    private:
 
-      glDrawBuffer(GL_NONE);
-      
-      isInited = true;
-      
-    }
+      static std::vector<glTexture> textures;
     
-    /*****************************************************************************/
-    // activate
-    /*****************************************************************************/
-    inline void activate(GLenum unit) const {
-      
-      if(!isInited) {
-        fprintf(stderr, "error: the TextureDepthMap must initialize before use it\n");
-        abort();
+      static std::unordered_map<std::string, int> textureMap;
+    
+    public:
+    
+      //****************************************************************************/
+      // load()
+      //****************************************************************************/
+      static int load(const std::string & type, const std::string & filename, const std::string & directory) {
+
+        std::string path = directory + '/' + filename;
+        
+        if(textureMap.count(path)) return textureMap[path];
+                
+        textures.push_back(glTexture(type, filename, directory));
+        
+        textureMap[path] = (int)textures.size() - 1;
+        
+        return textureMap[path];
+        
       }
-      
-      _activate(GL_TEXTURE_2D, unit);
-      
-      //fprintf(stderr, "DEBUG TEXTURE activate GL_TEXTURE_2D id %d on unit %d\n", id, unit);
-      
-    }
+    
+      //****************************************************************************/
+      // get()
+      //****************************************************************************/
+      static glTexture & get(size_t index) { return textures[index]; }
     
   };
 
+std::unordered_map<std::string, int> glTextures::textureMap = std::unordered_map<std::string, int>();
+std::vector<glTexture>               glTextures::textures   = std::vector<glTexture>();
 
-
-  
-  /*****************************************************************************/
-  // glTextureCubeMap
-  /*****************************************************************************/
-  class glTextureCubeMap : public glTexture {
-    
-  private:
-    
-    GLuint width;
-    GLuint height;
-        
-  public:
-    
-    /*****************************************************************************/
-    // glTextureCubeMap
-    /*****************************************************************************/
-    glTextureCubeMap() { }
-    
-    /*****************************************************************************/
-    // glTextureCubeMap
-    /*****************************************************************************/
-    glTextureCubeMap(GLuint _width, GLuint _height) { init(_width, _height); }
-    
-    /*****************************************************************************/
-    // ~glTextureCubeMap
-    /*****************************************************************************/
-    ~glTextureCubeMap() { cleanInGpu(); }
-    
-    /*****************************************************************************/
-    // init
-    /*****************************************************************************/
-    void init(GLuint _width, GLuint _height) {
-      
-      width  = _width;
-      height = _height;
-      
-      glGenTextures(1, &id);
-      
-      glBindTexture(GL_TEXTURE_CUBE_MAP, id);
-      
-      for(GLuint i=0; i<6; ++i)
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-      
-      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-      
-      //fprintf(stderr, "DEBUG TEXTURE create GL_TEXTURE_CUBE_MAP texture id %d\n", id);
-      
-      isInited = true;
-      
-    }
-    
-    /*****************************************************************************/
-    // activate
-    /*****************************************************************************/
-    inline void activate(GLenum unit) const {
-      
-      if(!isInited) {
-        fprintf(stderr, "error: the TextureCubeMap must initialize before use it\n");
-        abort();
-      }
-      
-      _activate(GL_TEXTURE_CUBE_MAP, unit);
-      
-      //fprintf(stderr, "DEBUG TEXTURE activate GL_TEXTURE_CUBE_MAP id %d on unit %d\n", id, unit);
-      
-    }
-    
-  };
-  
 } /* namespace ogl */
 
 #endif /* _H_OGL_GLTEXTURE_H_ */

@@ -38,11 +38,9 @@ namespace ogl {
     
   private:
     
-    GLuint vao = -1;
+    GLuint vao;
     GLuint vbo[2];
-    
-    float lineWidth = 1;
-    
+        
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec4> colors;
         
@@ -52,13 +50,13 @@ namespace ogl {
     // glLines()
     //****************************************************************************/
     glLines(const std::string & _name = "") { name = _name; }
-    glLines(const std::vector<glm::vec3> & _vertices, const glm::vec4 & _color = glm::vec4(0.0), float _lineWidth = 1, const std::string & _name = "") {
+    glLines(const std::vector<glm::vec3> & _vertices, const glm::vec4 & _color = glm::vec4(0.0), const std::string & _name = "") {
       name = _name;
-      init(_vertices, _color, _lineWidth);
+      init(_vertices, _color);
     }
-    glLines(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, float _lineWidth = 1, const std::string & _name = "") {
+    glLines(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, const std::string & _name = "") {
       name = _name;
-      init(_vertices, _color, _lineWidth);
+      init(_vertices, _color);
     }
     
     
@@ -70,7 +68,7 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const std::vector<glm::vec3> & _vertices, const glm::vec4 & _color = glm::vec4(0.0), float _lineWidth = 1) {
+    void init(const std::vector<glm::vec3> & _vertices, const glm::vec4 & _color = glm::vec4(0.0)) {
       
       DEBUG_LOG("glLines::init(" + name + ")");
       
@@ -79,9 +77,7 @@ namespace ogl {
       shader.initAdvanced();
       
       vertices = _vertices;
-      
-      lineWidth = _lineWidth;
-      
+            
       colors.resize(vertices.size(), _color);
             
       isInited = true;
@@ -91,7 +87,7 @@ namespace ogl {
     //****************************************************************************/
     // init
     //****************************************************************************/
-    void init(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color, float _lineWidth = 1) {
+    void init(const std::vector<glm::vec3> & _vertices, const std::vector<glm::vec4> & _color) {
       
       DEBUG_LOG("glLines::init(" + name + ")");
       
@@ -101,19 +97,12 @@ namespace ogl {
       
       vertices = _vertices;
       
-      lineWidth = _lineWidth;
-
       colors = _color;
             
       isInited = true;
       
     }
     
-    //****************************************************************************/
-    // setLineWidth
-    //****************************************************************************/
-    //void setLineWidth(float _lineWidth) { lineWidth = _lineWidth; }
-  
     //****************************************************************************/
     // render()
     //****************************************************************************/
@@ -135,17 +124,18 @@ namespace ogl {
       shader.setUniform("model",      modelMatrix);
                         
       // https://vitaliburkov.wordpress.com/2016/09/17/simple-and-fast-high-quality-antialiased-lines-with-opengl/
-      //glLineWidth(lineWidth);
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
       glBindVertexArray(vao);
       
+      glDisable(GL_CULL_FACE);
+
       if(to == -1) to = (int) vertices.size();
       
       if(strip == -1) {
         
-        glDrawArrays(GL_LINE_STRIP, from, to);
+        glDrawArrays(GL_LINE_STRIP, from, to - from);
 
       } else {
         
@@ -157,6 +147,8 @@ namespace ogl {
       }
 
       glBindVertexArray(0);
+      
+      glCheckError();
       
     }
     
@@ -190,6 +182,7 @@ namespace ogl {
         
         glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec4), colors.data(), GL_STATIC_DRAW);
         
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
         
         glCheckError();

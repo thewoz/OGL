@@ -35,7 +35,7 @@ namespace ogl {
     
     private:
       
-      GLuint vao = -1;
+      GLuint vao;
       GLuint vbo[4];
       
       float radius;
@@ -108,17 +108,25 @@ namespace ogl {
         shader.setUniform("view",       camera->getView());
         shader.setUniform("model",      modelMatrix);
         shader.setUniform("color",      color);
-                
-        glDisable(GL_CULL_FACE);
-        
+                        
         glBindVertexArray(vao);
         
-        if(style == glObject::STYLE::WIREFRAME) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        if(style == glObject::STYLE::SOLID)     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if(style == glObject::STYLE::WIREFRAME) {
+          glDisable(GL_CULL_FACE);
+          glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+        
+        if(style == glObject::STYLE::SOLID) {
+          glEnable(GL_CULL_FACE);
+          glCullFace(GL_BACK);
+          glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
         
         glDrawElements(GL_TRIANGLES, (slices * stacks + slices) * 6, GL_UNSIGNED_INT, nullptr);
 
         glBindVertexArray(0);
+        
+        glCheckError();
         
       }
       
@@ -213,8 +221,9 @@ namespace ogl {
           glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
           glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(GLuint), indicies.data(), GL_STATIC_DRAW);
           
+          glBindBuffer(GL_ARRAY_BUFFER, 0);
           glBindVertexArray(0);
-       
+          
           glCheckError();
 
         }

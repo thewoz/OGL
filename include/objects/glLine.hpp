@@ -65,11 +65,6 @@ namespace ogl {
     ~glLine() { cleanInGpu(); }
     
     //****************************************************************************/
-    // setColor()
-    //****************************************************************************/
-    void setColor(const glm::vec3 & _color) { color = _color; }
-    
-    //****************************************************************************/
     // init()
     //****************************************************************************/
     void init(const std::vector<glm::vec3> & _vertices, const glm::vec3 & _color = glm::vec3(1.0)) {
@@ -113,9 +108,13 @@ namespace ogl {
       
       glBindVertexArray(vao);
 
+      glDisable(GL_CULL_FACE);
+
       glDrawArrays(GL_LINE_STRIP, 0, (GLuint)vertices.size());
      
       glBindVertexArray(0);
+      
+      glCheckError();
             
     }
     
@@ -147,8 +146,9 @@ namespace ogl {
       
       glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
         
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
-             
+      
       glCheckError();
           
     }

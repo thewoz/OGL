@@ -137,6 +137,8 @@ namespace ogl {
         glBindVertexArray(0);
                       
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+        
+        glCheckError();
 
       }
       
@@ -161,6 +163,7 @@ namespace ogl {
         
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
         
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
         
         glCheckError();

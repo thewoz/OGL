@@ -41,10 +41,14 @@ namespace ogl {
     GLuint vbo = -1;
     GLuint ibo = -1;
     
-    int slices;
-    int lenght;
+    int rows;
+    int cols;
+    
+    float cellSize;
     
     glm::vec3 color;
+    
+    std::vector<GLuint> indices;
     
   public:
     
@@ -52,9 +56,9 @@ namespace ogl {
     // glGrid()
     //****************************************************************************/
     glGrid(const std::string & _name = "") { name = _name; }
-    glGrid(int _slices, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+    glGrid(int _rows, int _cols, float _cellSize, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
       name = _name;
-      init(_slices, _color);
+      init(_rows, _cols, _cellSize, _color);
     }
     
     //****************************************************************************/
@@ -65,7 +69,7 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(int _slices, const glm::vec3 & _color = glm::vec3(0.0)) {
+    void init(int _rows, int _cols, float _cellSize, const glm::vec3 & _color = glm::vec3(0.0)) {
       
       DEBUG_LOG("glGrid::init(" + name + ")");
 
@@ -73,7 +77,11 @@ namespace ogl {
       
       shader.initPlain();
       
-      slices = _slices;
+      rows = _rows;
+      
+      cols = _cols;
+      
+      cellSize = _cellSize;
 
       color = _color;
               
@@ -101,14 +109,18 @@ namespace ogl {
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("color",      color);
-            
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
       glBindVertexArray(vao);
           
-      glDrawElements(GL_LINES, lenght, GL_UNSIGNED_INT, nullptr);
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      
+      glDisable(GL_CULL_FACE);
 
+      glDrawElements(GL_LINES, (GLsizei)indices.size(), GL_UNSIGNED_INT, nullptr);
+      
       glBindVertexArray(0);
+      
+      glCheckError();
             
     }
     
@@ -121,48 +133,48 @@ namespace ogl {
       
       DEBUG_LOG("glGrid::setInGpu(" + name + ")");
 
-      std::vector<glm::vec3> vertices;
-      std::vector<glm::uvec4> indices;
-         
-      for(int j=0; j<=slices; ++j) {
-        for(int i=0; i<=slices; ++i) {
-          float x = (float)i/(float)slices;
-          float y = 0;
-          float z = (float)j/(float)slices;
-          vertices.push_back(glm::vec3(x, y, z));
-        }
-      }
-           
-      for(int j=0; j<slices; ++j) {
-        for(int i=0; i<slices; ++i) {
-          
-          int row1 =  j    * (slices+1);
-          int row2 = (j+1) * (slices+1);
-          
-          indices.push_back(glm::uvec4(row1+i, row1+i+1, row1+i+1, row2+i+1));
-          indices.push_back(glm::uvec4(row2+i+1, row2+i, row2+i, row1+i));
+      indices.clear();
 
-        }
+      float halfWidth  = (cols * cellSize) * 0.5f;
+      float halfHeight = (rows * cellSize) * 0.5f;
+
+      std::vector<glm::vec3> vertices;
+
+      // Linee verticali
+      for(int i = 0; i <= cols; ++i) {
+          float x = -halfWidth + i * cellSize;
+          vertices.push_back(glm::vec3(x, 0.0f, -halfHeight));
+          vertices.push_back(glm::vec3(x, 0.0f,  halfHeight));
+          indices.push_back((GLuint)vertices.size() - 2);
+          indices.push_back((GLuint)vertices.size() - 1);
       }
-      
-      lenght = (GLuint)indices.size()*4;
+
+      // Linee orizzontali
+      for(int j = 0; j <= rows; ++j) {
+          float z = -halfHeight + j * cellSize;
+          vertices.push_back(glm::vec3(-halfWidth, 0, z));
+          vertices.push_back(glm::vec3( halfWidth, 0, z));
+          indices.push_back((GLuint)vertices.size() - 2);
+          indices.push_back((GLuint)vertices.size() - 1);
+      }
 
       glGenVertexArrays(1, &vao);
       glBindVertexArray(vao);
 
       glGenBuffers(1, &vbo);
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(0);
 
-      glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec3), glm::value_ptr(vertices[0]), GL_STATIC_DRAW);
-         
       glGenBuffers(1, &ibo);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size()*sizeof(glm::uvec4), glm::value_ptr(indices[0]), GL_STATIC_DRAW);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
-
+      
       glCheckError();
             
     }

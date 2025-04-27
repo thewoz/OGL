@@ -49,8 +49,8 @@ namespace ogl {
     MODE mode;
     
     // Constanti
-    GLfloat speed       =  2.00f;
-    GLfloat sensitivity =  0.025f;
+    GLfloat speed       = 10.0f;
+    GLfloat sensitivity = 0.2f;
 
     // Camera Attributes
     glm::vec3 position;
@@ -238,13 +238,13 @@ namespace ogl {
     //****************************************************************************/
     void updatePosition(float dx, float dy, float dz) { position.x += dx; position.y += dy; position.z += dz; }
     
-    glm::vec3 getPosition() { return position; }
+    glm::vec3 getPosition() const { return position; }
 
     inline void setPitch(float _pitch) { pitch = _pitch; updateCameraVectors(); }
     inline void setYaw(float _yaw)     { yaw = _yaw;     updateCameraVectors(); }
 
-    inline float getPitch() { return pitch; }
-    inline float getYaw()   { return yaw;   }
+    inline float getPitch() const { return pitch; }
+    inline float getYaw()   const { return yaw;   }
     
     //****************************************************************************/
     // setTarget() - Aggiorno la posizione del target
@@ -274,7 +274,7 @@ namespace ogl {
         glm::mat4 r = rotation(pitch, yaw, 0);
         return t1 * r * t2;
       }
-      abort();
+      throw std::runtime_error("Invalid camera mode");
     }
     
     //****************************************************************************/
@@ -342,7 +342,7 @@ namespace ogl {
             
       glm::vec4 coord = glm::vec4(_coord, 1);
       
-      coord = getProjection() * getView() * model * coord;
+      coord = projection * getView() * model * coord;
       
       if(coord.w <= 0) return false;
       
@@ -359,6 +359,53 @@ namespace ogl {
       if(coord.z < -1.0 || coord.z > 1.0) return false;
       
       return true;
+      
+    }
+    
+    //****************************************************************************/
+    // getFOV()
+    //****************************************************************************/
+    std::pair<float,float> getFOV(bool inDegrees = false) const {
+      
+      float m00 = projection[0][0];
+      float m11 = projection[1][1];
+      
+      float aspect = m11 / m00;
+
+      float fovY = 2.0f * atan(1.0f / m11);
+      float fovX = 2.0f * atan(tan(fovY / 2.0f) * aspect);
+      
+      if(inDegrees) {
+        fovY = glm::degrees(fovY);
+        fovX = glm::degrees(fovX);
+      }
+      
+      return { fovY, fovX };
+      
+    }
+        
+    //****************************************************************************/
+    // getAspect()
+    //****************************************************************************/
+    float getAspect() const {
+      float m00 = projection[0][0];
+      float m11 = projection[1][1];
+      return m11 / m00;
+    }
+    
+    //****************************************************************************/
+    // computeCameraDistanceToFitObject()
+    //****************************************************************************/
+    // Calcola la distanza minima per far entrare l’oggetto nella vista
+    float computeCameraDistanceToFitObject(float boundingRadius) const {
+     
+      std::pair<float,float> fov = getFOV();
+      
+      float distVertical   = boundingRadius / sin(fov.first  / 2.0f);
+      float distHorizontal = boundingRadius / sin(fov.second / 2.0f);
+
+      // Distanza finale
+      return std::max(distVertical, distHorizontal);
       
     }
     
@@ -390,11 +437,11 @@ namespace ogl {
     //****************************************************************************//
     // rotation
     //****************************************************************************//
-    glm::mat4 rotation(float _pitch, float _roll, float _yaw) const {
+    glm::mat4 rotation(float _pitch, float _yaw, float _roll) const {
             
       glm::mat4 RX = glm::rotate(glm::mat4(1.0f), _pitch, glm::vec3(1,0,0));
-      glm::mat4 RY = glm::rotate(glm::mat4(1.0f), _roll,  glm::vec3(0,1,0));
-      glm::mat4 RZ = glm::rotate(glm::mat4(1.0f), _yaw,   glm::vec3(0,0,1));
+      glm::mat4 RY = glm::rotate(glm::mat4(1.0f), _yaw,   glm::vec3(0,1,0));
+      glm::mat4 RZ = glm::rotate(glm::mat4(1.0f), _roll,  glm::vec3(0,0,1));
       
       return RX * RY * RZ;
       

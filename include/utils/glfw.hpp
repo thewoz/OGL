@@ -74,14 +74,19 @@ namespace glfw {
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
       glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);           // This telling the mac to deprecate everything before it basically
       glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // This telling the mac to use the core profile
-      
+
 #else
+      
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
       glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
       glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+      
 #endif
-            
+      
+      // Abilito il Multi-Sample Anti-Aliasing
+      glfwWindowHint(GLFW_SAMPLES, 4);
+      
       inited = true;
       
     } else { DEBUG_LOG("glfw::init(false)"); }

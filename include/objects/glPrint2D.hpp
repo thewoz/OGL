@@ -64,6 +64,8 @@ namespace ogl {
     
     std::map<GLchar, Character_t> Characters;
     
+    std::vector<GLuint> characterTextures;
+    
   public:
     
     //****************************************************************************/
@@ -93,7 +95,7 @@ namespace ogl {
       
       shader.setName(name);
       
-      shader.initText2D();
+      shader.initText();
       
       text = _text;
       
@@ -164,7 +166,7 @@ namespace ogl {
       
       if(!isInited){
         shader.setName(name);
-        shader.initText2D();
+        shader.initText();
         isInited = true;
       }
       
@@ -176,7 +178,8 @@ namespace ogl {
       shader.setUniform("color",      color);
                   
       glEnable(GL_CULL_FACE);
-      
+      glCullFace(GL_BACK);
+
       glEnable(GL_BLEND);
       
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -240,9 +243,7 @@ namespace ogl {
       
       glBindVertexArray(0);
       
-      glDisable(GL_CULL_FACE);
-      
-      glDisable(GL_BLEND);
+      glCheckError();
       
     }
     
@@ -283,6 +284,8 @@ namespace ogl {
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
         
+        characterTextures.push_back(textureID);
+
         glTexImage2D(GL_TEXTURE_2D,
                      0,
                      GL_RED,
@@ -329,10 +332,10 @@ namespace ogl {
 
       glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
             
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       
       glCheckError();
-
       
     }
     
@@ -346,7 +349,9 @@ namespace ogl {
         glDeleteBuffers(1, &vbo);
         glDeleteVertexArrays(1, &vao);
         
-        glDeleteTextures(1, &textureID);
+        glDeleteTextures((GLsizei)characterTextures.size(), characterTextures.data());
+
+        characterTextures.clear();
 
         isInitedInGpu = false;
         

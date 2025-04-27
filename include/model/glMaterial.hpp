@@ -51,40 +51,39 @@ namespace ogl {
     // illum mode
     int illum = 2;
     
-    float d  = 1.0f; // opacity
-    float ns = 1.0f; // phong exponent for ks
+    float d  = 1.0f;  // opacity
+    float ns = 1.0f;  // phong exponent for ks
     float ni = 0.98f; // index of refraction
     
     // material textures
-    std::vector<ogl::glTexture2D> textures;
+    std::vector<int> textures;
     
-    bool haveDiffuseTexture = false;
-    bool haveSpecularTexture = false;
-    bool haveAmbientTexture = false;
-    bool haveEmissimeTexture = false;
-    bool haveHeightTexture = false;
-    bool haveNormalsTexture = false;
-    bool haveShininessTexture = false;
-    bool haveOpacityTexture = false;
+    bool haveDiffuseTexture      = false;
+    bool haveSpecularTexture     = false;
+    bool haveAmbientTexture      = false;
+    bool haveEmissimeTexture     = false;
+    bool haveHeightTexture       = false;
+    bool haveNormalsTexture      = false;
+    bool haveShininessTexture    = false;
+    bool haveOpacityTexture      = false;
     bool haveDisplactemenTexture = false;
-    bool haveLightTexture = false;
-    bool haveReflectionTexture = false;
+    bool haveLightTexture        = false;
+    bool haveReflectionTexture   = false;
     
     bool isInited;
     bool isInitedInGpu;
-    bool isBinded;
     
   public:
     
     //****************************************************************************//
     // glMaterial - Empty constructor
     //****************************************************************************//
-    glMaterial() : isInited(false), isInitedInGpu(false), isBinded(false) { }
+    glMaterial() : isInited(false), isInitedInGpu(false) { }
     
     //****************************************************************************//
     // glMaterial - Assimp material constructor
     //****************************************************************************//
-    glMaterial(const aiMaterial * material, const std::string & path) : isInitedInGpu(false), isBinded(false) {
+    glMaterial(const aiMaterial * material, const std::string & path) : isInitedInGpu(false) {
       
       aiString tmpName;
       
@@ -154,7 +153,12 @@ namespace ogl {
     //****************************************************************************//
     // setInShader
     //****************************************************************************//
-    void setInShader(const ogl::glShader & shader) const {
+    void setInShader(const ogl::glShader & shader) {
+      
+      if(!isInitedInGpu) {
+        fprintf(stderr, "Error glMaterial: must be initialized in the GPU before set in the shader\n");
+        abort();
+      }
       
       // set available textures
       shader.setUniform("material.haveDiffuseTexture",      haveDiffuseTexture);
@@ -181,67 +185,29 @@ namespace ogl {
       shader.setUniform("material.shininess",  ns);
       shader.setUniform("material.refraction", ni);
       shader.setUniform("material.opacity",     d);
+            
+      for(GLuint i=0; i<textures.size(); i++)
+        glTextures::get(textures[i]).setInShader(shader, i);
+      
+      glCheckError();
       
     }
     
     //****************************************************************************//
-    // bindTextures
+    // setInGpu() -
     //****************************************************************************//
-    void bindTextures(const ogl::glShader & shader) {
-      
-      if(!isInitedInGpu) {
-        fprintf(stderr, "Error glMaterial: the textures must be initialized in the GPU before bind it\n");
-        abort();
-      }
-      
-      if(isBinded) {
-        fprintf(stderr, "Error glMaterial: the textures are allready binded\n");
-        abort();
-      }
-      
-      for(GLuint i=0; i<textures.size(); i++) {
-        textures[i].activate(i + 1);
-        shader.setUniform(textures[i].getType(), i + 1);
-      }
-      
-      isBinded = true;
-      
-    }
-    
-    //****************************************************************************//
-    // unbindTexture() -
-    //****************************************************************************//
-    void unbindTexture(GLuint shader) {
-      
-      if(!isBinded) {
-        fprintf(stderr, "Error glMaterial: the textures are not binded\n");
-        abort();
-      }
-      
-      // Always good practice to set everything back to defaults once configured.
-      for(GLuint i=0; i<textures.size(); i++) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        glBindTexture(GL_TEXTURE_2D, 0);
-      }
-       
-      isBinded = false;
-
-    }
-    
-    //****************************************************************************//
-    // initInGpu() -
-    //****************************************************************************//
-    void initInGpu() {
+    void setInGpu() {
       
       if(!isInited) {
-        fprintf(stderr, "Error glMaterial: material must be inizializadet before set in Gpu\n");
+        fprintf(stderr, "Error glMaterial: material must be inizialized before set in Gpu\n");
         abort();
       }
       
-      for(size_t i=0; i<textures.size(); ++i) {
-        textures[i].initInGpu();
-      }
+      for(size_t i=0; i<textures.size(); ++i)
+        glTextures::get(textures[i]).setInGpu();
       
+      glCheckError();
+
       isInitedInGpu = true;
       
     }
@@ -279,7 +245,7 @@ namespace ogl {
       if(isInitedInGpu) {
         
         for(size_t i=0; i<textures.size(); ++i) {
-          textures[i].cleanInGpu();
+          glTextures::get(textures[i]).cleanInGpu();
         }
         
         isInitedInGpu = false;
@@ -304,7 +270,7 @@ namespace ogl {
         //NOTE: prendo solo la prima
         material->GetTexture(type, 0, &filename);
         
-        textures.push_back(ogl::glTexture2D(typeName, filename.C_Str(), path));
+        textures.push_back(ogl::glTextures::load(typeName, filename.C_Str(), path));
         
         if(typeName == "diffuseTexture")      haveDiffuseTexture      = true;
         if(typeName == "specularTexture")     haveSpecularTexture     = true;

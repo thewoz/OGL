@@ -20,505 +20,237 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <vector>
-#include <algorithm>
-#include <random>
 
-//#define DEBUG_OGL
-#include <ogl/ogl.hpp>
 
-#include <imgui/imgui.hpp>
-
-/* ****************************************************************************/
-// main
-/* ****************************************************************************/
-int main(int argc, char * const argv []) {
 
 #if(1)
-  
+
+//#define DEBUG_OGL
+#define OGL_WITHOUT_IMGUI
+#include <ogl/ogl.hpp>
+
+//*****************************************************************************/
+// main
+//*****************************************************************************/
+int main(int argc, char * const argv []) {
+
   ogl::glWindow window;
   
   window.create(800, 600);
 
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
   
-  window.makeContextCurrent();
-    
-  window.getCurrentCamera()->setPosition(0.538431, 0.416719, 0.91360);
-  window.getCurrentCamera()->setYaw(-122);
-  window.getCurrentCamera()->setPitch(-11);
+  window.getCurrentCamera()->setPosition(3, 1.5, 0);
+  window.getCurrentCamera()->setYaw(180);
+  window.getCurrentCamera()->setPitch(-20);
 
   ogl::glAxes axes;
   ogl::glReferenceAxes referenceAxes;
-  ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0));
-  ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0)); box.translate(glm::vec3(-0.5));
+  ogl::glGrid grid(10, 10, 0.5, ogl::glColors::cyan);
   ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  ogl::glPrint2D text2D(10, 10, glm::vec3(1.0), 0.5, "FPS: ");
-
+  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5, "FPS: ");
+  
   while(!window.shouldClose()) {
     
     window.renderBegin();
-      axes.render(window.getCurrentCamera()); glCheckError();
-      grid.render(window.getCurrentCamera()); glCheckError();
-      referenceAxes.render(window.getCurrentCamera()); glCheckError();
-      model.render(window.getCurrentCamera()); glCheckError();
-      text2D.render(window.getCurrentCamera(), "FPS: " + std::to_string(window.getFPS())); glCheckError();
+    
+      axes.render(window.getCurrentCamera());
+      grid.render(window.getCurrentCamera());
+      referenceAxes.render(window.getCurrentCamera());
+      model.render(window.getCurrentCamera());
+      text.render(window.getCurrentCamera(), "FPS: " + std::to_string(window.getFPS()));
+    
     window.renderEnd();
         
   }
   
-#endif
-  
-#if(0)
-  
-  ogl::glWindow window;
-  
-  window.create(800, 600);
-
-  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-  
-  window.makeContextCurrent();
-    
-  ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0));
-  ogl::glAxes axes;
-  ogl::glReferenceAxes referenceAxes;
-  ogl::glEllipse ellipse(0.1, 0.1, 0.3, 10, 20, ogl::glObject::STYLE::WIREFRAME, glm::vec3(2.0,0.0,1.0));
-  ogl::glSphere sphere(1.0, 10, 10, ogl::glObject::STYLE::WIREFRAME, glm::vec3(0.0,0.0,1.0));
-  ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0));
-  ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0)); box.translate(glm::vec3(-0.5));
-  ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0)); cube.translate(glm::vec3(0.5));
-  ogl::glLines lines({glm::vec3(0.0,0.0,0.0), glm::vec3(-1.0,-1.0,-1.0), glm::vec3(-1.0,1.0,1.0)}, glm::vec4(1.0));
-  ogl::glPrint2D text2D(10, 10, glm::vec3(1.0), 1, "OGL");
-  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  //ogl::glQuad quad;
-  
-  std::random_device rd;
-  std::mt19937 gen = std::mt19937(rd());
-  std::normal_distribution<float> gaussRandom = std::normal_distribution<float>(-0.2, 0.2);
-
-  std::vector<glm::vec3> coords(1000);
-
-  for(size_t i=0; i<1000; ++i) {
-    coords[i].x = gaussRandom(gen);
-    coords[i].y = gaussRandom(gen);
-    coords[i].z = gaussRandom(gen);
-  }
-
-  ogl::glPoints points(coords, glm::vec4(1.0), 10, "points");
-
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-      line.render(window.getCurrentCamera()); glCheckError();
-      axes.render(window.getCurrentCamera()); glCheckError();
-      ellipse.render(window.getCurrentCamera()); glCheckError();
-      sphere.render(window.getCurrentCamera()); glCheckError();
-      grid.render(window.getCurrentCamera()); glCheckError();
-      box.render(window.getCurrentCamera()); glCheckError();
-      cube.render(window.getCurrentCamera()); glCheckError();
-      referenceAxes.render(window.getCurrentCamera()); glCheckError();
-      points.render(window.getCurrentCamera()); glCheckError();
-      lines.render(window.getCurrentCamera()); glCheckError();
-      model.render(window.getCurrentCamera()); glCheckError();
-      text2D.render(window.getCurrentCamera()); glCheckError();
-      //quad.render(window.getCurrentCamera()); glCheckError();
-    window.renderEnd();
-        
-  }
-  
-#endif
-  
-  
-#if(0)
-  
-  ogl::glWindow window;
-  
-  window.create(800, 600);
-  
-  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-  
-  window.makeContextCurrent();
-  
-  ogl::glAxes axes(1.0);
-  ogl::glSmallAxes axesSmall(1.0);
-
-  ogl::glPrint3D text3D("OGL", 1, 1, 1, glm::vec3(255.0));
-  ogl::glPrint   text2D("testo");
-  
-  ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0));
-  ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0)); cube.translate(glm::vec3(0.5));
-  
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-    
-    axes.render(window.getProjection(), window.getView());
-    axesSmall.render(window.getOrthoProjection(), window.getCurrentCamera()->getLookAt(glm::vec3(0)));
-   
-    line.render(window.getProjection(), window.getView());
-    cube.render(window.getProjection(), window.getView());
-    //cube.render(window.getOrthoProjection(), window.getView());
-    
-    text2D.print(window.getOrthoProjectionText(), "leo", 0, 0, glm::vec3(255.0));
-
-    text3D.print(window.getProjection(), window.getCurrentCamera());
-
-    window.renderEnd();
-    
-  }
-  
-#endif
-  
-  
-#if(0)
-  
-  ogl::glWindow window;
-  
-  window.create(800, 600);
-  
-  //window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-  
-  window.makeContextCurrent();
-  
-  // Setup Dear ImGui context
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO(); (void)io;
-  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-  
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-  //ImGui::StyleColorsClassic();
-  
-  const char* glsl_version = "#version 150";
-
-  // Setup Platform/Renderer bindings
-  ImGui_ImplGlfw_InitForOpenGL(window.window, true);
-  ImGui_ImplOpenGL3_Init(glsl_version);
-  
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-    
-    // Start the Dear ImGui frame
-    ImGui_ImplOpenGL3_NewFrame();
-    ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
-    
-    bool show_demo_window = true;
-    bool show_another_window = false;
-    ImVec4 clear_color;
-    
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-    {
-      static float f = 0.0f;
-      static int counter = 0;
-      
-      ImGui::Begin("Params");                                 // Create a window called "Hello, world!" and append into it.
-      
-      ImGui::Text("List of Icaro parameters:");               // Display some text (you can use a format strings too)
-      ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
-      ImGui::Checkbox("Another Window", &show_another_window);
-      
-      ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-      ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
-      
-      if(ImGui::Button("Button"))                             // Buttons return true when clicked (most widgets return true when edited/activated)
-        counter++;
-      
-      ImGui::SameLine();
-      ImGui::Text("counter = %d", counter);
-      ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-      
-      ImGui::End();
-    }
-    
-    // Rendering
-    ImGui::Render();
-   
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    
-    window.renderEnd();
-    
-  }
-  
-#endif
-  
-  
-#if(0)
-  
-  ogl::glWindow window;
-  
-  window.create(800, 600);
-  
-  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-  
-  window.makeContextCurrent();
-  
-  ogl::glPrint text("testo");
-    
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-    
-    text.print(window.getOrthoProjection(), "leo", 0, 0, glm::vec3(255.0));
-
-    window.renderEnd();
-    
-  }
-  
-#endif
-  
-#if(0)
-  
-  ogl::glWindow window;
-    
-  window.create(800, 600);
-
-  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-
-  window.makeContextCurrent();
-    
-  while(!window.shouldClose()) {
-      
-    window.renderBegin();
-      
-    float ratio = window.width / (float) window.height;
-    glViewport(0, 0, window.width, window.height);
-      
-    glClear(GL_COLOR_BUFFER_BIT);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glOrtho(-ratio, ratio, -1.f, 1.f, 1.f, -1.f);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glRotatef((float) glfwGetTime() * 50.f, 0.f, 0.f, 1.f);
-    glBegin(GL_TRIANGLES);
-    glColor3f(1.f, 0.f, 0.f);
-    glVertex3f(-0.6f, -0.4f, 0.f);
-    glColor3f(0.f, 1.f, 0.f);
-    glVertex3f(0.6f, -0.4f, 0.f);
-    glColor3f(0.f, 0.f, 1.f);
-    glVertex3f(0.f, 0.6f, 0.f);
-    glEnd();
-            
-    window.renderEnd();
-      
-  }
-
-#endif
-  
-#if(0)
-  
-  ogl::glWindow window;
-
-  window.create(800, 600);
-
-  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-  
-  window.makeContextCurrent();
-
-  std::random_device rd;
-  std::mt19937 gen = std::mt19937(rd());
-  std::normal_distribution<float> gaussRandom = std::normal_distribution<float>(-0.2, 0.2);
-  
-  std::vector<glm::vec3> coords(1000);
-  
-  for(size_t i=0; i<1000; ++i) {
-    coords[i].x = gaussRandom(gen);
-    coords[i].y = gaussRandom(gen);
-    coords[i].z = gaussRandom(gen);
-  }
-  
-  ogl::glPoints points(coords, glm::vec4(1.0), 10, "punti");
-  
-  ogl::glAxes axes(1.0, "assi");
-  ogl::glSphere sphere(1.0, 10, 10, ogl::glObject::STYLE::WIREFRAME, glm::vec3(0.0,0.0,1.0), "sfera");
-  ogl::glEllipse ellipse(0.1, 0.1, 0.3, 10, 20, ogl::glObject::STYLE::WIREFRAME, glm::vec3(2.0,0.0,1.0), "ellipse");
-  ogl::glLine line({glm::vec3(0.0,0.0,0.0), glm::vec3(1.0,1.0,1.0)}, glm::vec3(1.0,0.0,1.0), "linea");
-  ogl::glCuboid cube(glm::vec3(0.1), ogl::glObject::STYLE::SOLID, glm::vec3(1.0,0.0,0.0), "cubo"); cube.translate(glm::vec3(0.5));
-  ogl::glBox box(glm::vec3(1.0,2.0,5.0), glm::vec3(1.0,0.0,0.0), "box"); box.translate(glm::vec3(-0.5));
-  ogl::glPrint text("testo");
-  ogl::glGrid grid(10, glm::vec3(0.0,1.0,1.0), "griglia");
-  ogl::glPrint3D text3D("testo3D");
-
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-  
-      axes.render(window.getProjection(), window.getView());
-//      sphere.render(window.getProjection(), window.getView());
-//      grid.render(window.getProjection(), window.getView());
-      line.render(window.getProjection(), window.getView());
-      cube.render(window.getProjection(), window.getView());
-//      box.render(window.getProjection(), window.getView());
-//      ellipse.render(window.getProjection(), window.getView());
-//      points.render(window.getProjection(), window.getView());
-      text.print(window.getOrthoProjection(), "OGL", 0, 0, glm::vec3(255.0));
-      text3D.print(window.getProjection(), window.getView(), "OGL 3D", 0, 1, 0, glm::vec3(255.0), 1);
-
-    window.renderEnd();
-      
-  }
-
-#endif
-  
-#if(0)
-  
-  ogl::glAxes axes;
-
-  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
-
-  ogl::glWindow window;
-
-  window.create(800, 600);
-  
-  window.makeContextCurrent();
-      
-  window.addCamera(45.0, 0.1, 10.0, glm::vec3(1.1, 1.3, 1.4), ogl::glCamera::MODE::TARGET, glm::vec3(0.01, 0.01, 0.01));
-
-  window.changeCamera();
-      
-  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-
-  uint32_t frame = 0;
-
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-    
-    axes.render(window.getProjection(), window.getView());
-    
-    model.rotate(glm::vec3(glm::sin(glm::radians((float)frame)),
-                                    glm::sin(glm::radians((float)frame)),
-                                    glm::cos(glm::radians((float)frame))));
-
-    model.render(window.getProjection(), window.getView());
-    
-    window.renderEnd();
-    
-    ++frame;
-      
-  }
-      
-#endif
-  
-#if(0)
-  
-  ogl::glAxes axes;
-  
-  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
-  
-  ogl::glWindow window;
-  
-  window.create(800, 600);
-  
-  window.makeContextCurrent();
-  
-  window.addCamera(45.0, 0.1, 10.0, glm::vec3(1.1, 1.3, 1.4), ogl::glCamera::MODE::TARGET, glm::vec3(0.01, 0.01, 0.01));
-  
-  window.changeCamera();
-  
-  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  
-  uint32_t frame = 0;
-  
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-    
-    axes.render(window.getProjection(), window.getView());
-    
-    model.rotate(glm::vec3(glm::sin(glm::radians((float)frame)),
-                           glm::sin(glm::radians((float)frame)),
-                           glm::cos(glm::radians((float)frame))));
-    
-    model.render(window.getProjection(), window.getView());
-    
-    window.renderEnd();
-    
-    ++frame;
-    
-  }
-  
-#endif
-  
-#if(0)
-  
-  ogl::glAxes axes;
-  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
-
-  ogl::glWindow window;
-    
-  window.create(800, 600);
-  
-  window.makeContextCurrent();
-  
-  window.addCamera(45.0, 0.1, 10.0, glm::vec3(1.1, 1.3, 1.4), ogl::glCamera::MODE::TARGET, glm::vec3(0.01, 0.01, 0.01));
-  
-  window.changeCamera();
-  
-  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  
-  uint32_t frame = 0;
-  
-  while(!window.shouldClose()) {
-    
-    window.renderBegin();
-    
-    axes.render(window.getProjection(), window.getView());
-    
-    model.rotate(glm::vec3(glm::sin(glm::radians((float)frame)),
-                           glm::sin(glm::radians((float)frame)),
-                           glm::cos(glm::radians((float)frame))));
-    
-    model.render(window.getProjection(), window.getView());
-    
-    window.renderEnd();
-    
-    ++frame;
-    
-  }
-  
-  window.destroy();
-
-  ogl::glWindow window1;
-  
-  window1.create(800, 600);
-  
-  window1.makeContextCurrent();
-  
-  window1.addCamera(45.0, 0.1, 10.0, glm::vec3(1.1, 1.3, 1.4), ogl::glCamera::MODE::TARGET, glm::vec3(0.01, 0.01, 0.01));
-  
-  window1.changeCamera();
-  
-  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  
-  frame = 0;
-  
-  while(!window1.shouldClose()) {
-    
-    window1.renderBegin();
-    
-    axes.render(window1.getProjection(), window1.getView());
-    
-    model.rotate(glm::vec3(glm::sin(glm::radians((float)frame)),
-                           glm::sin(glm::radians((float)frame)),
-                           glm::cos(glm::radians((float)frame))));
-    
-    model.render(window1.getProjection(), window1.getView());
-    
-    window1.renderEnd();
-    
-    ++frame;
-    
-  }
-  
-  window1.destroy();
-  
-#endif
-
   return 0;
   
 }
+
+#else
+
+#include <glad/glad.h>
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <vector>
+#include <iostream>
+
+#include <tiffio.h>
+  
+  //****************************************************************************//
+  // snapshot
+  //****************************************************************************//
+  void snapshot(int width, int height, std::string outputfile) {
+    
+    TIFF * file = TIFFOpen(outputfile.c_str(), "w");
+    
+    if(file==NULL){
+      abort();
+    }
+    
+    GLubyte * image = (GLubyte*) malloc(width * height * sizeof(GLubyte) * 3);
+    
+    if(image==NULL){
+      abort();
+    }
+   
+    /* OpenGL's default 4 byte pack alignment would leave extra bytes at the
+     end of each image row so that each full row contained a number of bytes
+     divisible by 4.  Ie, an RGB row with 3 pixels and 8-bit componets would
+     be laid out like "RGBRGBRGBxxx" where the last three "xxx" bytes exist
+     just to pad the row out to 12 bytes (12 is divisible by 4). To make sure
+     the rows are packed as tight as possible (no row padding), set the pack
+     alignment to 1. */
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+        
+    TIFFSetField(file, TIFFTAG_IMAGEWIDTH,  width);
+    TIFFSetField(file, TIFFTAG_IMAGELENGTH, height);
+    TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
+    TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS);
+    TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+    TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 3);
+    TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+    TIFFSetField(file, TIFFTAG_ROWSPERSTRIP, 1);
+    TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, "");
+    
+    // mi serve per non scordarmi il valore del puntatore originale
+    GLubyte * p = image;
+    
+    for(int i=height - 1; i>=0; --i) {
+      
+      if(TIFFWriteScanline(file, p, i, 0) < 0) {
+        fprintf(stderr, "file '%s' line %d function '%s': error in TIFFWriteScanline\n", __FILE__, __LINE__, __func__);
+        abort();
+      }
+ 
+      p += width * sizeof(GLubyte) * 3;
+      
+    }
+    
+    TIFFClose(file);
+    
+    free(image);
+    
+  }
+
+void CheckStatus( GLuint obj, bool isShader )
+{
+    GLint status = GL_FALSE, log[ 1 << 11 ] = { 0 };
+    ( isShader ? glGetShaderiv : glGetProgramiv )( obj, isShader ? GL_COMPILE_STATUS : GL_LINK_STATUS, &status );
+    if( status == GL_TRUE ) return;
+    ( isShader ? glGetShaderInfoLog : glGetProgramInfoLog )( obj, sizeof( log ), NULL, (GLchar*)log );
+    std::cerr << (GLchar*)log << "\n";
+    std::exit( EXIT_FAILURE );
+}
+
+void AttachShader( GLuint program, GLenum type, const char* src )
+{
+    GLuint shader = glCreateShader( type );
+    glShaderSource( shader, 1, &src, NULL );
+    glCompileShader( shader );
+    CheckStatus( shader, true );
+    glAttachShader( program, shader );
+    glDeleteShader( shader );
+}
+
+const char* const vert = 1 + R"GLSL(
+#version 330 core
+layout ( location = 0 ) in vec2 Position;
+layout ( location = 1 ) in vec3 Color;
+out VertexData
+{
+    vec3 Color;
+} vsOutput;
+void main()
+{
+    gl_Position = vec4( Position, 0.0, 1.0 );
+    vsOutput.Color = Color;
+}
+)GLSL";
+
+const char* const frag = 1 + R"GLSL(
+#version 330 core
+in VertexData
+{
+    vec3 Color;
+} fsInput;
+out vec4 outColor;
+void main()
+{
+    outColor = vec4( fsInput.Color, 1.0 );
+}
+)GLSL";
+
+int main( int, char** )
+{
+    glfwSetErrorCallback( []( int, const char* desc ) { std::cerr << desc << "\n"; std::exit( EXIT_FAILURE ); } );
+    glfwInit();
+    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 1 );
+    glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE );
+    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+    GLFWwindow* window = glfwCreateWindow( 640, 480, "GLFW", NULL, NULL );
+    glfwMakeContextCurrent( window );
+    gladLoadGLLoader( (GLADloadproc)glfwGetProcAddress );
+
+    GLuint vbo = 0;
+    glGenBuffers( 1, &vbo );
+    glBindBuffer( GL_ARRAY_BUFFER, vbo );
+    struct Vertex
+    {
+        glm::vec2 mPosition;
+        glm::vec3 mColor;
+    };
+    const std::vector< Vertex > verts =
+    {
+        { glm::vec2( -0.5f, -0.5f ), glm::vec3( 1.0f, 0.0f, 0.0f ) },
+        { glm::vec2(  0.5f, -0.5f ), glm::vec3( 0.0f, 1.0f, 0.0f ) },
+        { glm::vec2(  0.0f,  0.5f ), glm::vec3( 0.0f, 0.0f, 1.0f ) },
+    };
+    glBufferData( GL_ARRAY_BUFFER, sizeof( Vertex ) * verts.size(), verts.data(), GL_STATIC_DRAW );
+
+    GLuint vao = 0;
+    glGenVertexArrays( 1, &vao );
+    glBindVertexArray( vao );
+    glEnableVertexAttribArray( 0 );
+    glVertexAttribPointer( 0 , 2, GL_FLOAT, GL_FALSE, sizeof( Vertex ), (GLvoid*)offsetof( Vertex, mPosition ) );
+    glEnableVertexAttribArray( 1 );
+    glVertexAttribPointer( 1 , 3, GL_FLOAT, GL_FALSE, sizeof( Vertex ), (GLvoid*)offsetof( Vertex, mColor ) );
+
+    GLuint prog = glCreateProgram();
+    AttachShader( prog, GL_VERTEX_SHADER, vert );
+    AttachShader( prog, GL_FRAGMENT_SHADER, frag );
+    glLinkProgram( prog );
+    CheckStatus( prog, false );
+    glUseProgram( prog );
+
+    bool snap = true;
+  
+    while( !glfwWindowShouldClose( window ) )
+    {
+        glfwPollEvents();
+        int w, h;
+        glfwGetFramebufferSize( window, &w, &h );
+        glViewport( 0, 0, w, h );
+        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+        glDrawArrays( GL_TRIANGLES, 0, 3 );
+      
+      if(snap) {
+        snapshot(w, h, home + "/Desktop/test.tif");
+          snap = false;
+      }
+      
+        glfwSwapBuffers( window );
+      
+
+      
+    }
+  
+    glfwTerminate();
+}
+
+#endif

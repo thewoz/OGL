@@ -63,7 +63,7 @@ namespace ogl {
     //****************************************************************************/
     // init
     //****************************************************************************/
-    void init(std::string path, GLfloat sizeFactor = 1.0f) {
+    void init(std::string path, GLfloat normalizeTo = 1.0f) {
                 
       name = ogl::io::name(path);
       
@@ -96,17 +96,11 @@ namespace ogl {
       // Process ASSIMP's root node recursively
       processNode(scene->mRootNode, scene, directory);
       
+      // messo qui senno normalize si incavola che non vede l'init
       isInited = true;
 
-      normalize(sizeFactor, false);
+      if(normalizeTo !=0) normalize(normalizeTo);
       
-      glm::vec3 modelCenter, modelSizeVec;
-      
-      float modelRadius;
-      
-      //TODO: ci sta un problema su come mi calcolo il centro
-      getBounds(modelCenter, modelSizeVec, modelRadius);
-                  
     }
     
     //****************************************************************************/
@@ -122,22 +116,22 @@ namespace ogl {
     //****************************************************************************/
     // render() - Render the model, and thus all its meshes
     //****************************************************************************/
-    void render(const glCamera * camera, bool withMaterials = true) {
+    void render(const glCamera * camera) {
             
-      renderBegin(camera, withMaterials);
+      renderBegin(camera);
       
-      for(std::size_t i=0; i<meshes.size(); ++i) {
-        meshes[i].render(shader, withMaterials);
-      }
+      for(std::size_t i=0; i<meshes.size(); ++i) meshes[i].render(shader);
       
       renderEnd();
+      
+      glCheckError();
       
     }
 
     //****************************************************************************/
     // renderBegin()
     //****************************************************************************/
-    void renderBegin(const glCamera * camera, bool withMaterials = true){
+    void renderBegin(const glCamera * camera){
               
       DEBUG_LOG("glModel::render(" + name + ")");
       
@@ -157,11 +151,8 @@ namespace ogl {
       shader.setUniform("withShadow", false);
       
       light.setInShader(shader, camera->getView());
-      
-      //glEnable(GL_DEPTH_TEST);
-      
+    
       glEnable(GL_CULL_FACE);
-      
       glCullFace(GL_BACK);
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -172,51 +163,50 @@ namespace ogl {
     //****************************************************************************/
     // renderEnd()
     //****************************************************************************/
-    void renderEnd() {
-      
-      glDisable(GL_CULL_FACE);
-      
-      //glDisable(GL_DEPTH_TEST);
-      
-    }
+    void renderEnd() { }
     
     //****************************************************************************/
     // getBounds() - Compute the bounds of the model (center, size, radius)
     //****************************************************************************/
-    void getBounds(glm::vec3 & _center, glm::vec3 & size, float & radius) const {
-      
-      if(!isInited){
-        fprintf(stderr, "glModel must be inited before get bounds\n");
+    void getBounds(glm::vec3 & center, glm::vec3 & size, float & radius) const {
+          
+      if(!isInited) {
+        fprintf(stderr, "glModel must be initialized before calling getBounds\n");
         abort();
       }
-      
-      _center = glm::vec3(0.0f);
-      size    = glm::vec3(0.0f);
-      radius  = 0;
-      
-      int counter = 0;
-      
-      for(std::size_t i=0; i<meshes.size(); ++i){
-        
-        glm::vec3 tmp_center; glm::vec3 tmp_size; float tmp_radius;
-        
+
+      if(meshes.empty()) {
+        center = glm::vec3(0.0f);
+        size = glm::vec3(0.0f);
+        radius = 0.0f;
+        return;
+      }
+
+      glm::vec3 min_bound(+FLT_MAX);
+      glm::vec3 max_bound(-FLT_MAX);
+
+      for(std::size_t i=0; i<meshes.size(); ++i) {
+
+        glm::vec3 tmp_center, tmp_size;
+        float tmp_radius;
+
         meshes[i].bounds(tmp_center, tmp_size, tmp_radius);
-        
-        _center += tmp_center;
-        
-        if(tmp_radius > radius) radius = tmp_radius;
-        
-        if(tmp_size.x > size.x) size.x = tmp_size.x;
-        if(tmp_size.y > size.y) size.y = tmp_size.y;
-        if(tmp_size.z > size.z) size.z = tmp_size.z;
-        
-        ++counter;
+
+        glm::vec3 half_size = tmp_size * 0.5f;
+        glm::vec3 local_min = tmp_center - half_size;
+        glm::vec3 local_max = tmp_center + half_size;
+
+        min_bound = glm::min(min_bound, local_min);
+        max_bound = glm::max(max_bound, local_max);
         
       }
-      
-      _center /= (double) counter;
+
+      center = (min_bound + max_bound) * 0.5f;
+      size   = (max_bound - min_bound);
+      radius = glm::length(size) * 0.5f;
       
     }
+
     
     //****************************************************************************/
     // getRadius() - Compute the radius of the model
@@ -260,24 +250,16 @@ namespace ogl {
     //****************************************************************************/
     // normalize() - Normalize and set the center of the model
     //****************************************************************************/
-    void normalize(double scaleTo, bool m_center = false) {
-      
-      //TODO: controlla bounds
-      
-      glm::vec3 _center; glm::vec3 size; float radius = 0.0f;
-      
-      getBounds(_center, size, radius);
+    void normalize(double normalizeTo) {
             
-      double scalingFactor = scaleTo / radius;
+      glm::vec3 center; glm::vec3 size; float radius = 0.0f;
       
-      glm::vec3 offset = glm::vec3(0.0f);
-      
-      if(m_center) offset = -_center;
+      getBounds(center, size, radius);
+            
+      double scalingFactor = normalizeTo / radius;
       
       for(std::size_t i=0; i<meshes.size(); ++i)
-        meshes[i].scale(scalingFactor, offset);
-      
-//    getBounds(center, size, radius);
+        meshes[i].scale(scalingFactor, glm::vec3(0.0f));
       
     }
     
@@ -286,9 +268,7 @@ namespace ogl {
     //                 located at the node and repeats this process on its children nodes (if any)
     //****************************************************************************/
     void processNode(const aiNode * node, const aiScene * scene, const std::string & path) {
-      
-      //printf("%s\n", node->mName.C_Str());
-      
+            
       // Process each mesh located at the current node
       for(GLuint i=0; i<node->mNumMeshes; ++i) {
         

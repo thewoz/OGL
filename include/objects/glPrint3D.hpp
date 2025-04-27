@@ -54,6 +54,8 @@ namespace ogl {
     
     std::string text;
     
+    bool isDynamicScale = false;
+    
     struct Character_t {
       unsigned int TextureID; // ID handle of the glyph texture
       glm::ivec2   Size;      // Size of glyph
@@ -62,6 +64,8 @@ namespace ogl {
     };
     
     std::map<GLchar, Character_t> Characters;
+    
+    std::vector<GLuint> characterTextures;
     
   public:
     
@@ -73,17 +77,17 @@ namespace ogl {
     //****************************************************************************/
     // glPrint()
     //****************************************************************************/
-    glPrint3D(const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1, const std::string _text = "", const std::string & _name = "") {
+    glPrint3D(const std::string _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1.0, float _isDynamicScale = false, const std::string & _name = "") {
       name = _name;
-      init(_coord, _color, _scale, _text);
+      init(_text, _coord, _color, _scale, _isDynamicScale);
     }
     
     //****************************************************************************/
     // glPrint()
     //****************************************************************************/
-    glPrint3D(const glm::vec3 & _color, float _scale = 1, const std::string & _name = "") {
+    glPrint3D(const glm::vec3 & _color, float _scale = 1.0, bool _isDynamicScale = false, const std::string & _name = "") {
       name = _name;
-      init(glm::vec3(0,0,0), _color, _scale, "");
+      init("", glm::vec3(0,0,0), _color, _scale, _isDynamicScale);
     }
     
     //****************************************************************************/
@@ -94,13 +98,13 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1, const std::string _text = "") {
+    void init(const std::string _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1.0, float _isDynamicScale = false) {
       
       DEBUG_LOG("glPrint3D::init(" + name + ")");
       
       shader.setName(name);
       
-      shader.initText2D();
+      shader.initText();
       
       text = _text;
       
@@ -109,6 +113,8 @@ namespace ogl {
       color = _color;
       
       scale = _scale;
+      
+      isDynamicScale = _isDynamicScale;
       
       isInited = true;
       
@@ -173,7 +179,7 @@ namespace ogl {
 
       if(!isInited){
         shader.setName(name);
-        shader.initText2D();
+        shader.initText();
         isInited = true;
       }
       
@@ -185,9 +191,13 @@ namespace ogl {
       shader.setUniform("color",      color);
             
       glEnable(GL_CULL_FACE);
+      glCullFace(GL_BACK);
+
+      //glEnable(GL_DEPTH_TEST);
+      glDepthMask(GL_FALSE);
       
       glEnable(GL_BLEND);
-      
+            
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       
       glActiveTexture(GL_TEXTURE0);
@@ -198,16 +208,23 @@ namespace ogl {
           
       float tmpX = screen.x;
       
+      float _scale = scale;
+      
+      if(isDynamicScale) {
+        float distance = glm::distance(camera->getPosition(), coord);
+        _scale = scale / distance;
+      }
+      
       // iterate through all characters
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
         
         const Character_t & ch = Characters[*c];
         
-        float xpos = tmpX + ch.Bearing.x * scale;
-        float ypos = screen.y - (ch.Size.y - ch.Bearing.y) * scale;
+        float xpos = tmpX + ch.Bearing.x * _scale;
+        float ypos = screen.y - (ch.Size.y - ch.Bearing.y) * _scale;
         
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
+        float w = ch.Size.x * _scale;
+        float h = ch.Size.y * _scale;
         
         // update VBO for each character
         float vertices[6][4] = {
@@ -231,17 +248,18 @@ namespace ogl {
         glDrawArrays(GL_TRIANGLES, 0, 6);
         
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels
-        tmpX += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        tmpX += (ch.Advance >> 6) * _scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
                 
       }
       
       glBindVertexArray(0);
       
       glBindTexture(GL_TEXTURE_2D, 0);
-            
-      glDisable(GL_CULL_FACE);
       
-      glDisable(GL_BLEND);
+      glDepthMask(GL_TRUE);
+      
+      glCheckError();
+      
       
     }
     
@@ -255,12 +273,12 @@ namespace ogl {
       FT_Library ft;
       
       // All functions return a value different than 0 whenever an error occurred
-      if (FT_Init_FreeType(&ft))
+      if(FT_Init_FreeType(&ft))
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
       
       // load font as face
       FT_Face face;
-      if (FT_New_Face(ft, "/usr/local/include/ogl/data/fonts/arial.ttf", 0, &face))
+      if(FT_New_Face(ft, "/usr/local/include/ogl/data/fonts/arial.ttf", 0, &face))
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
       
       // set size to load glyphs as
@@ -281,6 +299,7 @@ namespace ogl {
         // generate texture
         glGenTextures(1, &textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
+        characterTextures.push_back(textureID);
         
         glTexImage2D(
                      GL_TEXTURE_2D,
@@ -330,6 +349,7 @@ namespace ogl {
       glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
       glEnableVertexAttribArray(0);
                   
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       
       glCheckError();
@@ -346,7 +366,8 @@ namespace ogl {
         glDeleteBuffers(1, &vbo);
         glDeleteVertexArrays(1, &vao);
         
-        glDeleteTextures(1, &textureID);
+        glDeleteTextures((GLsizei)characterTextures.size(), characterTextures.data());
+        characterTextures.clear();
         
         isInitedInGpu = false;
         
