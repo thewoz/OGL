@@ -48,12 +48,9 @@ namespace ogl {
     glm::vec3 kr = {0, 0, 0}; // reflection color
     glm::vec3 kt = {0, 0, 0}; // transmission color
     
-    // illum mode
-    int illum = 2;
-    
     float d  = 1.0f;  // opacity
     float ns = 1.0f;  // phong exponent for ks
-    float ni = 0.98f; // index of refraction
+    //float ni = 0.98f; // index of refraction
     
     // material textures
     std::vector<int> textures;
@@ -61,12 +58,12 @@ namespace ogl {
     bool haveDiffuseTexture      = false;
     bool haveSpecularTexture     = false;
     bool haveAmbientTexture      = false;
-    bool haveEmissimeTexture     = false;
+    bool haveEmissiveTexture     = false;
     bool haveHeightTexture       = false;
     bool haveNormalsTexture      = false;
     bool haveShininessTexture    = false;
     bool haveOpacityTexture      = false;
-    bool haveDisplactemenTexture = false;
+    bool haveDisplacementTexture = false;
     bool haveLightTexture        = false;
     bool haveReflectionTexture   = false;
     
@@ -100,9 +97,12 @@ namespace ogl {
       
       material->Get(AI_MATKEY_SHININESS, ns);
       
-      material->Get(AI_MATKEY_REFRACTI, ni);
+      //float ni = 0.98f; // index of refraction
+      //material->Get(AI_MATKEY_REFRACTI, ni);
       
-      material->Get(AI_MATKEY_SHADING_MODEL, illum);
+      //TODO:
+      //int illum;
+      //material->Get(AI_MATKEY_SHADING_MODEL, illum);
       
       material->Get(AI_MATKEY_OPACITY, d);
       
@@ -119,7 +119,7 @@ namespace ogl {
       loadTextures(material, aiTextureType_EMISSIVE, "emissimeTexture", path);
       
       // 5. Height maps
-      loadTextures(material, aiTextureType_HEIGHT, "heightTexture", path);
+      //loadTextures(material, aiTextureType_HEIGHT, "heightTexture", path);
       
       // 6. Normals maps
       loadTextures(material, aiTextureType_NORMALS, "normalsTexture", path);
@@ -131,7 +131,7 @@ namespace ogl {
       loadTextures(material, aiTextureType_OPACITY, "opacityTexture", path);
       
       // 9. Displacement maps
-      loadTextures(material, aiTextureType_DISPLACEMENT, "displactemenTexture", path);
+      //loadTextures(material, aiTextureType_DISPLACEMENT, "displactemenTexture", path);
       
       // 10. Light maps
       loadTextures(material, aiTextureType_LIGHTMAP, "lightTexture", path);
@@ -164,12 +164,12 @@ namespace ogl {
       shader.setUniform("material.haveDiffuseTexture",      haveDiffuseTexture);
       shader.setUniform("material.haveSpecularTexture",     haveSpecularTexture);
       shader.setUniform("material.haveAmbientTexture",      haveAmbientTexture);
-      shader.setUniform("material.haveEmissimeTexture",     haveEmissimeTexture);
-      shader.setUniform("material.haveHeightTexture",       haveHeightTexture);
+      shader.setUniform("material.haveEmissiveTexture",     haveEmissiveTexture);
+      //shader.setUniform("material.haveHeightTexture",       haveHeightTexture);
       shader.setUniform("material.haveNormalsTexture",      haveNormalsTexture);
       shader.setUniform("material.haveShininessTexture",    haveShininessTexture);
       shader.setUniform("material.haveOpacityTexture",      haveOpacityTexture);
-      shader.setUniform("material.haveDisplactemenTexture", haveDisplactemenTexture);
+      //shader.setUniform("material.haveDisplacementTexture", haveDisplacementTexture);
       shader.setUniform("material.haveLightTexture",        haveLightTexture);
       shader.setUniform("material.haveReflectionTexture",   haveReflectionTexture);
       
@@ -183,7 +183,7 @@ namespace ogl {
       
       // set
       shader.setUniform("material.shininess",  ns);
-      shader.setUniform("material.refraction", ni);
+      //shader.setUniform("material.refraction", ni);
       shader.setUniform("material.opacity",     d);
             
       // TODO: questo rallenta molto
@@ -228,11 +228,11 @@ namespace ogl {
       fprintf(output, "Kt %f %f %f\n", kt[0], kt[1], kt[2]);
       
       fprintf(output, "Ns %f\n", ns);
-      fprintf(output, "Ni %f\n", ni);
+      //fprintf(output, "Ni %f\n", ni);
       
       fprintf(output, "d %f\n", d);
       
-      fprintf(output, "illum %d\n", illum);
+      //fprintf(output, "illum %d\n", illum);
       
       fprintf(output, "\n");
       
@@ -276,12 +276,12 @@ namespace ogl {
         if(typeName == "diffuseTexture")      haveDiffuseTexture      = true;
         if(typeName == "specularTexture")     haveSpecularTexture     = true;
         if(typeName == "ambientTexture")      haveAmbientTexture      = true;
-        if(typeName == "emissimeTexture")     haveEmissimeTexture     = true;
-        if(typeName == "heightTexture")       haveHeightTexture       = true;
+        if(typeName == "emissiveTexture")     haveEmissiveTexture     = true;
+        //if(typeName == "heightTexture")       haveHeightTexture       = true;
         if(typeName == "normalsTexture")      haveNormalsTexture      = true;
         if(typeName == "shininessTexture")    haveShininessTexture    = true;
         if(typeName == "opacityTexture")      haveOpacityTexture      = true;
-        if(typeName == "displactemenTexture") haveDisplactemenTexture = true;
+        //if(typeName == "displacementTexture") haveDisplacementTexture = true;
         if(typeName == "lightTexture")        haveLightTexture        = true;
         if(typeName == "reflectionTexture")   haveReflectionTexture   = true;
         

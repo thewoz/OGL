@@ -38,56 +38,44 @@ namespace ogl {
     // contatore del numero di luci create
     static GLuint counter;
     
-  public:
-    
-    // posizione della luce
     glm::vec3 position;
-    
-    // intensita della luce (colore)
-    glm::vec3 intensities;
-    
-    // direzione della luce
     glm::vec3 direction;
+
+    glm::vec3 ambient;
+    glm::vec3 diffuse;
+    glm::vec3 specular;
     
-    // attenuazione
-    float attenuation;
-    
-    // ?
-    float ambientCoefficient;
-    
-    // grandezza del cono
-    float coneAngle;
-    
-    // direzione del cono
-    glm::vec3 coneDirection;
+  public:
     
     //****************************************************************************//
     // glLight
     //****************************************************************************//
-    glLight() { counter++; }
+    glLight() : position(0.0f), direction(0.0f, -1.0f, 0.0f), ambient(0.2f), diffuse(0.5f), specular(1.0f) {
+      counter++;
+    }
     
     //****************************************************************************//
-    // setPosition
+    // set()
     //****************************************************************************//
-    void setPosition(const glm::vec3 & _position) { position = _position; }
-    
-    //****************************************************************************//
-    // setDirection
-    //****************************************************************************//
-    void setDirection(const glm::vec3 & _direction) { direction = _direction; }
+    void setPosition(const glm::vec3& _position)   { position = _position; }
+    void setDirection(const glm::vec3& _direction) { direction = _direction; }
+    void setAmbient(const glm::vec3& _ambient)     { ambient = _ambient; }
+    void setDiffuse(const glm::vec3& _diffuse)     { diffuse = _diffuse; }
+    void setSpecular(const glm::vec3& _specular)   { specular = _specular; }
     
     //****************************************************************************//
     // setInShader
     //****************************************************************************//
     void setInShader(const ogl::glShader & shader, const glm::mat4 & view) const {
-      
-      glm::vec3 _position = glm::vec3(view * glm::vec4(position, 1));
-      
-      shader.setUniform("light.position", _position);
-      shader.setUniform("light.direction", _position);
-      shader.setUniform("light.ambient", glm::vec3(0.0f));
-      shader.setUniform("light.diffuse", glm::vec3(1.0f));
-      shader.setUniform("light.specular", glm::vec3(1.0f));
+            
+      glm::vec3 transformedPos = glm::vec3(view * glm::vec4(position, 1.0f));
+      glm::vec3 transformedDir = glm::normalize(glm::mat3(view) * direction);
+
+      shader.setUniform("light.position", transformedPos);
+      shader.setUniform("light.direction", transformedDir);
+      shader.setUniform("light.ambient", ambient);
+      shader.setUniform("light.diffuse", diffuse);
+      shader.setUniform("light.specular", specular);
       
     }
     
