@@ -55,7 +55,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { PLAIN, MODEL, SPHERE, TEXT, ADVANCED };
+    enum STYLE { PLAIN, PLAIN2D, MODEL, SPHERE, TEXT, ADVANCED };
 
     int style;
     
@@ -86,6 +86,14 @@ namespace ogl {
       style = STYLE::PLAIN;
     }
 
+    //****************************************************************************/
+    // initPlain2D
+    //****************************************************************************/
+    void initPlain2D() {
+      init("/usr/local/include/ogl/shader/plain2D.vs", "/usr/local/include/ogl/shader/plain2D.fs");
+      style = STYLE::PLAIN2D;
+    }
+    
     //****************************************************************************/
     // initAdvanced
     //****************************************************************************/

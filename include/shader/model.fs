@@ -61,7 +61,6 @@ struct Light {
 /*****************************************************************************/
 uniform Material material;
 uniform Light light;
-//uniform vec3 cameraPosition;
 uniform sampler2D shadowMap;
 uniform mat4 depthBiasMVP;
 uniform bool withShadow;

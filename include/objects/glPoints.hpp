@@ -140,8 +140,10 @@ namespace ogl {
 
       glBindVertexArray(vao);
       
-      glEnable(GL_CULL_FACE);
-      glCullFace(GL_BACK);
+      //glEnable(GL_CULL_FACE);
+      //glCullFace(GL_BACK);
+
+      glDisable(GL_BLEND);
 
       glDrawArrays(GL_POINTS, from, to);
 

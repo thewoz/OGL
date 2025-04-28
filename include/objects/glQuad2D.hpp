@@ -1,4 +1,3 @@
-@ -1,179 +0,0 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
