@@ -69,67 +69,138 @@ namespace tiff {
   
 #include <tiffio.h>
   
-  //****************************************************************************//
-  // snapshot
-  //****************************************************************************//
-  void snapshot(int width, int height, const char * outputfile) {
-    
-    TIFF * file = TIFFOpen(outputfile, "w");
-    
-    if(file==NULL){
-      fprintf(stderr, "file '%s' line %d function '%s': error in opening file '%s'\n", __FILE__, __LINE__, __func__, outputfile);
-      exit(EXIT_FAILURE);
-    }
-    
-    GLubyte * image = (GLubyte*) malloc(width * height * sizeof(GLubyte) * 3);
-    
-    if(image==NULL){
-      fprintf(stderr, "file '%s' line %d function '%s': error in malloc %s\n", __FILE__, __LINE__, __func__, strerror(errno));
+//****************************************************************************//
+// snapshot()
+//****************************************************************************//
+void snapshot(int width, int height, const char * outputfile, bool compress = false) {
+  
+    static GLubyte * image = nullptr;
+
+    size_t requiredSize = width * height * 3;
+  
+    image = (GLubyte*)realloc(image, requiredSize);
+    if(image == nullptr) {
+      fprintf(stderr, "snapshot error: realloc failed\n");
       abort();
     }
-   
-    /* OpenGL's default 4 byte pack alignment would leave extra bytes at the
-     end of each image row so that each full row contained a number of bytes
-     divisible by 4.  Ie, an RGB row with 3 pixels and 8-bit componets would
-     be laid out like "RGBRGBRGBxxx" where the last three "xxx" bytes exist
-     just to pad the row out to 12 bytes (12 is divisible by 4). To make sure
-     the rows are packed as tight as possible (no row padding), set the pack
-     alignment to 1. */
+
+    TIFF * file = TIFFOpen(outputfile, "w");
+    if(!file) {
+      fprintf(stderr, "snapshot error: could not open '%s'\n", outputfile);
+      abort();
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  
+    glReadBuffer(GL_FRONT);
+  
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    
+
     glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
-    
+  
     glCheckError();
     
-    TIFFSetField(file, TIFFTAG_IMAGEWIDTH,  width);
+    TIFFSetField(file, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(file, TIFFTAG_IMAGELENGTH, height);
     TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
-    TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS);
+    TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
     TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
     TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 3);
     TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-    TIFFSetField(file, TIFFTAG_ROWSPERSTRIP, 1);
-    TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, "");
-    
-    // mi serve per non scordarmi il valore del puntatore originale
-    GLubyte * p = image;
-    
-    for(int i=height - 1; i>=0; --i) {
-      
+    TIFFSetField(file, TIFFTAG_ROWSPERSTRIP, height);
+
+    if(compress) {
+      TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+    } else {
+      TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+    }
+  
+    for(int i=0; i<height; ++i) {
+      GLubyte * p = image + (width * 3 * (height - 1 - i));
       if(TIFFWriteScanline(file, p, i, 0) < 0) {
-        fprintf(stderr, "file '%s' line %d function '%s': error in TIFFWriteScanline\n", __FILE__, __LINE__, __func__);
+        fprintf(stderr, "snapshot error: TIFFWriteScanline failed\n");
         abort();
       }
- 
-      p += width * sizeof(GLubyte) * 3;
-      
     }
-    
+
     TIFFClose(file);
-    
-    free(image);
-    
-  }
+  
+}
+
+
+//****************************************************************************//
+// snapshotPBO()
+//****************************************************************************//
+void snapshotPBO(int width, int height, const char* outputfile, bool compress = false) {
+  
+    // 1. Creazione del PBO
+    GLuint pbo = 0;
+    glGenBuffers(1, &pbo);
+
+    // 2. Bind del PBO e allocazione spazio
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+    glBufferData(GL_PIXEL_PACK_BUFFER, width * height * 3, NULL, GL_STREAM_READ);
+
+    // 3. Impostazioni corrette
+    glReadBuffer(GL_BACK);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+    // 4. Leggi i pixel direttamente nel PBO
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, 0); // <<=== GL_RGB, non RGBA
+
+    // 5. Mappiamo il buffer
+    GLubyte * ptr = (GLubyte*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+    if(!ptr) {
+      fprintf(stderr, "snapshotPBO() error: glMapBuffer failed\n");
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+      glDeleteBuffers(1, &pbo);
+      abort();
+    }
+
+    // 6. Creiamo il file TIFF
+    TIFF * file = TIFFOpen(outputfile, "w");
+    if(!file) {
+      fprintf(stderr, "snapshotPBO() error: cannot open '%s'\n", outputfile);
+      glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+      glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+      glDeleteBuffers(1, &pbo);
+      abort();
+    }
+
+    TIFFSetField(file, TIFFTAG_IMAGEWIDTH, width);
+    TIFFSetField(file, TIFFTAG_IMAGELENGTH, height);
+    TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
+    TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 3);
+    TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+    TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+    TIFFSetField(file, TIFFTAG_ROWSPERSTRIP, height);
+
+    if(compress) {
+      TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_LZW);
+    } else {
+      TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+    }
+
+    // 7. Scriviamo il file (invertendo le righe)
+    for(int i=0; i<height; ++i) {
+      const GLubyte* p = ptr + (width * 3 * (height - 1 - i)); // 3 bytes per pixel (RGB)
+      if(TIFFWriteScanline(file, (void*)p, i, 0) < 0) {
+        fprintf(stderr, "snapshotPBO() error: TIFFWriteScanline failed at row %d\n", i);
+        abort();
+      }
+    }
+
+    TIFFClose(file);
+
+    // 8. Cleanup
+    glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+    glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+    glDeleteBuffers(1, &pbo);
+  
+}
+
+
+
   
 } /* namespace tiff */
 
