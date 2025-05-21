@@ -56,15 +56,10 @@ namespace ogl {
         
     // Tempo dell'ultimo rendering
     GLfloat lastTime;
-    
-    // Memoria di appoggio per salvare il contenuto della finestra
-    GLubyte * image;
 
     // Background color
     glm::vec3 background;
-    
-    //bool inputDisable;
-    
+        
     bool isProcessMouseMovement = true;
     
     bool isFullscreen;
@@ -84,9 +79,6 @@ namespace ogl {
     // Tempo passato dall'ultima volta che e' stato effettuato il rendering
     GLfloat deltaTime;
     
-    //TODO:
-    // mettere un controllo su offscreen
-    
   public:
     
     // Puntatore della finestra GLFW
@@ -98,7 +90,7 @@ namespace ogl {
     //*****************************************************************************/
     // glWindow() - Costruttore vuoto
     //*****************************************************************************/
-    glWindow() { window = NULL; image = NULL; }
+    glWindow() { window = NULL;}
     
     //*****************************************************************************/
     // ~glWindow() - Distruttore
@@ -111,7 +103,6 @@ namespace ogl {
         ImGui::DestroyContext();
       #endif
       if(window != NULL) { glfwDestroyWindow(window); window = NULL; }
-      if(image  != NULL) { free(image); image = NULL; }
       if(windowsCounter == 0) { glfw::close(); }
       
     }
@@ -152,8 +143,7 @@ namespace ogl {
       glfwGetFramebufferSize(window, &width, &height);
       
       glfwSetWindowUserPointer(window, this);
-
-      //glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+      
       glfwSetWindowCloseCallback(window, windowCloseCallback);
       glfwSetCursorPosCallback(window, cursorPosCallback);
       glfwSetMouseButtonCallback(window, mouseButtonCallback);
@@ -179,8 +169,6 @@ namespace ogl {
       currentCameraIndex = 0;
 
       currentCamera = &cameras[currentCameraIndex];
-
-      // inputDisable = false;
         
       // Funziona con OpenGL >= 4.3
       // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
@@ -190,6 +178,7 @@ namespace ogl {
       #ifndef OGL_WITHOUT_IMGUI
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImGui::GetIO().IniFilename = nullptr;  // <-- DISABILITA imgui.ini
         //ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 150");
@@ -236,14 +225,12 @@ namespace ogl {
      
       glfwSetWindowUserPointer(window, this);
       
-      //glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
       glfwSetWindowCloseCallback(window, windowCloseCallback);
       glfwSetCursorPosCallback(window, cursorPosCallback);
       glfwSetMouseButtonCallback(window, mouseButtonCallback);
       glfwSetScrollCallback(window, scrollCallback);
       glfwSetKeyCallback(window, keyCallback);
       glfwSetCursorEnterCallback(window, cursorEnterCallback);
-      //glfwSetWindowFocusCallback(window, framebufferSizeCallback);
       glfwSetWindowSizeCallback(window, sizeCallback);
 
       glfwSwapInterval(1);
@@ -263,16 +250,13 @@ namespace ogl {
       currentCameraIndex = 0;
       
       currentCamera = &cameras[currentCameraIndex];
-      
-      //inputDisable = false;
-      
+            
       // Funziona con OpenGL >= 4.3
       // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
       // glEnable(GL_DEBUG_OUTPUT);
       // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
       
     }
-    
     
     //*****************************************************************************/
     // destroy() -
@@ -312,10 +296,6 @@ namespace ogl {
       ((glWindow*)glfwGetWindowUserPointer(window))->windowCloseCallback();
     }
     
-    //static inline void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    //  ((glWindow*)glfwGetWindowUserPointer(window))->framebufferSizeCallback(width, height);
-    //}
-    
     static inline void cursorPosCallback(GLFWwindow* window, double xPos, double yPos) {
       ((glWindow*)glfwGetWindowUserPointer(window))->cursorPosCallback(xPos, yPos);
     }
@@ -339,12 +319,7 @@ namespace ogl {
     static inline void sizeCallback(GLFWwindow* window, int width, int height) {
       ((glWindow*)glfwGetWindowUserPointer(window))->sizeCallback(width, height);
     }
-    
-    
-    //static inline void  windowFocusCallback(GLFWwindow* window, int focused) {
-    //  ((glWindow*)glfwGetWindowUserPointer(window))->focus(focused);
-    //}
-        
+
     //****************************************************************************//
     // External callback interfaces
     //****************************************************************************//
@@ -353,7 +328,6 @@ namespace ogl {
     inline void virtual cursorPos(double xPos, double yPos, double xoffset, double yoffset) { };
     inline void virtual mouseButton(int button, int action, int mods) { };
     inline void virtual cursorEnter(int entered) { if(entered) { onFocus = true; } else { onFocus = false; } }
-    //inline void virtual focus(int focused) { if(focused) { onFocus = true; } else { onFocus = false; } }
     
     //****************************************************************************//
     // Callback
@@ -366,11 +340,6 @@ namespace ogl {
       for(std::size_t i=0; i<cameras.size(); ++i)
         cameras[i].setSensorSize(width, height);
     }
-    
-//    inline void framebufferSizeCallback(int width, int height) {
-//      for(std::size_t i=0; i<cameras.size(); ++i)
-//        cameras[i].setSensorSize(width, height);
-//    }
     
     inline void scrollCallback(double xoffset, double yoffset) {
       
@@ -414,12 +383,8 @@ namespace ogl {
       
     }
     
-    inline void cursorPosCallback(double xPos, double yPos){
-      //    if(cursorPos(xpos, ypos)){
-      //      //cameraMouseCallback(buttonMouse, xpos - oldXpos, ypos - oldYpos);
-      //      oldXpos = xpos; oldYpos = ypos;
-      //    }
-      
+    inline void cursorPosCallback(double xPos, double yPos) {
+
       if(onFocus) {
       
         if(firstMouse) {
@@ -449,15 +414,7 @@ namespace ogl {
         
     }
     
-    inline void mouseButtonCallback(int button, int action, int mods) {
-      mouseButton(button, action, mods);
-      //    if(action == GLFW_PRESS){
-      //      buttonMouse = button;
-      //      if(buttonMouse==GLFW_MOUSE_BUTTON_1 && mods==GLFW_MOD_CONTROL) buttonMouse = GLFW_MOUSE_BUTTON_2;
-      //      else if(button==GLFW_MOUSE_BUTTON_1 && mods==GLFW_MOD_SHIFT)   buttonMouse = GLFW_MOUSE_BUTTON_3;
-      //    } else if(action == GLFW_RELEASE){ buttonMouse = -1; }
-    }
-    
+    inline void mouseButtonCallback(int button, int action, int mods) { mouseButton(button, action, mods); }
     
   public:
     
@@ -554,32 +511,33 @@ namespace ogl {
       cameras.push_back(glCamera(currentCamera->getWidth(), currentCamera->getHeight(), fov, position, mode, target));
       currentCamera = &cameras[currentCameraIndex];
     }
-    
+
     //*****************************************************************************/
     // get projection and view matrix
     //*****************************************************************************/
-    inline glm::mat4 getProjection() const { return currentCamera->getProjection(); }
-    
+    inline glm::mat4 getProjection()      const { return currentCamera->getProjection(); }
     inline glm::mat4 getOrthoProjection() const { return currentCamera->getOrthoProjection(); }
-      
-//    inline glm::mat4 getOrthoProjectionText() const {
-//      
-//     // float aspect = static_cast<float>(width) / static_cast<float>(height);
-//     // return glm::ortho(-aspect, aspect, -1.0f, 1.0f, currentCamera->getzNear(), currentCamera->getzFar());
-//      
-//      return glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
-//      
-//    }
-    
-    inline glm::vec2 getViewport() const { return currentCamera->getViewport(); }
 
+    //*****************************************************************************/
+    // getViewport()
+    //*****************************************************************************/
+    inline glm::vec2 getViewport() const { return currentCamera->getViewport(); }
     
+    //*****************************************************************************/
+    // getView()
+    //*****************************************************************************/
     inline glm::mat4 getView() const { return currentCamera->getView(); }
 
+    //*****************************************************************************/
+    // getPitch() getYaw()
+    //*****************************************************************************/
     inline float getPitch() { return currentCamera->getPitch(); }
     inline float getYaw() { return currentCamera->getYaw(); }
+    
+    //*****************************************************************************/
+    // getCameraPosition()
+    //*****************************************************************************/
     inline glm::vec3 getCameraPosition() { return currentCamera->getPosition(); }
-
     
     //*****************************************************************************/
     // isOnRetinaDisplay()
@@ -596,23 +554,6 @@ namespace ogl {
       }
 
       return (xScale == 2);
-      
-//      int wWidth, wHeight;
-//      int fWidth, fHeight;
-//
-//      glfwGetWindowSize(window, &wWidth, &wHeight);
-//
-//      glfwGetFramebufferSize(window, &fWidth, &fHeight);
-//
-//      double xScale = fWidth  / (double)wWidth;
-//      double yScale = fHeight / (double)wHeight;
-//
-//      if(xScale != yScale) {
-//        fprintf(stderr, "errore");
-//        abort();
-//      }
-//
-//      return (xScale == 2);
       
     }
 
@@ -639,16 +580,13 @@ namespace ogl {
 
       glClearColor(background.r, background.g, background.b, 1.0f);
       
-      glClearDepth(1.0f); // set to -1.0 for GL_GREATER
-
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_LEQUAL);
       
       keybord = true;
 
       #ifndef OGL_WITHOUT_IMGUI
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -664,9 +602,8 @@ namespace ogl {
       #ifndef OGL_WITHOUT_IMGUI
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glDisable(GL_DEPTH_TEST);
       #endif
-
-      glDisable(GL_DEPTH_TEST);
     
       glfwSwapBuffers(window);
       
@@ -675,68 +612,16 @@ namespace ogl {
     //*****************************************************************************/
     // snapshot()
     //*****************************************************************************/
-    void snapshot(const std::string & filename) {
-      
-      glReadBuffer(GL_BACK);
-      
-//#ifdef OPENCV_ALL_HPP
-#ifdef OGL_TEST_SNAPSHOT
-      cv::snapshot(currentCamera->getWidth(), currentCamera->getHeight(), filename.c_str());
-#else
-      tiff::snapshot(currentCamera->getWidth(), currentCamera->getHeight(), filename.c_str());
-#endif
-      
-    }
-    
-    //*****************************************************************************/
-    // pixelsValue()
-    //*****************************************************************************/
-    glm::vec3 pixelsValue() {
-      
-      glm::vec3 rbg;
+    void snapshot(std::string path) {
       
       glReadBuffer(GL_BACK);
 
-      double pixelsNum = currentCamera->getWidth() * currentCamera->getHeight();
-
-      // creo un immagine grande quanto la finestra
-      image = (GLubyte *) realloc(image, pixelsNum * sizeof(GLubyte) * 3);
+      ogl::io::expandPath(path);
       
-      glPixelStorei(GL_PACK_ALIGNMENT, 1);
-      
-      glReadPixels(0, 0, currentCamera->getWidth(), currentCamera->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, image);
-      
-      glCheckError();
-
-      rbg = glm::vec3(0);
-      
-      size_t counter = 0;
-      
-      for(int p=0; p<pixelsNum; ++p) {
-        
-       // salto i pixels neri
-       if(image[(p*3)] == 0 && image[(p*3)+1] == 0 && image[(p*3)+2] == 0) continue;
-
-        rbg.r += image[(p*3)];
-        rbg.g += image[(p*3)+1];
-        rbg.b += image[(p*3)+2];
-        
-        ++counter;
-        
-      }
-      
-      if(counter != 0) {
-      
-        rbg.r /= (double)counter;
-        rbg.g /= (double)counter;
-        rbg.b /= (double)counter;
-
-      }
-            
-      return rbg;
+      ogl::snapshot(currentCamera->getWidth(), currentCamera->getHeight(), path.c_str());
       
     }
- 
+  
     //****************************************************************************
     // toggleFullscreen()
     //****************************************************************************

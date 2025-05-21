@@ -94,36 +94,36 @@ Here is a simple example showing how to create a window, set up a camera, and re
 
 int main(int argc, char* const argv[]) {
 
-    ogl::glWindow window;
-    
-    window.create(800, 600);
-    window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-    
-    window.getCurrentCamera()->setPosition(3.0f, 1.5f, 0.0f);
-    window.getCurrentCamera()->setYaw(180.0f);
-    window.getCurrentCamera()->setPitch(-20.0f);
+      ogl::glWindow window;
+  
+  window.create(800, 600);
 
-    ogl::glAxes axes;
-    ogl::glReferenceAxes referenceAxes;
-    ogl::glGrid grid(10, 10, 0.5f, ogl::glColors::cyan);
-    ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
-    model.setLight(glm::vec3(1.0f), glm::vec3(-1.0f));
-    ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5f, "FPS: ");
+  window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+  
+  window.getCurrentCamera()->setPosition(3, 1.5, 0);
+  window.getCurrentCamera()->setYaw(180);
+  window.getCurrentCamera()->setPitch(-20);
+
+  ogl::glAxes axes;
+  ogl::glGrid grid(10, 10, 0.5, ogl::glColors::cyan);
+  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
+  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5, "FPS: ");
     
-    while (!window.shouldClose()) {
-        
-        window.renderBegin();
-        
-            axes.render(window.getCurrentCamera());
-            grid.render(window.getCurrentCamera());
-            referenceAxes.render(window.getCurrentCamera());
-            model.render(window.getCurrentCamera());
-            text.render(window.getCurrentCamera(), "FPS: " + std::to_string(window.getFPS()));
-        
-        window.renderEnd();
-    }
+  while(!window.shouldClose()) {
     
-    return 0;
+    window.renderBegin();
+  
+      axes.render(window.getCurrentCamera());
+      grid.render(window.getCurrentCamera());
+      model.render(window.getCurrentCamera());
+      text.render(window.getCurrentCamera(), "FPS: " + std::to_string(window.getFPS()));
+    
+    window.renderEnd();
+
+  }
+  
+  return 0;
+  
 }
 ```
 
@@ -144,17 +144,19 @@ int main(int argc, char* const argv[]) {
 ## 🧰 TODO
 
 - Implement thick line rendering
-- Add shadow support
 - Add lighting for objects like cuboids, spheres, ellipses
 - Add render-to-texture support
 - Add axis labels (X,Y,Z) and a background rectangle to `glReferenceAxes` for better visualization
 - Include an example with ImGui
+- Rewrite camera class
+- Improves key management
 
 ---
 
 ## 🐞 Known Issues
 
-- Resolve the issue with screenshot capturing on Linux
+- Multi-Sample Anti-Aliasing do not work on Linux
+- glReferenceAxes doesn't work well with all types of cameras
 
 ---
 

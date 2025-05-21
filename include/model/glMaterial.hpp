@@ -97,13 +97,6 @@ namespace ogl {
       
       material->Get(AI_MATKEY_SHININESS, ns);
       
-      //float ni = 0.98f; // index of refraction
-      //material->Get(AI_MATKEY_REFRACTI, ni);
-      
-      //TODO:
-      //int illum;
-      //material->Get(AI_MATKEY_SHADING_MODEL, illum);
-      
       material->Get(AI_MATKEY_OPACITY, d);
       
       // 1. Diffuse maps
@@ -165,11 +158,9 @@ namespace ogl {
       shader.setUniform("material.haveSpecularTexture",     haveSpecularTexture);
       shader.setUniform("material.haveAmbientTexture",      haveAmbientTexture);
       shader.setUniform("material.haveEmissiveTexture",     haveEmissiveTexture);
-      //shader.setUniform("material.haveHeightTexture",       haveHeightTexture);
       shader.setUniform("material.haveNormalsTexture",      haveNormalsTexture);
       shader.setUniform("material.haveShininessTexture",    haveShininessTexture);
       shader.setUniform("material.haveOpacityTexture",      haveOpacityTexture);
-      //shader.setUniform("material.haveDisplacementTexture", haveDisplacementTexture);
       shader.setUniform("material.haveLightTexture",        haveLightTexture);
       shader.setUniform("material.haveReflectionTexture",   haveReflectionTexture);
       
@@ -183,7 +174,6 @@ namespace ogl {
       
       // set
       shader.setUniform("material.shininess",  ns);
-      //shader.setUniform("material.refraction", ni);
       shader.setUniform("material.opacity",     d);
             
       // TODO: questo rallenta molto
@@ -228,12 +218,9 @@ namespace ogl {
       fprintf(output, "Kt %f %f %f\n", kt[0], kt[1], kt[2]);
       
       fprintf(output, "Ns %f\n", ns);
-      //fprintf(output, "Ni %f\n", ni);
       
       fprintf(output, "d %f\n", d);
-      
-      //fprintf(output, "illum %d\n", illum);
-      
+            
       fprintf(output, "\n");
       
     }
@@ -277,11 +264,9 @@ namespace ogl {
         if(typeName == "specularTexture")     haveSpecularTexture     = true;
         if(typeName == "ambientTexture")      haveAmbientTexture      = true;
         if(typeName == "emissiveTexture")     haveEmissiveTexture     = true;
-        //if(typeName == "heightTexture")       haveHeightTexture       = true;
         if(typeName == "normalsTexture")      haveNormalsTexture      = true;
         if(typeName == "shininessTexture")    haveShininessTexture    = true;
         if(typeName == "opacityTexture")      haveOpacityTexture      = true;
-        //if(typeName == "displacementTexture") haveDisplacementTexture = true;
         if(typeName == "lightTexture")        haveLightTexture        = true;
         if(typeName == "reflectionTexture")   haveReflectionTexture   = true;
         

@@ -157,13 +157,16 @@ namespace ogl {
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LEQUAL);
+      
     }
     
     
     //****************************************************************************/
     // renderEnd()
     //****************************************************************************/
-    void renderEnd() { }
+    void renderEnd() { glDisable(GL_DEPTH_TEST); }
     
     //****************************************************************************/
     // getBounds() - Compute the bounds of the model (center, size, radius)

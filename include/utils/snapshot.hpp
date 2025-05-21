@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _H_OGL_TIFF_H_
-#define _H_OGL_TIFF_H_
+#ifndef _H_OGL_SNAPSHOPT_H_
+#define _H_OGL_SNAPSHOPT_H_
 
 #include <cstdlib>
 #include <cstdio>
@@ -31,41 +31,10 @@
   #include <GL/gl.h>
 #endif
 
-//#ifdef OPENCV_ALL_HPP
-#ifdef OGL_TEST_SNAPSHOT
-
 //****************************************************************************//
-// namespace cv
+// namespace ogl
 //****************************************************************************//
-namespace cv {
-  
-  //****************************************************************************//
-  // snapshot
-  //****************************************************************************//
-  void snapshot(int width, int height, const char * outputfile) {
-    
-    cv::Mat image(width, height, CV_8UC3);
-    
-    glPixelStorei(GL_PACK_ALIGNMENT, (image.step & 3) ? 1 : 4);
-    
-    glPixelStorei(GL_PACK_ROW_LENGTH, (int)image.step/image.elemSize());
-    
-    glReadPixels(0, 0, image.cols, image.rows, GL_BGR, GL_UNSIGNED_BYTE, image.data);
-    
-    cv::flip(image, image, 0);
-
-    cv::imwrite(outputfile, image);
-    
-  }
-  
-}
-
-#else
-
-//****************************************************************************//
-// namespace tiff
-//****************************************************************************//
-namespace tiff {
+namespace ogl {
   
 #include <tiffio.h>
   
@@ -199,11 +168,7 @@ void snapshotPBO(int width, int height, const char* outputfile, bool compress = 
   
 }
 
+} /* namespace ogl */
 
 
-  
-} /* namespace tiff */
-
-#endif
-
-#endif /* _H_OGL_TIFF_H_ */
+#endif /* _H_OGL_SNAPSHOPT_H_ */

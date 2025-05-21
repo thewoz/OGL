@@ -31,7 +31,7 @@ endif
 # Targets
 # ==========================
 
-all: install
+all:
 
 # Install headers as a symbolic link
 install:

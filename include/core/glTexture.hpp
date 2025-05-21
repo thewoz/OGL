@@ -47,7 +47,7 @@ namespace ogl {
     /* texture init flags */
     bool isInited;
     bool isInitedInGpu;
-    
+        
     /* texture type */
     std::string type;
     
@@ -59,7 +59,7 @@ namespace ogl {
     
     /* texture data */
     std::vector<unsigned char> image;
-    
+        
   public:
     
     //****************************************************************************/
@@ -127,13 +127,7 @@ namespace ogl {
       glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &image[0]);
       
       glGenerateMipmap(GL_TEXTURE_2D);
-      
-      // Parameters
-      //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-      //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      
+  
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -151,23 +145,21 @@ namespace ogl {
     //****************************************************************************/
     // setInShader
     //****************************************************************************/
-    inline void setInShader(const ogl::glShader & shader, GLenum unit) const {
+    inline void setInShader(const ogl::glShader & shader, GLenum unit) {
       
       if(!isInitedInGpu) {
         fprintf(stderr, "Error glTexture: the texture must be initialized in the GPU before being used\n");
         abort();
       }
-            
+  
       // Active proper texture unit before binding
       glActiveTexture(GL_TEXTURE0 + unit);
       
       // And finally bind the texture
       glBindTexture(GL_TEXTURE_2D, id);
-      
-      shader.setUniform(type, unit);
-
+              
       glCheckError();
-            
+                 
     }
     
     //****************************************************************************/
