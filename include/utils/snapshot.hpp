@@ -61,7 +61,7 @@ void snapshot(int width, int height, const char * outputfile, bool compress = fa
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   
-    glReadBuffer(GL_FRONT);
+    glReadBuffer(GL_BACK);
   
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
