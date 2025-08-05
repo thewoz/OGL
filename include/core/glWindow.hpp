@@ -179,7 +179,6 @@ namespace ogl {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGui::GetIO().IniFilename = nullptr;  // <-- DISABILITA imgui.ini
-        //ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 150");
         ImGui::StyleColorsDark();
