@@ -91,7 +91,7 @@ namespace ogl {
         
         DEBUG_LOG("glQuad::init(" + name + ")");
 
-        if(vertices.size() != 6) {
+        if(_vertices.size() != 6) {
           fprintf(stderr, "glQuad init error vertices must be six\n");
           abort();
         }
