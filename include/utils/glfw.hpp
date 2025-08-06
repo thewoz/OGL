@@ -93,11 +93,11 @@ namespace glfw {
   }
   
   //****************************************************************************//
-  // close
+  // terminate
   //****************************************************************************//
-  void close() {
+  void terminate() {
     
-    DEBUG_LOG("glfw::close()");
+    DEBUG_LOG("glfw::terminate()");
 
     inited = false;
       

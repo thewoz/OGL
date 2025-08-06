@@ -103,7 +103,7 @@ namespace ogl {
         ImGui::DestroyContext();
       #endif
       if(window != NULL) { glfwDestroyWindow(window); window = NULL; }
-      if(windowsCounter == 0) { glfw::close(); }
+      if(windowsCounter == 0) { glfw::terminate(); }
       
     }
     

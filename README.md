@@ -134,8 +134,8 @@ int main(int argc, char* const argv[]) {
 | Command         | Description                                    |
 |:----------------|:-----------------------------------------------|
 | `make install`  | Install the OGL headers to `/usr/local/include/ogl` |
-| `make uninstall`| Remove the installed OGL headers               |
-| `make example`  | Build the example program in `~/bin/ogl`        |
+| `make uninstall`| Remove the installed OGL headers                    |
+| `make example`  | Build the example program in `~/bin/ogl`            |
 
 > Note: the Makefile automatically detects whether you are on **Linux** or **macOS**.
 
