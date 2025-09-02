@@ -420,19 +420,19 @@ namespace ogl {
     //****************************************************************************//
     // Window Interface funtions
     //****************************************************************************//
-    inline void setPosition(int xPos, int yPos){
+    inline void setPosition(int xPos, int yPos) {
       glfwSetWindowPos(window, xPos, yPos);
     }
     
-    inline void setTitle(const std::string & title){
+    inline void setTitle(const std::string & title) {
       glfwSetWindowTitle(window, title.c_str());
     }
     
-    inline bool shouldClose(){
+    inline bool shouldClose() {
       return glfwWindowShouldClose(window);
     }
     
-    inline void setShouldClose(bool mode){
+    inline void setShouldClose(bool mode) {
       glfwSetWindowShouldClose(window, mode);
     }
     
@@ -440,17 +440,17 @@ namespace ogl {
       glfwSetInputMode(window, GLFW_CURSOR, mode);
     }
     
-    inline void getCursorPos(double & x, double & y){
+    inline void getCursorPos(double & x, double & y) {
       glfwGetCursorPos(window, &x, &y);
     }
     
-    inline void setSize(int width, int height){
+    inline void setSize(int width, int height) {
       glfwSetWindowSize(window, width, height);
       for(std::size_t i=0; i<cameras.size(); ++i)
         cameras[i].setSensorSize(width, height);
     }
     
-    inline void setBackground(const glm::vec3 & _background){
+    inline void setBackground(const glm::vec3 & _background) {
       background = _background;
     }
     
