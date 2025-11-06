@@ -6,7 +6,7 @@ if [ `uname` == "Darwin" ]; then
   brew install sdl2
   brew install assimp
   brew install glm
-  brew install premake4
+  brew install premake
 
 else
 
@@ -25,9 +25,13 @@ if [ ! -d "/usr/local/include/SOIL2/" ]; then
 
   git clone https://github.com/SpartanJ/SOIL2.git
   cd SOIL2
-  premake4 gmake
+  premake5 gmake
   cd make/*/
-  make config=release soil2-static-lib
+  if [ `uname` == "Darwin" ]; then
+    make soil2-static-lib config=release_x86_64
+  else
+    make soil2-static-lib config=release
+  fi
   cd ../../lib/*
   sudo cp libsoil2.a /usr/local/lib
   cd ../../src/SOIL2/
@@ -41,13 +45,13 @@ fi
 # Controllo se la libreria GLAD è installata
 if [ ! -d "/usr/local/include/glad/" ]; then
   cd glad
-  sudo make install
+    make install
   cd -
 fi
 
 # Controllo se la libreria IMGUI è installata
 if [ ! -d "/usr/local/include/imgui/" ]; then
   cd imgui
-  sudo make install
+    make install
   cd -
 fi
