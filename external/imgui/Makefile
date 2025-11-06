@@ -4,8 +4,8 @@ LIBRARY_INSTALL_PATH=/usr/local/lib
 LIBRARY_NAME=imgui
 
 all: install
-
-compile:
+	
+install:
 	@mkdir -p ./build/lib
 	@mkdir -p ./build/include
 	g++ -march=native --std=c++11 -Os -c -DIMGUI_IMPL_OPENGL_LOADER_GLAD ./code/imgui_draw.cpp -o ./build/imgui_draw.o
@@ -19,19 +19,12 @@ compile:
 	@ar rcs ./build/lib/libimgui.a ./build/*.o
 	@cp ./code/*.h ./build/include
 	@cp imgui.hpp ./build/include
-
-clear:
-	@rm -rf ./build
-	
-install: compile
 	@mkdir -p $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)/
 	@mkdir -p $(LIBRARY_INSTALL_PATH)
 	@cp ./build/include/*.h* $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)/
 	@cp ./build/lib/libimgui.a $(LIBRARY_INSTALL_PATH)
+	@rm -rf ./build
 
-uninstall:
-	@rm -rf $(INCLUDE_INSTALL_PATH)/$(LIBRARY_NAME)/
-	@rm -rf $(LIBRARY_INSTALL_PATH)/$(LIBRARY_NAME)/
 
 
 
