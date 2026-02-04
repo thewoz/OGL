@@ -55,7 +55,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { PLAIN, PLAIN2D, MODEL, SPHERE, TEXT, ADVANCED };
+    enum STYLE { PLAIN, PLAIN2D, MODEL, SPHERE, TEXT, ADVANCED, WIREFRAME, LINE };
 
     int style;
     
@@ -101,6 +101,22 @@ namespace ogl {
       init("/usr/local/include/ogl/shader/advanced.vs", "/usr/local/include/ogl/shader/advanced.fs");
       style = STYLE::ADVANCED;
     }
+
+    //****************************************************************************/
+    // initWireframe
+    //****************************************************************************/
+    void initWireframe() {
+      init("/usr/local/include/ogl/shader/wireframe.vs", "/usr/local/include/ogl/shader/wireframe.fs", "/usr/local/include/ogl/shader/wireframe.gs");
+      style = STYLE::WIREFRAME;
+    }
+
+    //****************************************************************************/
+    // initLine
+    //****************************************************************************/
+    void initLine() {
+      init("/usr/local/include/ogl/shader/line.vs", "/usr/local/include/ogl/shader/line.fs", "/usr/local/include/ogl/shader/line.gs");
+      style = STYLE::LINE;
+    }
     
     //****************************************************************************/
     // initSphere
@@ -122,6 +138,12 @@ namespace ogl {
     // init - Constructor generates the shader on the fly
     //****************************************************************************/
     void init(std::string vertexPath, std::string fragmentPath, std::string geometryPath = "") {
+
+      if(program != -1) {
+        glDeleteProgram(program);
+        program = -1;
+      }
+      isInitedInGpu = false;
 
       // 1. Retrieve the vertex/fragment source code from filePath
       std::ifstream vShaderFile;

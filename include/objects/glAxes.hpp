@@ -72,7 +72,7 @@ namespace ogl {
 
         shader.setName(name);
         
-        shader.initPlain();
+        shader.initLine();
         
         scale(glm::vec3(_scale));
 
@@ -115,21 +115,28 @@ namespace ogl {
         
         if(isToInitInGpu()) initInGpu();
         
+        if(shader.style != glShader::STYLE::LINE) {
+          shader.setName(name);
+          shader.initLine();
+        }
+
         shader.use();
         
         shader.setUniform("projection", camera->getProjection());
         shader.setUniform("view",       camera->getView());
         shader.setUniform("model",      modelMatrix);
+        shader.setUniform("lineWidth",  lineWidth);
+        shader.setUniform("viewport",   camera->getViewport());
                 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        
         glBindVertexArray(vao);
 
         glDisable(GL_CULL_FACE);
+        glDisableVertexAttribArray(1);
+        glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
 
         for(int i=0; i<3; ++i) {
           
-          shader.setUniform("color", colors[i]);
+          shader.setUniform("uniformColor", glm::vec4(colors[i], 1.0f));
  	 
           glDrawArrays(GL_LINES, i*2, 2);
 
