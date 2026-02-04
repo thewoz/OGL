@@ -120,15 +120,13 @@ namespace ogl {
         shader.use();
         
         GLint viewport[4]; glGetIntegerv(GL_VIEWPORT, viewport);
-        
-        glViewport(viewport[2] - 160, 10, 160, 160);
+        constexpr GLint overlaySize = 160;
+        GLint overlayX = viewport[2] - overlaySize;
+        GLint overlayY = 10;
 
-        int viewportWidth = 0;
-        int viewportHeight = 0;
-        camera->getViewport(viewportWidth, viewportHeight);
-        float aspect = viewportHeight > 0
-                         ? static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight)
-                         : 1.0f;
+        glViewport(overlayX, overlayY, overlaySize, overlaySize);
+
+        float aspect = 1.0f;
         glm::mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
         shader.setUniform("projection", projection);
         glm::mat4 viewNoTranslation = camera->getView();
@@ -136,7 +134,10 @@ namespace ogl {
         shader.setUniform("view",       viewNoTranslation);
         shader.setUniform("model",      modelMatrix);
         shader.setUniform("lineWidth",  lineWidth);
-        shader.setUniform("viewport",   camera->getViewport());
+        shader.setUniform("viewport",   glm::vec2(overlaySize, overlaySize));
+
+        GLboolean depthEnabled = glIsEnabled(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
 
         glBindVertexArray(vao);
 
@@ -153,6 +154,10 @@ namespace ogl {
         }
         
         glBindVertexArray(0);
+
+        if(depthEnabled) {
+          glEnable(GL_DEPTH_TEST);
+        }
                       
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         
