@@ -25,6 +25,8 @@
 
 #include <vector>
 
+#include <ogl/model/glLight.hpp>
+
 //****************************************************************************/
 // namespace ogl
 //****************************************************************************/
@@ -38,9 +40,10 @@ namespace ogl {
     private:
     
       GLuint vao = 0;
-      GLuint vbo = 0;
+      GLuint vbo[2];
       glm::vec3 color;
       glm::vec2 size;
+      ogl::glLight light;
     
       std::vector<glm::vec3> vertices;
 
@@ -138,6 +141,9 @@ namespace ogl {
         shader.setUniform("view", camera->getView());
         shader.setUniform("model", modelMatrix);
         shader.setUniform("color", color);
+        if(style == glShader::STYLE::SOLID) {
+          light.setInShader(shader, camera->getView());
+        }
 
         glBindVertexArray(vao);
 
@@ -156,6 +162,16 @@ namespace ogl {
 
         glCheckError();
         
+      }
+
+      //****************************************************************************/
+      // setLight() - Set the light
+      //****************************************************************************/
+      void setLight(const glm::vec3 & _position, const glm::vec3 & _direction) {
+
+        light.setPosition(_position);
+        light.setDirection(_direction);
+
       }
 
     private:
@@ -193,12 +209,29 @@ namespace ogl {
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
         
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glGenBuffers(2, vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
         
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
         glEnableVertexAttribArray(0);
+
+        glm::vec3 normal(0.0f, 0.0f, 1.0f);
+        if(vertices.size() == 6) {
+          glm::vec3 edgeA = vertices[1] - vertices[0];
+          glm::vec3 edgeB = vertices[2] - vertices[0];
+          glm::vec3 computed = glm::normalize(glm::cross(edgeA, edgeB));
+          if(glm::length(computed) > 0.0f) {
+            normal = computed;
+          }
+        }
+
+        glm::vec3 normals[6] = { normal, normal, normal, normal, normal, normal };
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
+        glEnableVertexAttribArray(1);
         
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
@@ -213,7 +246,7 @@ namespace ogl {
       void cleanInGpu() {
         
         if(isInitedInGpu) {
-          glDeleteBuffers(1, &vbo);
+          glDeleteBuffers(2, vbo);
           glDeleteVertexArrays(1, &vao);
           isInitedInGpu = false;
         }
