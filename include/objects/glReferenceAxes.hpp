@@ -136,9 +136,6 @@ namespace ogl {
         shader.setUniform("lineWidth",  lineWidth);
         shader.setUniform("viewport",   glm::vec2(overlaySize, overlaySize));
 
-        //GLboolean depthEnabled = glIsEnabled(GL_DEPTH_TEST);
-        //glDisable(GL_DEPTH_TEST);
-
         glBindVertexArray(vao);
 
         glDisable(GL_CULL_FACE);
@@ -154,11 +151,7 @@ namespace ogl {
         }
         
         glBindVertexArray(0);
-
-       // if(depthEnabled) {
-        //  glEnable(GL_DEPTH_TEST);
-       // }
-                      
+      
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         
         glCheckError();
