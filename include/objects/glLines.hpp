@@ -74,7 +74,7 @@ namespace ogl {
       
       shader.setName(name);
       
-      shader.initAdvanced();
+      shader.initLine();
       
       vertices = _vertices;
             
@@ -93,7 +93,7 @@ namespace ogl {
       
       shader.setName(name);
       
-      shader.initAdvanced();
+      shader.initLine();
       
       vertices = _vertices;
       
@@ -122,11 +122,10 @@ namespace ogl {
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
+      shader.setUniform("lineWidth",  lineWidth);
+      shader.setUniform("viewport",   camera->getViewport());
+      shader.setUniform("useUniformColor", 0);
                         
-      // https://vitaliburkov.wordpress.com/2016/09/17/simple-and-fast-high-quality-antialiased-lines-with-opengl/
-      
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
       glBindVertexArray(vao);
       
       glDisable(GL_CULL_FACE);
