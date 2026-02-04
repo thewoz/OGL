@@ -69,7 +69,11 @@ namespace ogl {
       DEBUG_LOG("glCuboid::init(" + name + ")");
 
       shader.setName(name);
-      shader.initPlain();
+      if(_style == glObject::STYLE::WIREFRAME) {
+        shader.initWireframe();
+      } else {
+        shader.initPlain();
+      }
 
       size = _scale;
       style = _style;
@@ -93,6 +97,18 @@ namespace ogl {
 
       if(isToInitInGpu()) initInGpu();
 
+      if(style == glObject::STYLE::WIREFRAME) {
+        if(shader.style != glShader::STYLE::WIREFRAME) {
+          shader.setName(name);
+          shader.initWireframe();
+        }
+      } else {
+        if(shader.style != glShader::STYLE::PLAIN) {
+          shader.setName(name);
+          shader.initPlain();
+        }
+      }
+
       shader.use();
 
       shader.setUniform("projection", camera->getProjection());
@@ -103,12 +119,12 @@ namespace ogl {
       glBindVertexArray(vao);
 
       if(style == glObject::STYLE::WIREFRAME) {
+        shader.setUniform("lineWidth", lineWidth);
+        shader.setUniform("viewport", camera->getViewport());
         glDisable(GL_CULL_FACE);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       } else {
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       }
 
       glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);

@@ -73,7 +73,7 @@ namespace ogl {
 
       shader.setName(name);
      
-      shader.initPlain();
+      shader.initLine();
       
       color = _color;
       
@@ -102,9 +102,9 @@ namespace ogl {
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
-      shader.setUniform("color",      color);
-            
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      shader.setUniform("lineWidth",  lineWidth);
+      shader.setUniform("viewport",   camera->getViewport());
+      shader.setUniform("uniformColor", glm::vec4(color, 1.0f));
       
       glBindVertexArray(vao);
 

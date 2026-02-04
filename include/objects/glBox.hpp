@@ -80,7 +80,7 @@ namespace ogl {
 
       shader.setName(name);
       
-      shader.initPlain();
+      shader.initLine();
       
       scale(_scale);
 
@@ -106,19 +106,24 @@ namespace ogl {
       
       if(isToInitInGpu()) initInGpu();
       
+      if(shader.style != glShader::STYLE::LINE) {
+        shader.setName(name);
+        shader.initLine();
+      }
+
       shader.use();
       
       shader.setUniform("projection",  camera->getProjection());
       shader.setUniform("view",        camera->getView());
       shader.setUniform("model",       modelMatrix);
-      shader.setUniform("color",       color);
+      shader.setUniform("lineWidth",   lineWidth);
+      shader.setUniform("viewport",    camera->getViewport());
+      shader.setUniform("uniformColor", glm::vec4(color, 1.0f));
 
       glBindVertexArray(vao);
         
       glDisable(GL_CULL_FACE);
 
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      
       glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, nullptr);
      
       glBindVertexArray(0);
@@ -219,5 +224,3 @@ namespace ogl {
 } /* namespace ogl */
 
 #endif /* _H_OGL_BOX_H_ */
-
-
