@@ -41,7 +41,7 @@ namespace ogl {
       GLuint vbo[4];
     
       glm::vec3 color;
-     glm::vec3 size;
+      glm::vec3 size;
       ogl::glLight light;
 
   public:
@@ -78,7 +78,7 @@ namespace ogl {
         shader.initSolid();
       }
 
-      size = _scale;
+      size = _size;
       style = _style;
       color = _color;
 
