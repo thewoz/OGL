@@ -84,7 +84,7 @@ namespace ogl {
       
       scale(_scale);
 
-      style = glObject::STYLE::WIREFRAME;
+      style = glShader::STYLE::WIREFRAME;
       
       color = _color;
       

@@ -51,7 +51,7 @@ namespace ogl {
     //****************************************************************************/
     // Class glCuboid
     //****************************************************************************/
-    glCuboid(const glm::vec3 & _size, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
+    glCuboid(const glm::vec3 & _size, int _style = glShader::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
       name = _name;
       init(_size, _style, _color);
     }
@@ -64,12 +64,12 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const glm::vec3 & _size, int _style = glObject::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f)) {
+    void init(const glm::vec3 & _size, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f)) {
 
       DEBUG_LOG("glCuboid::init(" + name + ")");
 
       shader.setName(name);
-      if(_style == glObject::STYLE::WIREFRAME) {
+      if(_style == glShader::STYLE::WIREFRAME) {
         shader.initWireframe();
       } else {
         shader.initPlain();
@@ -97,13 +97,13 @@ namespace ogl {
 
       if(isToInitInGpu()) initInGpu();
 
-      if(style == glObject::STYLE::WIREFRAME) {
+      if(style == glShader::STYLE::WIREFRAME) {
         if(shader.style != glShader::STYLE::WIREFRAME) {
           shader.setName(name);
           shader.initWireframe();
         }
       } else {
-        if(shader.style != glShader::STYLE::PLAIN) {
+        if(shader.style != glShader::STYLE::SOLID) {
           shader.setName(name);
           shader.initPlain();
         }
@@ -118,7 +118,7 @@ namespace ogl {
 
       glBindVertexArray(vao);
 
-      if(style == glObject::STYLE::WIREFRAME) {
+      if(style == glShader::STYLE::WIREFRAME) {
         shader.setUniform("lineWidth", lineWidth);
         shader.setUniform("viewport", camera->getViewport());
         glDisable(GL_CULL_FACE);
