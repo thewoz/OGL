@@ -80,7 +80,7 @@ namespace ogl {
 
       shader.setName(name);
       
-      shader.initLine();
+      shader.initWireframe();
       
       scale(_scale);
 
