@@ -76,7 +76,7 @@ namespace ogl {
         if(_style == glShader::STYLE::WIREFRAME) {
           shader.initWireframe();
         } else {
-          shader.initPlain();
+          shader.initSolid();
         }
         
         radius = _radius;
@@ -105,18 +105,6 @@ namespace ogl {
         }
         
         if(isToInitInGpu()) initInGpu();
-        
-        if(style == glShader::STYLE::WIREFRAME) {
-          if(shader.style != glShader::STYLE::WIREFRAME) {
-            shader.setName(name);
-            shader.initWireframe();
-          }
-        } else {
-          if(shader.style != glShader::STYLE::SOLID) {
-            shader.setName(name);
-            shader.initPlain();
-          }
-        }
 
         shader.use();
 

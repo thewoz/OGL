@@ -69,7 +69,7 @@ namespace ogl {
         
         shader.setName(name);
         
-        shader.initPlain();
+        shader.initLine();
         
         scale(glm::vec3(_scale));
 

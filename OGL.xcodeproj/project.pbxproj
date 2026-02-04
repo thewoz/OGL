@@ -24,6 +24,22 @@
 
 /* Begin PBXFileReference section */
 		3A3B498D241F9BA700084872 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		3A3D08BC2F33B882008EAF80 /* line.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = line.fs; sourceTree = "<group>"; };
+		3A3D08BD2F33B882008EAF80 /* line.gs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = line.gs; sourceTree = "<group>"; };
+		3A3D08BE2F33B882008EAF80 /* line.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = line.vs; sourceTree = "<group>"; };
+		3A3D08BF2F33B882008EAF80 /* model.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.fs; sourceTree = "<group>"; };
+		3A3D08C02F33B882008EAF80 /* model.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.vs; sourceTree = "<group>"; };
+		3A3D08C12F33B882008EAF80 /* solid.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = solid.fs; sourceTree = "<group>"; };
+		3A3D08C22F33B882008EAF80 /* solid.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = solid.vs; sourceTree = "<group>"; };
+		3A3D08C32F33B882008EAF80 /* plain2D.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.fs; sourceTree = "<group>"; };
+		3A3D08C42F33B882008EAF80 /* plain2D.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.vs; sourceTree = "<group>"; };
+		3A3D08C52F33B882008EAF80 /* sphere.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.fs; sourceTree = "<group>"; };
+		3A3D08C62F33B882008EAF80 /* sphere.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.vs; sourceTree = "<group>"; };
+		3A3D08C72F33B882008EAF80 /* text.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.fs; sourceTree = "<group>"; };
+		3A3D08C82F33B882008EAF80 /* text.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.vs; sourceTree = "<group>"; };
+		3A3D08C92F33B882008EAF80 /* wireframe.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.fs; sourceTree = "<group>"; };
+		3A3D08CA2F33B882008EAF80 /* wireframe.gs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.gs; sourceTree = "<group>"; };
+		3A3D08CB2F33B882008EAF80 /* wireframe.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.vs; sourceTree = "<group>"; };
 		3A83B8882DBE9E9B00E0397A /* glQuad2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad2D.hpp; sourceTree = "<group>"; };
 		3AB7EB3C2DBE770C00A73EF1 /* glQuad.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad.hpp; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -49,14 +65,6 @@
 		3AC10EA42DBE35F7000C540C /* glPrint3D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPrint3D.hpp; sourceTree = "<group>"; };
 		3AC10EA62DBE35F7000C540C /* glReferenceAxes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glReferenceAxes.hpp; sourceTree = "<group>"; };
 		3AC10EA72DBE35F7000C540C /* glSphere.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glSphere.hpp; sourceTree = "<group>"; };
-		3AC10EAB2DBE35F7000C540C /* model.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.fs; sourceTree = "<group>"; };
-		3AC10EAC2DBE35F7000C540C /* model.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.vs; sourceTree = "<group>"; };
-		3AC10EAD2DBE35F7000C540C /* plain.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain.fs; sourceTree = "<group>"; };
-		3AC10EAE2DBE35F7000C540C /* plain.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain.vs; sourceTree = "<group>"; };
-		3AC10EAF2DBE35F7000C540C /* sphere.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.fs; sourceTree = "<group>"; };
-		3AC10EB02DBE35F7000C540C /* sphere.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.vs; sourceTree = "<group>"; };
-		3AC10EB12DBE35F7000C540C /* text.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.fs; sourceTree = "<group>"; };
-		3AC10EB22DBE35F7000C540C /* text.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.vs; sourceTree = "<group>"; };
 		3AC10EB42DBE35F7000C540C /* debug.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = debug.hpp; sourceTree = "<group>"; };
 		3AC10EB52DBE35F7000C540C /* error.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = error.hpp; sourceTree = "<group>"; };
 		3AC10EB82DBE35F7000C540C /* glfw.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glfw.hpp; sourceTree = "<group>"; };
@@ -142,14 +150,22 @@
 		3AC10EB32DBE35F7000C540C /* shader */ = {
 			isa = PBXGroup;
 			children = (
-				3AC10EAB2DBE35F7000C540C /* model.fs */,
-				3AC10EAC2DBE35F7000C540C /* model.vs */,
-				3AC10EAD2DBE35F7000C540C /* plain.fs */,
-				3AC10EAE2DBE35F7000C540C /* plain.vs */,
-				3AC10EAF2DBE35F7000C540C /* sphere.fs */,
-				3AC10EB02DBE35F7000C540C /* sphere.vs */,
-				3AC10EB12DBE35F7000C540C /* text.fs */,
-				3AC10EB22DBE35F7000C540C /* text.vs */,
+				3A3D08BC2F33B882008EAF80 /* line.fs */,
+				3A3D08BD2F33B882008EAF80 /* line.gs */,
+				3A3D08BE2F33B882008EAF80 /* line.vs */,
+				3A3D08BF2F33B882008EAF80 /* model.fs */,
+				3A3D08C02F33B882008EAF80 /* model.vs */,
+				3A3D08C12F33B882008EAF80 /* solid.fs */,
+				3A3D08C22F33B882008EAF80 /* solid.vs */,
+				3A3D08C32F33B882008EAF80 /* plain2D.fs */,
+				3A3D08C42F33B882008EAF80 /* plain2D.vs */,
+				3A3D08C52F33B882008EAF80 /* sphere.fs */,
+				3A3D08C62F33B882008EAF80 /* sphere.vs */,
+				3A3D08C72F33B882008EAF80 /* text.fs */,
+				3A3D08C82F33B882008EAF80 /* text.vs */,
+				3A3D08C92F33B882008EAF80 /* wireframe.fs */,
+				3A3D08CA2F33B882008EAF80 /* wireframe.gs */,
+				3A3D08CB2F33B882008EAF80 /* wireframe.vs */,
 			);
 			path = shader;
 			sourceTree = "<group>";
@@ -207,7 +223,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 2610;
 				ORGANIZATIONNAME = "Leonardo Parisi";
 				TargetAttributes = {
 					3ABAC82F241F9B8400C40957 = {
@@ -327,6 +343,7 @@
 					"-ltiff",
 				);
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 			};
 			name = Debug;
 		};
@@ -406,6 +423,7 @@
 					"-ltiff",
 				);
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 			};
 			name = Release;
 		};

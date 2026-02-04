@@ -105,11 +105,6 @@ namespace ogl {
       }
       
       if(isToInitInGpu()) initInGpu();
-      
-      if(shader.style != glShader::STYLE::LINE) {
-        shader.setName(name);
-        shader.initLine();
-      }
 
       shader.use();
       

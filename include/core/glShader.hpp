@@ -79,10 +79,10 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // initPlain
+    // initSolid
     //****************************************************************************/
-    void initPlain() {
-      init("/usr/local/include/ogl/shader/plain.vs", "/usr/local/include/ogl/shader/plain.fs");
+    void initSolid() {
+      init("/usr/local/include/ogl/shader/solid.vs", "/usr/local/include/ogl/shader/solid.fs");
       style = STYLE::SOLID;
     }
 
