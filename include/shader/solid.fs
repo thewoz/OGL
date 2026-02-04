@@ -1,8 +1,38 @@
 #version 330 core
 
+struct Light {
+    vec3 direction;
+    vec3 position;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
 uniform vec3 color;
+uniform Light light;
+
+in vec3 fragPos;
+in vec3 fragNormal;
 out vec4 outColor;
 
 void main() {
-    outColor = vec4(color, 1.0);
+    vec3 norm = normalize(fragNormal);
+    vec3 viewDir = normalize(-fragPos);
+
+    vec3 lightDir = vec3(0.0);
+    if(length(light.direction) > 0.001) {
+        lightDir = normalize(-light.direction);
+    } else {
+        lightDir = normalize(light.position - fragPos);
+    }
+
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+
+    vec3 ambient = light.ambient * color;
+    vec3 diffuse = light.diffuse * diff * color;
+    vec3 specular = light.specular * spec;
+
+    outColor = vec4(ambient + diffuse + specular, 1.0);
 }

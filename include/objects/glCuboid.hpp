@@ -23,6 +23,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <ogl/model/glLight.hpp>
+
 //****************************************************************************/
 // namespace ogl
 //****************************************************************************/
@@ -40,6 +42,7 @@ namespace ogl {
     
       glm::vec3 color;
      glm::vec3 size;
+      ogl::glLight light;
 
   public:
 
@@ -103,6 +106,9 @@ namespace ogl {
       shader.setUniform("view", camera->getView());
       shader.setUniform("model", modelMatrix);
       shader.setUniform("color", color);
+      if(style == glShader::STYLE::SOLID) {
+        light.setInShader(shader, camera->getView());
+      }
 
       glBindVertexArray(vao);
 
@@ -121,6 +127,16 @@ namespace ogl {
 
       glCheckError();
       
+    }
+
+    //****************************************************************************/
+    // setLight() - Set the light
+    //****************************************************************************/
+    void setLight(const glm::vec3 & _position, const glm::vec3 & _direction) {
+
+      light.setPosition(_position);
+      light.setDirection(_direction);
+
     }
 
   private:
