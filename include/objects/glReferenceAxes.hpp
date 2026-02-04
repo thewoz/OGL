@@ -119,10 +119,15 @@ namespace ogl {
         glViewport(viewport[2] - 160, 10, 160, 160);
 
         shader.setUniform("projection", camera->get3DOrthoProjection());
-        shader.setUniform("view",       camera->getLookAt(glm::vec3(0.0f)));
+        glm::mat4 viewNoTranslation = camera->getView();
+        viewNoTranslation[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+        shader.setUniform("view",       viewNoTranslation);
         shader.setUniform("model",      modelMatrix);
                         
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        GLfloat previousLineWidth = 1.0f;
+        glGetFloatv(GL_LINE_WIDTH, &previousLineWidth);
+        glLineWidth(lineWidth);
         
         glBindVertexArray(vao);
         
@@ -135,6 +140,7 @@ namespace ogl {
         }
         
         glBindVertexArray(0);
+        glLineWidth(previousLineWidth);
                       
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         
