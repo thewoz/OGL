@@ -40,10 +40,12 @@ int main(int argc, char * const argv []) {
   window.getCurrentCamera()->setPitch(-20);
 
   ogl::glAxes axes;
-  ogl::glGrid grid(10, 10, 0.5, ogl::glColors::get("cyan"));
+  ogl::glGrid grid(10, 10, 0.5, ogl::glColors::cyan);
   ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  ogl::glPrint2D text(10, 10, ogl::glColors::get("white"), 0.5, "FPS: ");
+  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5, "FPS: ");
     
+  grid.setLineWidth(2);
+  
   while(!window.shouldClose()) {
     
     window.renderBegin();
