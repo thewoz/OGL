@@ -125,6 +125,9 @@ namespace ogl {
         shader.setUniform("model",      modelMatrix);
                         
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        GLfloat previousLineWidth = 1.0f;
+        glGetFloatv(GL_LINE_WIDTH, &previousLineWidth);
+        glLineWidth(lineWidth);
         
         glBindVertexArray(vao);
         
@@ -137,6 +140,7 @@ namespace ogl {
         }
         
         glBindVertexArray(0);
+        glLineWidth(previousLineWidth);
                       
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         
