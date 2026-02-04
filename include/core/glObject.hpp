@@ -54,6 +54,7 @@ namespace ogl {
     glm::mat4 modelMatrix;
     
     int style;
+    float lineWidth;
     
   public:
     
@@ -73,6 +74,8 @@ namespace ogl {
       isInited = false;
       isInitedInGpu = false;
       isToUpdateInGpu = false;
+
+      lineWidth = 1.0f;
       
       updateModelMatrix();
       
@@ -132,6 +135,11 @@ namespace ogl {
     // setStyle()
     //****************************************************************************
     inline void setStyle(int _style) { style = _style; }
+
+    //****************************************************************************
+    // setLineWidth()
+    //****************************************************************************
+    inline void setLineWidth(float _lineWidth) { lineWidth = (_lineWidth > 0.0f) ? _lineWidth : 1.0f; }
     
     //****************************************************************************
     // setName()
