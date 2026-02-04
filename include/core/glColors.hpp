@@ -47,9 +47,7 @@ namespace ogl {
     // glColors()
     //****************************************************************************//
     glColors() {}
-    
-    static bool isInited;
-    
+        
   public:
     
     //****************************************************************************//
@@ -68,10 +66,7 @@ namespace ogl {
     // get()
     //****************************************************************************//
     static const glm::vec4 & get(const std::string & str, bool create = false) {
-         
-      // carico i colori
-      if(!isInited) init();
-      
+   
       auto colorMap = colors.find(normalize(str));
       
       if(colorMap == colors.end()) {
@@ -138,169 +133,160 @@ namespace ogl {
       
     }
     
-    //****************************************************************************//
-    // init()
-    //****************************************************************************//
-    static void init(){
-
-      add("aliceblue", 240, 248, 255);
-      add("antiquewhite", 250, 235, 215);
-      add("aqua", 0, 255, 255);
-      add("aquamarine", 127, 255, 212);
-      add("azure", 240, 255, 255);
-      add("beige", 245, 245, 220);
-      add("bisque", 255, 228, 196);
-      add("black", 0, 0, 0);
-      add("blanchedalmond", 255, 235, 205);
-      add("blue", 0, 0, 255);
-      add("blueviolet", 138, 43, 226);
-      add("brown", 165, 42, 42);
-      add("burlywood", 222, 184, 135);
-      add("cadetblue", 95, 158, 160);
-      add("chartreuse", 127, 255, 0);
-      add("chocolate", 210, 105, 30);
-      add("coral", 255, 127, 80);
-      add("cornflowerblue", 100, 149, 237);
-      add("cornsilk", 255, 248, 220);
-      add("crimson", 220, 20, 60);
-      add("cyan", 0, 255, 255);
-      add("darkblue", 0, 0, 139);
-      add("darkcyan", 0, 139, 139);
-      add("darkgoldenrod", 184, 134, 11);
-      add("darkgray", 169, 169, 169);
-      add("darkgreen", 0, 100, 0);
-      add("darkgrey", 169, 169, 169);
-      add("darkkhaki", 189, 183, 107);
-      add("darkmagenta", 139, 0, 139);
-      add("darkolivegreen", 85, 107, 47);
-      add("darkorange", 255, 140, 0);
-      add("darkorchid", 153, 50, 204);
-      add("darkred", 139, 0, 0);
-      add("darksalmon", 233, 150, 122);
-      add("darkseagreen", 143, 188, 143);
-      add("darkslateblue", 72, 61, 139);
-      add("darkslategray", 47, 79, 79);
-      add("darkslategrey", 47, 79, 79);
-      add("darkturquoise", 0, 206, 209);
-      add("darkviolet", 148, 0, 211);
-      add("deeppink", 255, 20, 147);
-      add("deepskyblue", 0, 191, 255);
-      add("dimgray", 105, 105, 105);
-      add("dimgrey", 105, 105, 105);
-      add("dodgerblue", 30, 144, 255);
-      add("firebrick", 178, 34, 34);
-      add("floralwhite", 255, 250, 240);
-      add("forestgreen", 34, 139, 34);
-      add("fuchsia", 255, 0, 255);
-      add("gainsboro", 220, 220, 220);
-      add("ghostwhite", 248, 248, 255);
-      add("gold", 255, 215, 0);
-      add("goldenrod", 218, 165, 32);
-      add("gray", 128, 128, 128);
-      add("green", 0, 128, 0);
-      add("greenyellow", 173, 255, 47);
-      add("grey", 128, 128, 128);
-      add("honeydew", 240, 255, 240);
-      add("hotpink", 255, 105, 180);
-      add("indianred", 205, 92, 92);
-      add("indigo", 75, 0, 130);
-      add("ivory", 255, 255, 240);
-      add("khaki", 240, 230, 140);
-      add("lavender", 230, 230, 250);
-      add("lavenderblush", 255, 240, 245);
-      add("lawngreen", 124, 252, 0);
-      add("lemonchiffon", 255, 250, 205);
-      add("lightblue", 173, 216, 230);
-      add("lightcoral", 240, 128, 128);
-      add("lightcyan", 224, 255, 255);
-      add("lightgoldenrodyellow", 250, 250, 210);
-      add("lightgray", 211, 211, 211);
-      add("lightgreen", 144, 238, 144);
-      add("lightgrey", 211, 211, 211);
-      add("lightpink", 255, 182, 193);
-      add("lightsalmon", 255, 160, 122);
-      add("lightseagreen", 32, 178, 170);
-      add("lightskyblue", 135, 206, 250);
-      add("lightslategray", 119, 136, 153);
-      add("lightslategrey", 119, 136, 153);
-      add("lightsteelblue", 176, 196, 222);
-      add("lightyellow", 255, 255, 224);
-      add("lime", 0, 255, 0);
-      add("limegreen", 50, 205, 50);
-      add("linen", 250, 240, 230);
-      add("magenta", 255, 0, 255);
-      add("maroon", 128, 0, 0);
-      add("mediumaquamarine", 102, 205, 170);
-      add("mediumblue", 0, 0, 205);
-      add("mediumorchid", 186, 85, 211);
-      add("mediumpurple", 147, 112, 219);
-      add("mediumseagreen", 60, 179, 113);
-      add("mediumslateblue", 123, 104, 238);
-      add("mediumspringgreen", 0, 250, 154);
-      add("mediumturquoise", 72, 209, 204);
-      add("mediumvioletred", 199, 21, 133);
-      add("midnightblue", 25, 25, 112);
-      add("mintcream", 245, 255, 250);
-      add("mistyrose", 255, 228, 225);
-      add("moccasin", 255, 228, 181);
-      add("navajowhite", 255, 222, 173);
-      add("navy", 0, 0, 128);
-      add("oldlace", 253, 245, 230);
-      add("olive", 128, 128, 0);
-      add("olivedrab", 107, 142, 35);
-      add("orange", 255, 165, 0);
-      add("orangered", 255, 69, 0);
-      add("orchid", 218, 112, 214);
-      add("palegoldenrod", 238, 232, 170);
-      add("palegreen", 152, 251, 152);
-      add("paleturquoise", 175, 238, 238);
-      add("palevioletred", 219, 112, 147);
-      add("papayawhip", 255, 239, 213);
-      add("peachpuff", 255, 218, 185);
-      add("peru", 205, 133, 63);
-      add("pink", 255, 192, 203);
-      add("plum", 221, 160, 221);
-      add("powderblue", 176, 224, 230);
-      add("purple", 128, 0, 128);
-      add("red", 255, 0, 0);
-      add("rosybrown", 188, 143, 143);
-      add("royalblue", 65, 105, 225);
-      add("saddlebrown", 139, 69, 19);
-      add("salmon", 250, 128, 114);
-      add("sandybrown", 244, 164, 96);
-      add("seagreen", 46, 139, 87);
-      add("seashell", 255, 245, 238);
-      add("sienna", 160, 82, 45);
-      add("silver", 192, 192, 192);
-      add("skyblue", 135, 206, 235);
-      add("slateblue", 106, 90, 205);
-      add("slategray", 112, 128, 144);
-      add("slategrey", 112, 128, 144);
-      add("snow", 255, 250, 250);
-      add("springgreen", 0, 255, 127);
-      add("steelblue", 70, 130, 180);
-      add("tan", 210, 180, 140);
-      add("teal", 0, 128, 128);
-      add("thistle", 216, 191, 216);
-      add("tomato", 255, 99, 71);
-      add("turquoise", 64, 224, 208);
-      add("violet", 238, 130, 238);
-      add("wheat", 245, 222, 179);
-      add("white", 255, 255, 255);
-      add("whitesmoke", 245, 245, 245);
-      add("yellow", 255, 255, 0);
-      add("yellowgreen", 154, 205, 50);
+  public:
     
-      isInited = true;
-      
-    }
+    constexpr static const glm::vec4 aliceblue = glm::vec4(0.941f, 0.973f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 antiquewhite = glm::vec4(0.980f, 0.922f, 0.843f, 1.000f);
+    constexpr static const glm::vec4 aqua = glm::vec4(0.000f, 1.000f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 aquamarine = glm::vec4(0.498f, 1.000f, 0.831f, 1.000f);
+    constexpr static const glm::vec4 azure = glm::vec4(0.941f, 1.000f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 beige = glm::vec4(0.961f, 0.961f, 0.863f, 1.000f);
+    constexpr static const glm::vec4 bisque = glm::vec4(1.000f, 0.894f, 0.769f, 1.000f);
+    constexpr static const glm::vec4 black = glm::vec4(0.000f, 0.000f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 blanchedalmond = glm::vec4(1.000f, 0.922f, 0.804f, 1.000f);
+    constexpr static const glm::vec4 blue = glm::vec4(0.000f, 0.000f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 blueviolet = glm::vec4(0.541f, 0.169f, 0.886f, 1.000f);
+    constexpr static const glm::vec4 brown = glm::vec4(0.647f, 0.165f, 0.165f, 1.000f);
+    constexpr static const glm::vec4 burlywood = glm::vec4(0.871f, 0.722f, 0.529f, 1.000f);
+    constexpr static const glm::vec4 cadetblue = glm::vec4(0.373f, 0.620f, 0.627f, 1.000f);
+    constexpr static const glm::vec4 chartreuse = glm::vec4(0.498f, 1.000f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 chocolate = glm::vec4(0.824f, 0.412f, 0.118f, 1.000f);
+    constexpr static const glm::vec4 coral = glm::vec4(1.000f, 0.498f, 0.314f, 1.000f);
+    constexpr static const glm::vec4 cornflowerblue = glm::vec4(0.392f, 0.584f, 0.929f, 1.000f);
+    constexpr static const glm::vec4 cornsilk = glm::vec4(1.000f, 0.973f, 0.863f, 1.000f);
+    constexpr static const glm::vec4 crimson = glm::vec4(0.863f, 0.078f, 0.235f, 1.000f);
+    constexpr static const glm::vec4 cyan = glm::vec4(0.000f, 1.000f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 darkblue = glm::vec4(0.000f, 0.000f, 0.545f, 1.000f);
+    constexpr static const glm::vec4 darkcyan = glm::vec4(0.000f, 0.545f, 0.545f, 1.000f);
+    constexpr static const glm::vec4 darkgoldenrod = glm::vec4(0.722f, 0.525f, 0.043f, 1.000f);
+    constexpr static const glm::vec4 darkgray = glm::vec4(0.663f, 0.663f, 0.663f, 1.000f);
+    constexpr static const glm::vec4 darkgreen = glm::vec4(0.000f, 0.392f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 darkgrey = glm::vec4(0.663f, 0.663f, 0.663f, 1.000f);
+    constexpr static const glm::vec4 darkkhaki = glm::vec4(0.741f, 0.718f, 0.420f, 1.000f);
+    constexpr static const glm::vec4 darkmagenta = glm::vec4(0.545f, 0.000f, 0.545f, 1.000f);
+    constexpr static const glm::vec4 darkolivegreen = glm::vec4(0.333f, 0.420f, 0.184f, 1.000f);
+    constexpr static const glm::vec4 darkorange = glm::vec4(1.000f, 0.549f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 darkorchid = glm::vec4(0.600f, 0.196f, 0.800f, 1.000f);
+    constexpr static const glm::vec4 darkred = glm::vec4(0.545f, 0.000f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 darksalmon = glm::vec4(0.914f, 0.588f, 0.478f, 1.000f);
+    constexpr static const glm::vec4 darkseagreen = glm::vec4(0.561f, 0.737f, 0.561f, 1.000f);
+    constexpr static const glm::vec4 darkslateblue = glm::vec4(0.282f, 0.239f, 0.545f, 1.000f);
+    constexpr static const glm::vec4 darkslategray = glm::vec4(0.184f, 0.310f, 0.310f, 1.000f);
+    constexpr static const glm::vec4 darkslategrey = glm::vec4(0.184f, 0.310f, 0.310f, 1.000f);
+    constexpr static const glm::vec4 darkturquoise = glm::vec4(0.000f, 0.808f, 0.820f, 1.000f);
+    constexpr static const glm::vec4 darkviolet = glm::vec4(0.580f, 0.000f, 0.827f, 1.000f);
+    constexpr static const glm::vec4 deeppink = glm::vec4(1.000f, 0.078f, 0.576f, 1.000f);
+    constexpr static const glm::vec4 deepskyblue = glm::vec4(0.000f, 0.749f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 dimgray = glm::vec4(0.412f, 0.412f, 0.412f, 1.000f);
+    constexpr static const glm::vec4 dimgrey = glm::vec4(0.412f, 0.412f, 0.412f, 1.000f);
+    constexpr static const glm::vec4 dodgerblue = glm::vec4(0.118f, 0.565f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 firebrick = glm::vec4(0.698f, 0.133f, 0.133f, 1.000f);
+    constexpr static const glm::vec4 floralwhite = glm::vec4(1.000f, 0.980f, 0.941f, 1.000f);
+    constexpr static const glm::vec4 forestgreen = glm::vec4(0.133f, 0.545f, 0.133f, 1.000f);
+    constexpr static const glm::vec4 fuchsia = glm::vec4(1.000f, 0.000f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 gainsboro = glm::vec4(0.863f, 0.863f, 0.863f, 1.000f);
+    constexpr static const glm::vec4 ghostwhite = glm::vec4(0.973f, 0.973f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 gold = glm::vec4(1.000f, 0.843f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 goldenrod = glm::vec4(0.855f, 0.647f, 0.125f, 1.000f);
+    constexpr static const glm::vec4 gray = glm::vec4(0.502f, 0.502f, 0.502f, 1.000f);
+    constexpr static const glm::vec4 green = glm::vec4(0.000f, 0.502f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 greenyellow = glm::vec4(0.678f, 1.000f, 0.184f, 1.000f);
+    constexpr static const glm::vec4 grey = glm::vec4(0.502f, 0.502f, 0.502f, 1.000f);
+    constexpr static const glm::vec4 honeydew = glm::vec4(0.941f, 1.000f, 0.941f, 1.000f);
+    constexpr static const glm::vec4 hotpink = glm::vec4(1.000f, 0.412f, 0.706f, 1.000f);
+    constexpr static const glm::vec4 indianred = glm::vec4(0.804f, 0.361f, 0.361f, 1.000f);
+    constexpr static const glm::vec4 indigo = glm::vec4(0.294f, 0.000f, 0.510f, 1.000f);
+    constexpr static const glm::vec4 ivory = glm::vec4(1.000f, 1.000f, 0.941f, 1.000f);
+    constexpr static const glm::vec4 khaki = glm::vec4(0.941f, 0.902f, 0.549f, 1.000f);
+    constexpr static const glm::vec4 lavender = glm::vec4(0.902f, 0.902f, 0.980f, 1.000f);
+    constexpr static const glm::vec4 lavenderblush = glm::vec4(1.000f, 0.941f, 0.961f, 1.000f);
+    constexpr static const glm::vec4 lawngreen = glm::vec4(0.486f, 0.988f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 lemonchiffon = glm::vec4(1.000f, 0.980f, 0.804f, 1.000f);
+    constexpr static const glm::vec4 lightblue = glm::vec4(0.678f, 0.847f, 0.902f, 1.000f);
+    constexpr static const glm::vec4 lightcoral = glm::vec4(0.941f, 0.502f, 0.502f, 1.000f);
+    constexpr static const glm::vec4 lightcyan = glm::vec4(0.878f, 1.000f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 lightgoldenrodyellow = glm::vec4(0.980f, 0.980f, 0.824f, 1.000f);
+    constexpr static const glm::vec4 lightgray = glm::vec4(0.827f, 0.827f, 0.827f, 1.000f);
+    constexpr static const glm::vec4 lightgreen = glm::vec4(0.565f, 0.933f, 0.565f, 1.000f);
+    constexpr static const glm::vec4 lightgrey = glm::vec4(0.827f, 0.827f, 0.827f, 1.000f);
+    constexpr static const glm::vec4 lightpink = glm::vec4(1.000f, 0.714f, 0.757f, 1.000f);
+    constexpr static const glm::vec4 lightsalmon = glm::vec4(1.000f, 0.627f, 0.478f, 1.000f);
+    constexpr static const glm::vec4 lightseagreen = glm::vec4(0.125f, 0.698f, 0.667f, 1.000f);
+    constexpr static const glm::vec4 lightskyblue = glm::vec4(0.529f, 0.808f, 0.980f, 1.000f);
+    constexpr static const glm::vec4 lightslategray = glm::vec4(0.467f, 0.533f, 0.600f, 1.000f);
+    constexpr static const glm::vec4 lightslategrey = glm::vec4(0.467f, 0.533f, 0.600f, 1.000f);
+    constexpr static const glm::vec4 lightsteelblue = glm::vec4(0.690f, 0.769f, 0.871f, 1.000f);
+    constexpr static const glm::vec4 lightyellow = glm::vec4(1.000f, 1.000f, 0.878f, 1.000f);
+    constexpr static const glm::vec4 lime = glm::vec4(0.000f, 1.000f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 limegreen = glm::vec4(0.196f, 0.804f, 0.196f, 1.000f);
+    constexpr static const glm::vec4 linen = glm::vec4(0.980f, 0.941f, 0.902f, 1.000f);
+    constexpr static const glm::vec4 magenta = glm::vec4(1.000f, 0.000f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 maroon = glm::vec4(0.502f, 0.000f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 mediumaquamarine = glm::vec4(0.400f, 0.804f, 0.667f, 1.000f);
+    constexpr static const glm::vec4 mediumblue = glm::vec4(0.000f, 0.000f, 0.804f, 1.000f);
+    constexpr static const glm::vec4 mediumorchid = glm::vec4(0.729f, 0.333f, 0.827f, 1.000f);
+    constexpr static const glm::vec4 mediumpurple = glm::vec4(0.576f, 0.439f, 0.859f, 1.000f);
+    constexpr static const glm::vec4 mediumseagreen = glm::vec4(0.235f, 0.702f, 0.443f, 1.000f);
+    constexpr static const glm::vec4 mediumslateblue = glm::vec4(0.482f, 0.408f, 0.933f, 1.000f);
+    constexpr static const glm::vec4 mediumspringgreen = glm::vec4(0.000f, 0.980f, 0.604f, 1.000f);
+    constexpr static const glm::vec4 mediumturquoise = glm::vec4(0.282f, 0.820f, 0.800f, 1.000f);
+    constexpr static const glm::vec4 mediumvioletred = glm::vec4(0.780f, 0.082f, 0.522f, 1.000f);
+    constexpr static const glm::vec4 midnightblue = glm::vec4(0.098f, 0.098f, 0.439f, 1.000f);
+    constexpr static const glm::vec4 mintcream = glm::vec4(0.961f, 1.000f, 0.980f, 1.000f);
+    constexpr static const glm::vec4 mistyrose = glm::vec4(1.000f, 0.894f, 0.882f, 1.000f);
+    constexpr static const glm::vec4 moccasin = glm::vec4(1.000f, 0.894f, 0.710f, 1.000f);
+    constexpr static const glm::vec4 navajowhite = glm::vec4(1.000f, 0.871f, 0.678f, 1.000f);
+    constexpr static const glm::vec4 navy = glm::vec4(0.000f, 0.000f, 0.502f, 1.000f);
+    constexpr static const glm::vec4 oldlace = glm::vec4(0.992f, 0.961f, 0.902f, 1.000f);
+    constexpr static const glm::vec4 olive = glm::vec4(0.502f, 0.502f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 olivedrab = glm::vec4(0.420f, 0.557f, 0.137f, 1.000f);
+    constexpr static const glm::vec4 orange = glm::vec4(1.000f, 0.647f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 orangered = glm::vec4(1.000f, 0.271f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 orchid = glm::vec4(0.855f, 0.439f, 0.839f, 1.000f);
+    constexpr static const glm::vec4 palegoldenrod = glm::vec4(0.933f, 0.910f, 0.667f, 1.000f);
+    constexpr static const glm::vec4 palegreen = glm::vec4(0.596f, 0.984f, 0.596f, 1.000f);
+    constexpr static const glm::vec4 paleturquoise = glm::vec4(0.686f, 0.933f, 0.933f, 1.000f);
+    constexpr static const glm::vec4 palevioletred = glm::vec4(0.859f, 0.439f, 0.576f, 1.000f);
+    constexpr static const glm::vec4 papayawhip = glm::vec4(1.000f, 0.937f, 0.835f, 1.000f);
+    constexpr static const glm::vec4 peachpuff = glm::vec4(1.000f, 0.855f, 0.725f, 1.000f);
+    constexpr static const glm::vec4 peru = glm::vec4(0.804f, 0.522f, 0.247f, 1.000f);
+    constexpr static const glm::vec4 pink = glm::vec4(1.000f, 0.753f, 0.796f, 1.000f);
+    constexpr static const glm::vec4 plum = glm::vec4(0.867f, 0.627f, 0.867f, 1.000f);
+    constexpr static const glm::vec4 powderblue = glm::vec4(0.690f, 0.878f, 0.902f, 1.000f);
+    constexpr static const glm::vec4 purple = glm::vec4(0.502f, 0.000f, 0.502f, 1.000f);
+    constexpr static const glm::vec4 red = glm::vec4(1.000f, 0.000f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 rosybrown = glm::vec4(0.737f, 0.561f, 0.561f, 1.000f);
+    constexpr static const glm::vec4 royalblue = glm::vec4(0.255f, 0.412f, 0.882f, 1.000f);
+    constexpr static const glm::vec4 saddlebrown = glm::vec4(0.545f, 0.271f, 0.075f, 1.000f);
+    constexpr static const glm::vec4 salmon = glm::vec4(0.980f, 0.502f, 0.447f, 1.000f);
+    constexpr static const glm::vec4 sandybrown = glm::vec4(0.957f, 0.643f, 0.376f, 1.000f);
+    constexpr static const glm::vec4 seagreen = glm::vec4(0.180f, 0.545f, 0.341f, 1.000f);
+    constexpr static const glm::vec4 seashell = glm::vec4(1.000f, 0.961f, 0.933f, 1.000f);
+    constexpr static const glm::vec4 sienna = glm::vec4(0.627f, 0.322f, 0.176f, 1.000f);
+    constexpr static const glm::vec4 silver = glm::vec4(0.753f, 0.753f, 0.753f, 1.000f);
+    constexpr static const glm::vec4 skyblue = glm::vec4(0.529f, 0.808f, 0.922f, 1.000f);
+    constexpr static const glm::vec4 slateblue = glm::vec4(0.416f, 0.353f, 0.804f, 1.000f);
+    constexpr static const glm::vec4 slategray = glm::vec4(0.439f, 0.502f, 0.565f, 1.000f);
+    constexpr static const glm::vec4 slategrey = glm::vec4(0.439f, 0.502f, 0.565f, 1.000f);
+    constexpr static const glm::vec4 snow = glm::vec4(1.000f, 0.980f, 0.980f, 1.000f);
+    constexpr static const glm::vec4 springgreen = glm::vec4(0.000f, 1.000f, 0.498f, 1.000f);
+    constexpr static const glm::vec4 steelblue = glm::vec4(0.275f, 0.510f, 0.706f, 1.000f);
+    constexpr static const glm::vec4 tan = glm::vec4(0.824f, 0.706f, 0.549f, 1.000f);
+    constexpr static const glm::vec4 teal = glm::vec4(0.000f, 0.502f, 0.502f, 1.000f);
+    constexpr static const glm::vec4 thistle = glm::vec4(0.847f, 0.749f, 0.847f, 1.000f);
+    constexpr static const glm::vec4 tomato = glm::vec4(1.000f, 0.388f, 0.278f, 1.000f);
+    constexpr static const glm::vec4 turquoise = glm::vec4(0.251f, 0.878f, 0.816f, 1.000f);
+    constexpr static const glm::vec4 violet = glm::vec4(0.933f, 0.510f, 0.933f, 1.000f);
+    constexpr static const glm::vec4 wheat = glm::vec4(0.961f, 0.871f, 0.702f, 1.000f);
+    constexpr static const glm::vec4 white = glm::vec4(1.000f, 1.000f, 1.000f, 1.000f);
+    constexpr static const glm::vec4 whitesmoke = glm::vec4(0.961f, 0.961f, 0.961f, 1.000f);
+    constexpr static const glm::vec4 yellow = glm::vec4(1.000f, 1.000f, 0.000f, 1.000f);
+    constexpr static const glm::vec4 yellowgreen = glm::vec4(0.604f, 0.804f, 0.196f, 1.000f);
     
   }; /* class glColors */
 
   std::map<std::string, glm::vec4> glColors::colors = std::map<std::string, glm::vec4>();
   
-bool glColors::isInited = false;
-
 } /* namespace ogl */
 
 #endif /* _H_OGL_OBJECT_H_ */
