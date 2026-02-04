@@ -46,7 +46,9 @@ namespace ogl {
     //****************************************************************************//
     // glColors()
     //****************************************************************************//
-    glColors() { init(); }
+    glColors() {}
+    
+    static bool isInited;
     
   public:
     
@@ -67,12 +69,15 @@ namespace ogl {
     //****************************************************************************//
     static const glm::vec4 & get(const std::string & str, bool create = false) {
          
+      // carico i colori
+      if(!isInited) init();
+      
       auto colorMap = colors.find(normalize(str));
       
       if(colorMap == colors.end()) {
         
         if(!create) {
-          fprintf(stderr, "error not found glColor\n");
+          fprintf(stderr, "error: color \"%s\" not found ogl::glColor\n", str.c_str());
           abort();
         }
         
@@ -286,12 +291,16 @@ namespace ogl {
       add("yellow", 255, 255, 0);
       add("yellowgreen", 154, 205, 50);
     
+      isInited = true;
+      
     }
     
   }; /* class glColors */
 
   std::map<std::string, glm::vec4> glColors::colors = std::map<std::string, glm::vec4>();
   
+bool glColors::isInited = false;
+
 } /* namespace ogl */
 
 #endif /* _H_OGL_OBJECT_H_ */
