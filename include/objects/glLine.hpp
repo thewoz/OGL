@@ -138,7 +138,6 @@ namespace ogl {
       } else {
      
         glBindVertexArray(vao);
-		
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
       }

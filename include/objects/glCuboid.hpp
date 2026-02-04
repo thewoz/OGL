@@ -64,7 +64,7 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const glm::vec3 & _size, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0f)) {
+    void init(const glm::vec3 & _size, int _style = glObject::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f)) {
 
       DEBUG_LOG("glCuboid::init(" + name + ")");
 

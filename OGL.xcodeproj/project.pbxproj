@@ -49,8 +49,6 @@
 		3AC10EA42DBE35F7000C540C /* glPrint3D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPrint3D.hpp; sourceTree = "<group>"; };
 		3AC10EA62DBE35F7000C540C /* glReferenceAxes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glReferenceAxes.hpp; sourceTree = "<group>"; };
 		3AC10EA72DBE35F7000C540C /* glSphere.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glSphere.hpp; sourceTree = "<group>"; };
-		3AC10EA92DBE35F7000C540C /* advanced.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = advanced.fs; sourceTree = "<group>"; };
-		3AC10EAA2DBE35F7000C540C /* advanced.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = advanced.vs; sourceTree = "<group>"; };
 		3AC10EAB2DBE35F7000C540C /* model.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.fs; sourceTree = "<group>"; };
 		3AC10EAC2DBE35F7000C540C /* model.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = model.vs; sourceTree = "<group>"; };
 		3AC10EAD2DBE35F7000C540C /* plain.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain.fs; sourceTree = "<group>"; };
@@ -144,8 +142,6 @@
 		3AC10EB32DBE35F7000C540C /* shader */ = {
 			isa = PBXGroup;
 			children = (
-				3AC10EA92DBE35F7000C540C /* advanced.fs */,
-				3AC10EAA2DBE35F7000C540C /* advanced.vs */,
 				3AC10EAB2DBE35F7000C540C /* model.fs */,
 				3AC10EAC2DBE35F7000C540C /* model.vs */,
 				3AC10EAD2DBE35F7000C540C /* plain.fs */,

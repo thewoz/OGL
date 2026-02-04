@@ -57,7 +57,7 @@ namespace ogl {
     //****************************************************************************/
     // glEllipse()
     //****************************************************************************/
-    glEllipse(float _a, float _b, float _c, int _stacks, int _slices, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+    glEllipse(float _a, float _b, float _c, int _stacks, int _slices, int _style = glObject::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
       
       name = _name;
       
@@ -71,7 +71,7 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(float _a, float _b, float _c, int _stacks, int _slices, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
+    void init(float _a, float _b, float _c, int _stacks, int _slices, int _style = glObject::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0)) {
       
       DEBUG_LOG("glEllipse::init(" + name + ")");
 

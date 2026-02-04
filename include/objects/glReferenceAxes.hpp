@@ -130,24 +130,22 @@ namespace ogl {
         shader.setUniform("model",      modelMatrix);
         shader.setUniform("lineWidth",  lineWidth);
         shader.setUniform("viewport",   camera->getViewport());
-                        
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        GLfloat previousLineWidth = 1.0f;
-        glGetFloatv(GL_LINE_WIDTH, &previousLineWidth);
-        glLineWidth(lineWidth);
-        
+
         glBindVertexArray(vao);
-        
+
+        glDisable(GL_CULL_FACE);
+        glDisableVertexAttribArray(1);
+        glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
+
         for(int i=0; i<3; ++i) {
           
-          shader.setUniform("color", colors[i]);
-          
+          shader.setUniform("uniformColor", glm::vec4(colors[i], 1.0f));
+    
           glDrawArrays(GL_LINES, i*2, 2);
-          
+
         }
         
         glBindVertexArray(0);
-        glLineWidth(previousLineWidth);
                       
         glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
         

@@ -143,10 +143,9 @@ int main(int argc, char* const argv[]) {
 
 ## 🧰 TODO
 
-- Implement thick line rendering
 - Add lighting for objects like cuboids, spheres, ellipses
 - Add render-to-texture support
-- Add axis labels (X,Y,Z) and a background rectangle to `glReferenceAxes` for better visualization
+- Add axis labels (X,Y,Z) to `glReferenceAxes` for better visualization
 - Include an example with ImGui
 - Rewrite camera class
 - Improves key management

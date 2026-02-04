@@ -121,7 +121,7 @@ namespace ogl {
       //****************************************************************************/
       // render()
       //****************************************************************************/
-      void render(const glCamera* camera) {
+      void render(const glCamera * camera) {
           
         DEBUG_LOG("glQuad::render(" + name + ")");
 

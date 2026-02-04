@@ -119,11 +119,11 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getView());
-      shader.setUniform("model",      modelMatrix);
-      shader.setUniform("lineWidth",  lineWidth);
-      shader.setUniform("viewport",   camera->getViewport());
+      shader.setUniform("projection",   camera->getProjection());
+      shader.setUniform("view",         camera->getView());
+      shader.setUniform("model",        modelMatrix);
+      shader.setUniform("lineWidth",    lineWidth);
+      shader.setUniform("viewport",     camera->getViewport());
       shader.setUniform("uniformColor", glm::vec4(1.0f));
                         
       glBindVertexArray(vao);
