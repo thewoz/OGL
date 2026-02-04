@@ -40,25 +40,18 @@ namespace ogl {
     
   private:
     
-    glColors() {}
-    
+    // mappa che mi contiene i colori
     static std::map<std::string, glm::vec4> colors;
-
-    static bool isInited;
-
-    static std::string normalize(const std::string & value) {
-      std::string lowered;
-      lowered.reserve(value.size());
-      for (unsigned char ch : value) {
-        lowered.push_back(static_cast<char>(std::tolower(ch)));
-      }
-      return lowered;
-    }
+    
+    //****************************************************************************//
+    // glColors()
+    //****************************************************************************//
+    glColors() { init(); }
     
   public:
     
     //****************************************************************************//
-    // getColor
+    // getRandom()
     //****************************************************************************//
     static const glm::vec4 getRandom() {
       
@@ -70,33 +63,31 @@ namespace ogl {
     }
     
     //****************************************************************************//
-    // getColor
+    // get()
     //****************************************************************************//
-    static const glm::vec4 & get(const std::string & str, bool createColor = false) {
+    static const glm::vec4 & get(const std::string & str, bool create = false) {
          
-      if(!isInited) init();
-      std::string key = normalize(str);
-      auto colorMap = colors.find(key);
+      auto colorMap = colors.find(normalize(str));
       
       if(colorMap == colors.end()) {
         
-        if(!createColor) {
+        if(!create) {
           fprintf(stderr, "error not found glColor\n");
           abort();
         }
         
-        colors[key] = getRandom();
+        add(str, getRandom());
         
-        return colors[key];
+        return colors[str];
         
-      } else { return colorMap->second; }
+      }
       
-      abort();
-      
+      return colorMap->second;
+            
     }
     
     //****************************************************************************//
-    // heatMap
+    // heatMap()
     //****************************************************************************//
     static const glm::vec4 heatMap(double value) {
             
@@ -111,16 +102,41 @@ namespace ogl {
       
     }
     
+    //****************************************************************************//
+    // add()
+    //****************************************************************************//
+    static void add(const std::string & name, int r, int g, int b) {
+      colors[name] = glm::vec4(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
+    }
+    
+    static void add(const std::string & name, const glm::vec4 & color) {
+      colors[name] = color;
+    }
+
+    
   private:
     
     //****************************************************************************//
-    // init
+    // normalize()
+    //****************************************************************************//
+    static std::string normalize(const std::string & value) {
+      
+      std::string lowered;
+      
+      lowered.reserve(value.size());
+      
+      for (unsigned char ch : value) {
+        lowered.push_back(static_cast<char>(std::tolower(ch)));
+      }
+      
+      return lowered;
+      
+    }
+    
+    //****************************************************************************//
+    // init()
     //****************************************************************************//
     static void init(){
-
-      auto add = [](const std::string & name, int r, int g, int b) {
-        colors[name] = glm::vec4(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
-      };
 
       add("aliceblue", 240, 248, 255);
       add("antiquewhite", 250, 235, 215);
@@ -269,89 +285,13 @@ namespace ogl {
       add("whitesmoke", 245, 245, 245);
       add("yellow", 255, 255, 0);
       add("yellowgreen", 154, 205, 50);
-
-      add("dark-gray", 169, 169, 169);
-      add("dark-grey", 169, 169, 169);
-      add("light-gray", 211, 211, 211);
-      add("light-grey", 211, 211, 211);
-      add("light-blue", 173, 216, 230);
-      add("light-green", 144, 238, 144);
-      add("light-cyan", 224, 255, 255);
-      add("light-pink", 255, 182, 193);
-      add("light-salmon", 255, 160, 122);
-      add("dark-magenta", 139, 0, 139);
-      add("dark-cyan", 0, 139, 139);
-      add("dark-orange", 255, 140, 0);
-      add("dark-red", 139, 0, 0);
-      add("dark-green", 0, 100, 0);
-      add("dark-blue", 0, 0, 139);
-      add("dark-turquoise", 0, 206, 209);
-      add("dark-violet", 148, 0, 211);
-      add("dark-khaki", 189, 183, 107);
-      add("dark-goldenrod", 184, 134, 11);
-      add("dark-salmon", 233, 150, 122);
-      add("dark-olivegreen", 85, 107, 47);
-      add("midnight-blue", 25, 25, 112);
-      add("medium-blue", 0, 0, 205);
-      add("spring-green", 0, 255, 127);
-      add("forest-green", 34, 139, 34);
-      add("sea-green", 46, 139, 87);
-      add("orange-red", 255, 69, 0);
-
-      add("web-green", 0, 192, 0);
-      add("web-blue", 0, 128, 255);
-      add("dark-yellow", 200, 200, 0);
-      add("dark-spring-green", 0, 128, 64);
-      add("dark-chartreuse", 64, 128, 0);
-      add("light-red", 240, 50, 50);
-      add("light-magenta", 240, 85, 240);
-      add("light-goldenrod", 238, 221, 130);
-      add("light-turquoise", 175, 238, 238);
-      add("dark-pink", 255, 20, 147);
-      add("dark-plum", 221, 80, 64);
-      add("orangered4", 128, 20, 0);
-      add("brown4", 128, 20, 20);
-      add("sienna4", 128, 64, 20);
-      add("orchid4", 128, 64, 128);
-      add("mediumpurple3", 128, 96, 192);
-      add("slateblue1", 128, 96, 255);
-      add("yellow4", 128, 128, 0);
-      add("sienna1", 255, 128, 64);
-      add("tan1", 255, 160, 64);
-      add("khaki1", 255, 255, 128);
-      add("grey0", 0, 0, 0);
-      add("grey10", 26, 26, 26);
-      add("grey20", 51, 51, 51);
-      add("grey30", 77, 77, 77);
-      add("grey40", 102, 102, 102);
-      add("grey50", 127, 127, 127);
-      add("grey60", 153, 153, 153);
-      add("grey70", 179, 179, 179);
-      add("grey80", 204, 204, 204);
-      add("grey90", 229, 229, 229);
-      add("grey100", 255, 255, 255);
-      add("gray0", 0, 0, 0);
-      add("gray10", 26, 26, 26);
-      add("gray20", 51, 51, 51);
-      add("gray30", 77, 77, 77);
-      add("gray40", 102, 102, 102);
-      add("gray50", 127, 127, 127);
-      add("gray60", 153, 153, 153);
-      add("gray70", 179, 179, 179);
-      add("gray80", 204, 204, 204);
-      add("gray90", 229, 229, 229);
-      add("gray100", 255, 255, 255);
-      
-      isInited = true;
-
+    
     }
     
   }; /* class glColors */
 
   std::map<std::string, glm::vec4> glColors::colors = std::map<std::string, glm::vec4>();
   
-  bool glColors::isInited = false;
-
 } /* namespace ogl */
 
 #endif /* _H_OGL_OBJECT_H_ */
