@@ -39,7 +39,7 @@ namespace ogl {
       GLuint vbo[4];
     
       glm::vec3 color;
-      glm::vec3 size;
+     glm::vec3 size;
 
   public:
 

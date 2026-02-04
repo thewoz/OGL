@@ -80,11 +80,11 @@ namespace ogl {
 
       shader.setName(name);
       
-      shader.initWireframe();
+      shader.initLine();
       
       scale(_scale);
 
-      style = glShader::STYLE::WIREFRAME;
+      style = glShader::STYLE::LINE;
       
       color = _color;
       
