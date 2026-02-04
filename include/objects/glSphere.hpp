@@ -54,7 +54,7 @@ namespace ogl {
       //****************************************************************************/
       // glSphere()
       //****************************************************************************/
-      glSphere(float _radius, int _slices, int _stacks, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+      glSphere(float _radius, int _slices, int _stacks, int _style = glShader::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
         name = _name;
         init(_radius, _slices, _stacks, _style, _color);
       }
@@ -67,13 +67,13 @@ namespace ogl {
       //****************************************************************************/
       // init()
       //****************************************************************************/
-      void init(float _radius, int _slices, int _stacks, int _style = glObject::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
+      void init(float _radius, int _slices, int _stacks, int _style = glShader::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
         
         DEBUG_LOG("glSphere::init(" + name + ")");
 
         shader.setName(name);
         
-        if(_style == glObject::STYLE::WIREFRAME) {
+        if(_style == glShader::STYLE::WIREFRAME) {
           shader.initWireframe();
         } else {
           shader.initPlain();
@@ -106,13 +106,13 @@ namespace ogl {
         
         if(isToInitInGpu()) initInGpu();
         
-        if(style == glObject::STYLE::WIREFRAME) {
+        if(style == glShader::STYLE::WIREFRAME) {
           if(shader.style != glShader::STYLE::WIREFRAME) {
             shader.setName(name);
             shader.initWireframe();
           }
         } else {
-          if(shader.style != glShader::STYLE::PLAIN) {
+          if(shader.style != glShader::STYLE::SOLID) {
             shader.setName(name);
             shader.initPlain();
           }
@@ -127,13 +127,13 @@ namespace ogl {
                         
         glBindVertexArray(vao);
         
-        if(style == glObject::STYLE::WIREFRAME) {
+        if(style == glShader::STYLE::WIREFRAME) {
           shader.setUniform("lineWidth", lineWidth);
           shader.setUniform("viewport",  camera->getViewport());
           glDisable(GL_CULL_FACE);
         }
         
-        if(style == glObject::STYLE::SOLID) {
+        if(style == glShader::STYLE::SOLID) {
           glEnable(GL_CULL_FACE);
           glCullFace(GL_BACK);
         }
