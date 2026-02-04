@@ -17,6 +17,7 @@ out vec4 outColor;
 
 void main() {
     vec3 norm = normalize(fragNormal);
+    // fragPos is in view space (camera at origin), so -fragPos points to the eye.
     vec3 viewDir = normalize(-fragPos);
 
     vec3 lightDir = vec3(0.0);

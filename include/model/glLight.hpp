@@ -67,7 +67,8 @@ namespace ogl {
     // setInShader
     //****************************************************************************//
     void setInShader(const ogl::glShader & shader, const glm::mat4 & view) const {
-            
+      // Match shader convention: light vectors are provided in view space
+      // because fragPos/fragNormal are computed in view space in the vertex shader.
       glm::vec3 transformedPos = glm::vec3(view * glm::vec4(position, 1.0f));
       glm::vec3 transformedDir = glm::normalize(glm::mat3(view) * direction);
 
