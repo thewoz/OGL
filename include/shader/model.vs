@@ -21,8 +21,10 @@ void main() {
     gl_Position = projection * view * model * vec4(position, 1.0f);
 
     // Outputs
+    // View-space outputs (camera at origin in view space)
     fragPos        = vec3(view * model * vec4(position, 1.0f));
-    fragNormal     = mat3(transpose(inverse(view * model))) * normal; // correzione per scaling non uniforme
+    // Normal matrix handles non-uniform scaling; result remains in view space.
+    fragNormal     = mat3(transpose(inverse(view * model))) * normal;
     fragTexCoord   = texCoords;
     fragPosLightSpace = lightSpaceMatrix * model * vec4(position, 1.0);
 }

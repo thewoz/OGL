@@ -91,6 +91,7 @@ void main() {
       norm = normalize(norm * 2.0 - 1.0);
     }
 
+    // fragPos is in view space (camera at origin), so -fragPos points to the eye.
     vec3 viewDir = normalize(-fragPos);
 
     vec2 texCoords = fragTexCoord;
