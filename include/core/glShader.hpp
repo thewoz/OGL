@@ -55,7 +55,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { SOLID, PLAIN2D, MODEL, SPHERE, TEXT, WIREFRAME, LINE };
+    enum STYLE { SOLID, WIREFRAME, LINE, POINTS, TEXT, MODEL, PLAIN2D };
 
     int style;
     
@@ -111,11 +111,11 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // initSphere
+    // initPoints
     //****************************************************************************/
-    void initSphere() {
-      init("/usr/local/include/ogl/shader/sphere.vs", "/usr/local/include/ogl/shader/sphere.fs");
-      style = STYLE::SPHERE;
+    void initPoints() {
+      init("/usr/local/include/ogl/shader/points.vs", "/usr/local/include/ogl/shader/points.fs");
+      style = STYLE::POINTS;
     }
     
     //****************************************************************************/

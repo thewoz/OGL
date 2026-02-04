@@ -94,7 +94,7 @@ Here is a simple example showing how to create a window, set up a camera, and re
 
 int main(int argc, char* const argv[]) {
 
-      ogl::glWindow window;
+  gl::glWindow window;
   
   window.create(800, 600);
 

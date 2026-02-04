@@ -33,8 +33,8 @@
 		3A3D08C22F33B882008EAF80 /* solid.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = solid.vs; sourceTree = "<group>"; };
 		3A3D08C32F33B882008EAF80 /* plain2D.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.fs; sourceTree = "<group>"; };
 		3A3D08C42F33B882008EAF80 /* plain2D.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = plain2D.vs; sourceTree = "<group>"; };
-		3A3D08C52F33B882008EAF80 /* sphere.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.fs; sourceTree = "<group>"; };
-		3A3D08C62F33B882008EAF80 /* sphere.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = sphere.vs; sourceTree = "<group>"; };
+		3A3D08C52F33B882008EAF80 /* points.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = points.fs; sourceTree = "<group>"; };
+		3A3D08C62F33B882008EAF80 /* points.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = points.vs; sourceTree = "<group>"; };
 		3A3D08C72F33B882008EAF80 /* text.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.fs; sourceTree = "<group>"; };
 		3A3D08C82F33B882008EAF80 /* text.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = text.vs; sourceTree = "<group>"; };
 		3A3D08C92F33B882008EAF80 /* wireframe.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.fs; sourceTree = "<group>"; };
@@ -159,8 +159,8 @@
 				3A3D08C22F33B882008EAF80 /* solid.vs */,
 				3A3D08C32F33B882008EAF80 /* plain2D.fs */,
 				3A3D08C42F33B882008EAF80 /* plain2D.vs */,
-				3A3D08C52F33B882008EAF80 /* sphere.fs */,
-				3A3D08C62F33B882008EAF80 /* sphere.vs */,
+				3A3D08C52F33B882008EAF80 /* points.fs */,
+				3A3D08C62F33B882008EAF80 /* points.vs */,
 				3A3D08C72F33B882008EAF80 /* text.fs */,
 				3A3D08C82F33B882008EAF80 /* text.vs */,
 				3A3D08C92F33B882008EAF80 /* wireframe.fs */,

@@ -74,7 +74,7 @@ namespace ogl {
       DEBUG_LOG("glPoints::init(" + name + ")");
          
       shader.setName(name);
-      shader.initSphere();
+      shader.initPoints();
       
       points = _points;
 
@@ -94,7 +94,7 @@ namespace ogl {
       DEBUG_LOG("glPoints::init(" + name + ")");
       
       shader.setName(name);
-      shader.initSphere();
+      shader.initPoints();
             
       points = _points;
       
