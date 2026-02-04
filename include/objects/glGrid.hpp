@@ -101,6 +101,11 @@ namespace ogl {
       }
       
       if(isToInitInGpu()) initInGpu();
+      
+      if(shader.style != glShader::STYLE::LINE) {
+        shader.setName(name);
+        shader.initLine();
+      }
 
       shader.use();
 
@@ -114,6 +119,8 @@ namespace ogl {
       glBindVertexArray(vao);
           
       glDisable(GL_CULL_FACE);
+      glDisableVertexAttribArray(1);
+      glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
 
       glDrawElements(GL_LINES, (GLsizei)indices.size(), GL_UNSIGNED_INT, nullptr);
       

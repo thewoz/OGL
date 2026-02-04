@@ -123,6 +123,8 @@ namespace ogl {
       glBindVertexArray(vao);
         
       glDisable(GL_CULL_FACE);
+      glDisableVertexAttribArray(1);
+      glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
 
       glDrawElements(GL_LINES, 24, GL_UNSIGNED_SHORT, nullptr);
      

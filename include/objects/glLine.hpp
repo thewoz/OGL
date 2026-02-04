@@ -109,6 +109,8 @@ namespace ogl {
       glBindVertexArray(vao);
 
       glDisable(GL_CULL_FACE);
+      glDisableVertexAttribArray(1);
+      glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
 
       glDrawArrays(GL_LINE_STRIP, 0, (GLuint)vertices.size());
      
