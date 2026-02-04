@@ -123,7 +123,14 @@ namespace ogl {
         
         glViewport(viewport[2] - 160, 10, 160, 160);
 
-        shader.setUniform("projection", camera->get3DOrthoProjection());
+        int viewportWidth = 0;
+        int viewportHeight = 0;
+        camera->getViewport(viewportWidth, viewportHeight);
+        float aspect = viewportHeight > 0
+                         ? static_cast<float>(viewportWidth) / static_cast<float>(viewportHeight)
+                         : 1.0f;
+        glm::mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
+        shader.setUniform("projection", projection);
         glm::mat4 viewNoTranslation = camera->getView();
         viewNoTranslation[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         shader.setUniform("view",       viewNoTranslation);
