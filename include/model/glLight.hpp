@@ -50,7 +50,7 @@ namespace ogl {
     //****************************************************************************//
     // glLight
     //****************************************************************************//
-    glLight() : position(0.0f), direction(0.0f, -1.0f, 0.0f), ambient(0.2f), diffuse(0.5f), specular(1.0f) {
+    glLight() : position(0.0f), direction(0.0f), ambient(0.2f), diffuse(0.5f), specular(1.0f) {
       counter++;
     }
     

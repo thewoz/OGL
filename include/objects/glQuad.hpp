@@ -52,17 +52,17 @@ namespace ogl {
       //****************************************************************************/
       // glQuad()
       //****************************************************************************/
-      glQuad(const glm::vec2& _size = glm::vec2(1.0f), int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
+      glQuad(const glm::vec2& _size = glm::vec2(1.0f), const glm::vec3 & _color = glm::vec3(1.0f), int _style = glShader::STYLE::SOLID, const std::string & _name = "") {
         name = _name;
-        init(_size, _style, _color);
+        init(_size, _color, _style);
       }
     
       //****************************************************************************/
       // glQuad()
       //****************************************************************************/
-      glQuad(const std::vector<glm::vec3> & _vertices, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
+      glQuad(const std::vector<glm::vec3> & _vertices, const glm::vec3 & _color = glm::vec3(1.0f), int _style = glShader::STYLE::SOLID, const std::string & _name = "") {
         name = _name;
-        init(_vertices, _style, _color);
+        init(_vertices, _color, _style);
       }
     
       //****************************************************************************/
@@ -73,7 +73,7 @@ namespace ogl {
       //****************************************************************************/
       // init()
       //****************************************************************************/
-      void init(const glm::vec2 & _size, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f)) {
+      void init(const glm::vec2 & _size, const glm::vec3 & _color = glm::vec3(1.0f), int _style = glShader::STYLE::SOLID) {
           
         DEBUG_LOG("glQuad::init(" + name + ")");
 
@@ -95,7 +95,7 @@ namespace ogl {
       //****************************************************************************/
       // init()
       //****************************************************************************/
-      void init(const std::vector<glm::vec3> & _vertices, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f)) {
+      void init(const std::vector<glm::vec3> & _vertices, const glm::vec3 & _color = glm::vec3(1.0f), int _style = glShader::STYLE::SOLID) {
         
         DEBUG_LOG("glQuad::init(" + name + ")");
 
