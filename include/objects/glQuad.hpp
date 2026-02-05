@@ -44,6 +44,7 @@ namespace ogl {
       glm::vec3 color;
       glm::vec2 size;
       ogl::glLight light;
+      bool cullFaceEnabled = false;
     
       std::vector<glm::vec3> vertices;
 
@@ -151,9 +152,11 @@ namespace ogl {
           shader.setUniform("lineWidth", lineWidth);
           shader.setUniform("viewport",  camera->getViewport());
           glDisable(GL_CULL_FACE);
-        } else {
+        } else if(cullFaceEnabled) {
           glEnable(GL_CULL_FACE);
           glCullFace(GL_BACK);
+        } else {
+          glDisable(GL_CULL_FACE);
         }
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -173,6 +176,11 @@ namespace ogl {
         light.setDirection(_direction);
 
       }
+
+      //****************************************************************************/
+      // setCullFaceEnabled() - Toggle back-face culling
+      //****************************************************************************/
+      void setCullFaceEnabled(bool _enabled) { cullFaceEnabled = _enabled; }
 
     private:
     
