@@ -11,6 +11,16 @@ OGL provides a simple API for:
 
 ---
 
+## 🆕 Version 4 Released
+
+Version 4 of the library has been released. Among the highlights (along with other updates):
+
+- Updated and improved color management
+- Implemented thick line rendering
+- Implemented lighting for objects like cuboids, spheres, ellipses
+
+---
+
 ## ✨ Features
 
 OGL allows you to render:
@@ -143,7 +153,6 @@ int main(int argc, char* const argv[]) {
 
 ## 🧰 TODO
 
-- Add lighting for objects like cuboids, spheres, ellipses
 - Add render-to-texture support
 - Add axis labels (X,Y,Z) to `glReferenceAxes` for better visualization
 - Include an example with ImGui
@@ -170,4 +179,3 @@ This project is licensed under the **GNU General Public License v3.0** — see t
 OGL was created to make OpenGL programming easier, cleaner, and faster for small to medium projects, educational purposes, and prototyping.
 
 Enjoy building with it! 🚀
-
