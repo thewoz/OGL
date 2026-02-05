@@ -4,6 +4,6 @@ in vec4 fragColor;
 out vec4 outColor;
 
 void main() {
-  if(fragColor.w < 0.001) discard;
+  if(fragColor.w < 0.999) discard;
   outColor = fragColor;
 }
