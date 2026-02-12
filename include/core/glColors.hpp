@@ -51,6 +51,162 @@ namespace ogl {
   public:
     
     //****************************************************************************//
+    // loadColors()
+    //****************************************************************************//
+    // https://htmlcolorcodes.com/color-names/
+    static void loadPalette() {
+      
+      colors["aliceblue"] = aliceblue;
+      colors["antiquewhite"] = antiquewhite;
+      colors["aqua"] = aqua;
+      colors["aquamarine"] = aquamarine;
+      colors["azure"] = azure;
+      colors["beige"] = beige;
+      colors["bisque"] = bisque;
+      colors["black"] = black;
+      colors["blanchedalmond"] = blanchedalmond;
+      colors["blue"] = blue;
+      colors["blueviolet"] = blueviolet;
+      colors["brown"] = brown;
+      colors["burlywood"] = burlywood;
+      colors["cadetblue"] = cadetblue;
+      colors["chartreuse"] = chartreuse;
+      colors["chocolate"] = chocolate;
+      colors["coral"] = coral;
+      colors["cornflowerblue"] = cornflowerblue;
+      colors["cornsilk"] = cornsilk;
+      colors["crimson"] = crimson;
+      colors["cyan"] = cyan;
+      colors["darkblue"] = darkblue;
+      colors["darkcyan"] = darkcyan;
+      colors["darkgoldenrod"] = darkgoldenrod;
+      colors["darkgray"] = darkgray;
+      colors["darkgreen"] = darkgreen;
+      colors["darkgrey"] = darkgrey;
+      colors["darkkhaki"] = darkkhaki;
+      colors["darkmagenta"] = darkmagenta;
+      colors["darkolivegreen"] = darkolivegreen;
+      colors["darkorange"] = darkorange;
+      colors["darkorchid"] = darkorchid;
+      colors["darkred"] = darkred;
+      colors["darksalmon"] = darksalmon;
+      colors["darkseagreen"] = darkseagreen;
+      colors["darkslateblue"] = darkslateblue;
+      colors["darkslategray"] = darkslategray;
+      colors["darkslategrey"] = darkslategrey;
+      colors["darkturquoise"] = darkturquoise;
+      colors["darkviolet"] = darkviolet;
+      colors["deeppink"] = deeppink;
+      colors["deepskyblue"] = deepskyblue;
+      colors["dimgray"] = dimgray;
+      colors["dimgrey"] = dimgrey;
+      colors["dodgerblue"] = dodgerblue;
+      colors["firebrick"] = firebrick;
+      colors["floralwhite"] = floralwhite;
+      colors["forestgreen"] = forestgreen;
+      colors["fuchsia"] = fuchsia;
+      colors["gainsboro"] = gainsboro;
+      colors["ghostwhite"] = ghostwhite;
+      colors["gold"] = gold;
+      colors["goldenrod"] = goldenrod;
+      colors["gray"] = gray;
+      colors["green"] = green;
+      colors["greenyellow"] = greenyellow;
+      colors["grey"] = grey;
+      colors["honeydew"] = honeydew;
+      colors["hotpink"] = hotpink;
+      colors["indianred"] = indianred;
+      colors["indigo"] = indigo;
+      colors["ivory"] = ivory;
+      colors["khaki"] = khaki;
+      colors["lavender"] = lavender;
+      colors["lavenderblush"] = lavenderblush;
+      colors["lawngreen"] = lawngreen;
+      colors["lemonchiffon"] = lemonchiffon;
+      colors["lightblue"] = lightblue;
+      colors["lightcoral"] = lightcoral;
+      colors["lightcyan"] = lightcyan;
+      colors["lightgoldenrodyellow"] = lightgoldenrodyellow;
+      colors["lightgray"] = lightgray;
+      colors["lightgreen"] = lightgreen;
+      colors["lightgrey"] = lightgrey;
+      colors["lightpink"] = lightpink;
+      colors["lightsalmon"] = lightsalmon;
+      colors["lightseagreen"] = lightseagreen;
+      colors["lightskyblue"] = lightskyblue;
+      colors["lightslategray"] = lightslategray;
+      colors["lightslategrey"] = lightslategrey;
+      colors["lightsteelblue"] = lightsteelblue;
+      colors["lightyellow"] = lightyellow;
+      colors["lime"] = lime;
+      colors["limegreen"] = limegreen;
+      colors["linen"] = linen;
+      colors["magenta"] = magenta;
+      colors["maroon"] = maroon;
+      colors["mediumaquamarine"] = mediumaquamarine;
+      colors["mediumblue"] = mediumblue;
+      colors["mediumorchid"] = mediumorchid;
+      colors["mediumpurple"] = mediumpurple;
+      colors["mediumseagreen"] = mediumseagreen;
+      colors["mediumslateblue"] = mediumslateblue;
+      colors["mediumspringgreen"] = mediumspringgreen;
+      colors["mediumturquoise"] = mediumturquoise;
+      colors["mediumvioletred"] = mediumvioletred;
+      colors["midnightblue"] = midnightblue;
+      colors["mintcream"] = mintcream;
+      colors["mistyrose"] = mistyrose;
+      colors["moccasin"] = moccasin;
+      colors["navajowhite"] = navajowhite;
+      colors["navy"] = navy;
+      colors["oldlace"] = oldlace;
+      colors["olive"] = olive;
+      colors["olivedrab"] = olivedrab;
+      colors["orange"] = orange;
+      colors["orangered"] = orangered;
+      colors["orchid"] = orchid;
+      colors["palegoldenrod"] = palegoldenrod;
+      colors["palegreen"] = palegreen;
+      colors["paleturquoise"] = paleturquoise;
+      colors["palevioletred"] = palevioletred;
+      colors["papayawhip"] = papayawhip;
+      colors["peachpuff"] = peachpuff;
+      colors["peru"] = peru;
+      colors["pink"] = pink;
+      colors["plum"] = plum;
+      colors["powderblue"] = powderblue;
+      colors["purple"] = purple;
+      colors["red"] = red;
+      colors["rosybrown"] = rosybrown;
+      colors["royalblue"] = royalblue;
+      colors["saddlebrown"] = saddlebrown;
+      colors["salmon"] = salmon;
+      colors["sandybrown"] = sandybrown;
+      colors["seagreen"] = seagreen;
+      colors["seashell"] = seashell;
+      colors["sienna"] = sienna;
+      colors["silver"] = silver;
+      colors["skyblue"] = skyblue;
+      colors["slateblue"] = slateblue;
+      colors["slategray"] = slategray;
+      colors["slategrey"] = slategrey;
+      colors["snow"] = snow;
+      colors["springgreen"] = springgreen;
+      colors["steelblue"] = steelblue;
+      colors["tan"] = tan;
+      colors["teal"] = teal;
+      colors["thistle"] = thistle;
+      colors["tomato"] = tomato;
+      colors["turquoise"] = turquoise;
+      colors["violet"] = violet;
+      colors["wheat"] = wheat;
+      colors["white"] = white;
+      colors["whitesmoke"] = whitesmoke;
+      colors["yellow"] = yellow;
+      colors["yellowgreen"] = yellowgreen;
+      
+    }
+    
+    //****************************************************************************//
     // getRandom()
     //****************************************************************************//
     static const glm::vec4 getRandom() {
@@ -134,6 +290,8 @@ namespace ogl {
     }
     
   public:
+    
+    // https://htmlcolorcodes.com/color-names/
     
     constexpr static const glm::vec4 aliceblue = glm::vec4(0.941f, 0.973f, 1.000f, 1.000f);
     constexpr static const glm::vec4 antiquewhite = glm::vec4(0.980f, 0.922f, 0.843f, 1.000f);
