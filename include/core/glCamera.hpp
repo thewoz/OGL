@@ -293,14 +293,14 @@ namespace ogl {
     inline void setMode(MODE _mode) { mode = _mode; }
     
     //****************************************************************************/
-    // setSpeed() -
+    // setKeybordSpeed() -
     //****************************************************************************/
-    inline void setSpeed(GLfloat _speed) { speed = _speed; }
+    inline void setKeybordSpeed(GLfloat _speed) { speed = _speed; }
     
     //****************************************************************************/
-    // setSensitivity() -
+    // setMouseSensitivity() -
     //****************************************************************************/
-    inline void setSensitivity(GLfloat _sensitivity) { sensitivity = _sensitivity; }
+    inline void setMouseSensitivity(GLfloat _sensitivity) { sensitivity = _sensitivity; }
     
     //****************************************************************************/
     // setzNearFar() -
