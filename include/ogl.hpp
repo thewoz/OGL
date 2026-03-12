@@ -46,7 +46,7 @@
   #endif
 #endif
 
-#define OGL_LIB_VERSION "OGL Lib v4.1"
+#define OGL_LIB_VERSION "OGL Lib v4.1.1"
 
 // Debug
 //#define DEBUG_OGL
