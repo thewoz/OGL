@@ -209,6 +209,13 @@ namespace ogl {
     }
 
     //****************************************************************************/
+    // setLineThickness()
+    //****************************************************************************/
+    void setLineThickness(float _lineThickness) {
+      setLineWidth(_lineThickness);
+    }
+
+    //****************************************************************************/
     // setLabelScale()
     //****************************************************************************/
     void setLabelScale(float _axisLabelScale, float _tickLabelScale = -1.0f) {
@@ -268,6 +275,7 @@ namespace ogl {
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
+      shader.setUniform("uniformColor", glm::vec4(1.0f));
       shader.setUniform("lineWidth",  lineWidth);
       shader.setUniform("viewport",   camera->getViewport());
 
