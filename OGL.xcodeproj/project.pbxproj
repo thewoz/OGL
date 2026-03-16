@@ -23,6 +23,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3A07EE142F6809E200D5D460 /* glPlot.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPlot.hpp; sourceTree = "<group>"; };
 		3A3B498D241F9BA700084872 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
 		3A3D08BC2F33B882008EAF80 /* line.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = line.fs; sourceTree = "<group>"; };
 		3A3D08BD2F33B882008EAF80 /* line.gs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = line.gs; sourceTree = "<group>"; };
@@ -136,6 +137,7 @@
 				3AC10E9F2DBE35F7000C540C /* glGrid.hpp */,
 				3AC10EA02DBE35F7000C540C /* glLine.hpp */,
 				3AC10EA12DBE35F7000C540C /* glLines.hpp */,
+				3A07EE142F6809E200D5D460 /* glPlot.hpp */,
 				3AC10EA22DBE35F7000C540C /* glPoints.hpp */,
 				3AC10EA32DBE35F7000C540C /* glPrint2D.hpp */,
 				3AC10EA42DBE35F7000C540C /* glPrint3D.hpp */,
