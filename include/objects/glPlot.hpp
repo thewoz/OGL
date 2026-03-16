@@ -329,9 +329,13 @@ namespace ogl {
 
       for(float v = start; v <= range.max + eps; v += step) {
 
-        if(axis == 0) addSegment(glm::vec3(v, axisOrigin.y - tickSize, axisOrigin.z), glm::vec3(v, axisOrigin.y + tickSize, axisOrigin.z), color);
-        if(axis == 1) addSegment(glm::vec3(axisOrigin.x - tickSize, v, axisOrigin.z), glm::vec3(axisOrigin.x + tickSize, v, axisOrigin.z), color);
-        if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y - tickSize, v), glm::vec3(axisOrigin.x, axisOrigin.y + tickSize, v), color);
+        if(step < majorTickStep && isOnMajorTick(v, range, majorTickStep)) continue;
+
+        float axisValue = mapAxisValue(range, v, axisOriginByAxis(axis), false);
+
+        if(axis == 0) addSegment(glm::vec3(axisValue, axisOrigin.y - tickSize, axisOrigin.z), glm::vec3(axisValue, axisOrigin.y + tickSize, axisOrigin.z), color);
+        if(axis == 1) addSegment(glm::vec3(axisOrigin.x - tickSize, axisValue, axisOrigin.z), glm::vec3(axisOrigin.x + tickSize, axisValue, axisOrigin.z), color);
+        if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y - tickSize, axisValue), glm::vec3(axisOrigin.x, axisOrigin.y + tickSize, axisValue), color);
       }
       
     }
@@ -383,9 +387,9 @@ namespace ogl {
       AxisRange yDrawRange = getDrawRange(yRange, axisOrigin.y, yLog);
       AxisRange zDrawRange = getDrawRange(zRange, axisOrigin.z, zLog);
 
-      addSegment(glm::vec3(xDrawRange.min, axisOrigin.y, axisOrigin.z), glm::vec3(xDrawRange.max, axisOrigin.y, axisOrigin.z), axisColor);
-      addSegment(glm::vec3(axisOrigin.x, yDrawRange.min, axisOrigin.z), glm::vec3(axisOrigin.x, yDrawRange.max, axisOrigin.z), axisColor);
-      addSegment(glm::vec3(axisOrigin.x, axisOrigin.y, zDrawRange.min), glm::vec3(axisOrigin.x, axisOrigin.y, zDrawRange.max), axisColor);
+      addSegment(glm::vec3(mapAxisValue(xRange, xDrawRange.min, axisOrigin.x, xLog), axisOrigin.y, axisOrigin.z), glm::vec3(mapAxisValue(xRange, xDrawRange.max, axisOrigin.x, xLog), axisOrigin.y, axisOrigin.z), axisColor);
+      addSegment(glm::vec3(axisOrigin.x, mapAxisValue(yRange, yDrawRange.min, axisOrigin.y, yLog), axisOrigin.z), glm::vec3(axisOrigin.x, mapAxisValue(yRange, yDrawRange.max, axisOrigin.y, yLog), axisOrigin.z), axisColor);
+      addSegment(glm::vec3(axisOrigin.x, axisOrigin.y, mapAxisValue(zRange, zDrawRange.min, axisOrigin.z, zLog)), glm::vec3(axisOrigin.x, axisOrigin.y, mapAxisValue(zRange, zDrawRange.max, axisOrigin.z, zLog)), axisColor);
 
       if(drawMajorTicks) {
         if(xLog) buildAxisLogTicks(0, xRange, majorTickSize, majorTickColor, false);
@@ -426,9 +430,9 @@ namespace ogl {
         float yOff = majorTickSize * 2.2f;
         float zOff = majorTickSize * 2.2f;
 
-        axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(xDrawRange.max, axisOrigin.y + xOff, axisOrigin.z), axisColor, axisLabelScale);
-        axisLabelPrinter.render(camera, yAxisLabel, glm::vec3(axisOrigin.x + yOff, yDrawRange.max, axisOrigin.z), axisColor, axisLabelScale);
-        axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(axisOrigin.x, axisOrigin.y + zOff, zDrawRange.max), axisColor, axisLabelScale);
+        axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(mapAxisValue(xRange, xDrawRange.max, axisOrigin.x, xLog), axisOrigin.y + xOff, axisOrigin.z), axisColor, axisLabelScale);
+        axisLabelPrinter.render(camera, yAxisLabel, glm::vec3(axisOrigin.x + yOff, mapAxisValue(yRange, yDrawRange.max, axisOrigin.y, yLog), axisOrigin.z), axisColor, axisLabelScale);
+        axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(axisOrigin.x, axisOrigin.y + zOff, mapAxisValue(zRange, zDrawRange.max, axisOrigin.z, zLog)), axisColor, axisLabelScale);
         
       }
 
@@ -460,9 +464,10 @@ namespace ogl {
 
       for(float v = start; v <= range.max + eps; v += step) {
         std::string label = formatTickValue(v);
-        if(axis == 0) tickLabelPrinter.render(camera, label, glm::vec3(v, axisOrigin.y - off, axisOrigin.z), majorTickColor, tickLabelScale);
-        if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x - off, v, axisOrigin.z), majorTickColor, tickLabelScale);
-        if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x, axisOrigin.y - off, v), majorTickColor, tickLabelScale);
+        float axisValue = mapAxisValue(range, v, axisOriginByAxis(axis), false);
+        if(axis == 0) tickLabelPrinter.render(camera, label, glm::vec3(axisValue, axisOrigin.y - off, axisOrigin.z), majorTickColor, tickLabelScale);
+        if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x - off, axisValue, axisOrigin.z), majorTickColor, tickLabelScale);
+        if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x, axisOrigin.y - off, axisValue), majorTickColor, tickLabelScale);
       }
       
     }
@@ -612,23 +617,43 @@ namespace ogl {
     }
 
     //****************************************************************************/
+    // mapAxisValue()
+    //****************************************************************************/
+    float mapAxisValue(const AxisRange & range, float value, float axisOriginValue, bool isLogScale) const {
+      if(isLogScale) return value;
+      if(range.max <= range.min) return axisOriginValue;
+      return value - range.min + axisOriginValue;
+    }
+
+    //****************************************************************************/
+    // axisOriginByAxis()
+    //****************************************************************************/
+    float axisOriginByAxis(int axis) const {
+      if(axis == 1) return axisOrigin.y;
+      if(axis == 2) return axisOrigin.z;
+      return axisOrigin.x;
+    }
+
+    //****************************************************************************/
+    // isOnMajorTick()
+    //****************************************************************************/
+    bool isOnMajorTick(float value, const AxisRange & range, float majorStep) const {
+
+      if(majorStep <= 0.0f) return false;
+
+      const float eps = 1e-4f;
+      float majorStart = std::ceil(range.min / majorStep) * majorStep;
+      float k = std::round((value - majorStart) / majorStep);
+      float major = majorStart + k * majorStep;
+
+      return std::fabs(value - major) <= eps;
+    }
+
+    //****************************************************************************/
     // getDrawRange()
     //****************************************************************************/
-    AxisRange getDrawRange(const AxisRange & range, float originValue, bool isLogScale) const {
-
-      AxisRange out = range;
-
-      if(isLogScale) {
-        if(originValue > 0.0f) {
-          if(originValue < out.min) out.min = originValue;
-          if(originValue > out.max) out.max = originValue;
-        }
-      } else {
-        if(originValue < out.min) out.min = originValue;
-        if(originValue > out.max) out.max = originValue;
-      }
-
-      return sanitizeRange(out);
+    AxisRange getDrawRange(const AxisRange & range, float /*originValue*/, bool /*isLogScale*/) const {
+      return sanitizeRange(range);
     }
 
   };
