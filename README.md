@@ -11,13 +11,15 @@ OGL provides a simple API for:
 
 ---
 
-## 🆕 Version 4 Released
+## 🆕 Version 4.2 Released
 
-Version 4 of the library has been released. Among the highlights (along with other updates):
+Version 4.2 of the library has been released. Among the highlights (along with other updates):
 
 - Updated and improved color management
 - Implemented thick line rendering
 - Implemented lighting for objects like cuboids, spheres, ellipses
+- Camera Management Improvements
+- Added a class for 3D plot axis rendering
 
 ---
 
@@ -35,6 +37,7 @@ OGL allows you to render:
 - Planes
 - 2D and 3D Text
 - 3D Models
+- 3D Plot
 
 It also provides utilities like window management, camera control, and snapshot functionality.
 
