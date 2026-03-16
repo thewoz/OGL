@@ -170,7 +170,9 @@ namespace ogl {
       zRange = buildPaddedRange(minZ, maxZ, padding);
 
       useManualRange = false;
+      
       isToUpdateInGpu = true;
+      
     }
 
     //****************************************************************************/
@@ -211,9 +213,7 @@ namespace ogl {
     //****************************************************************************/
     // setLineThickness()
     //****************************************************************************/
-    void setLineThickness(float _lineThickness) {
-      setLineWidth(_lineThickness);
-    }
+    void setLineThickness(float _lineThickness) { setLineWidth(_lineThickness); }
 
     //****************************************************************************/
     // setLabelScale()
@@ -226,9 +226,7 @@ namespace ogl {
     //****************************************************************************/
     // setAxisLabels()
     //****************************************************************************/
-    void setAxisLabels(const std::string & _xAxisLabel,
-                       const std::string & _yAxisLabel,
-                       const std::string & _zAxisLabel) {
+    void setAxisLabels(const std::string & _xAxisLabel, const std::string & _yAxisLabel, const std::string & _zAxisLabel) {
       xAxisLabel = _xAxisLabel;
       yAxisLabel = _yAxisLabel;
       zAxisLabel = _zAxisLabel;
@@ -247,9 +245,7 @@ namespace ogl {
     //****************************************************************************/
     // setColors()
     //****************************************************************************/
-    void setColors(const glm::vec3 & _axisColor,
-                   const glm::vec3 & _majorTickColor,
-                   const glm::vec3 & _minorTickColor) {
+    void setColors(const glm::vec3 & _axisColor, const glm::vec3 & _majorTickColor, const glm::vec3 & _minorTickColor) {
       axisColor = _axisColor;
       majorTickColor = _majorTickColor;
       minorTickColor = _minorTickColor;
@@ -292,6 +288,7 @@ namespace ogl {
       renderLabels(camera);
 
       glCheckError();
+      
     }
 
   private:
