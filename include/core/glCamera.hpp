@@ -49,8 +49,8 @@ namespace ogl {
     MODE mode;
     
     // Constanti
-    GLfloat speed       = 10.0f;
-    GLfloat sensitivity = 0.2f;
+    GLfloat speed       = 3.0f;
+    GLfloat sensitivity = 0.3f;
 
     // Camera Attributes
     glm::vec3 position;
