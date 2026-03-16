@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -41,8 +41,12 @@ namespace ogl {
   public:
 
     struct AxisRange {
-      float min = -1.0f;
-      float max =  1.0f;
+      
+      AxisRange(float _min = -1.0f, float _max = 1.0f) : min(_min), max(_max) {}
+
+      float min;
+      float max;
+      
     };
 
   private:
@@ -108,9 +112,7 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const AxisRange & _xRange = AxisRange(),
-              const AxisRange & _yRange = AxisRange(),
-              const AxisRange & _zRange = AxisRange()) {
+    void init(const AxisRange & _xRange = AxisRange(), const AxisRange & _yRange = AxisRange(), const AxisRange & _zRange = AxisRange()) {
 
       DEBUG_LOG("glPlot::init(" + name + ")");
 
@@ -123,20 +125,21 @@ namespace ogl {
       setRanges(_xRange, _yRange, _zRange);
 
       isInited = true;
+      
     }
 
     //****************************************************************************/
     // setRanges()
     //****************************************************************************/
-    void setRanges(const AxisRange & _xRange,
-                   const AxisRange & _yRange,
-                   const AxisRange & _zRange) {
+    void setRanges(const AxisRange & _xRange, const AxisRange & _yRange,  const AxisRange & _zRange) {
 
       xRange = sanitizeRange(_xRange);
       yRange = sanitizeRange(_yRange);
       zRange = sanitizeRange(_zRange);
+      
       useManualRange = true;
       isToUpdateInGpu = true;
+      
     }
 
     //****************************************************************************/
@@ -297,6 +300,7 @@ namespace ogl {
       colors.push_back(glm::vec4(color, 1.0f));
       indices.push_back(base);
       indices.push_back(base + 1);
+      
     }
 
     //****************************************************************************/
@@ -315,6 +319,7 @@ namespace ogl {
         if(axis == 1) addSegment(glm::vec3(-tickSize, v, 0.0f), glm::vec3(tickSize, v, 0.0f), color);
         if(axis == 2) addSegment(glm::vec3(0.0f, -tickSize, v), glm::vec3(0.0f, tickSize, v), color);
       }
+      
     }
 
     //****************************************************************************/
@@ -348,6 +353,7 @@ namespace ogl {
           if(axis == 2) addSegment(glm::vec3(0.0f, -minorTickSize, minor), glm::vec3(0.0f, minorTickSize, minor), minorTickColor);
         }
       }
+      
     }
 
     //****************************************************************************/
@@ -384,6 +390,7 @@ namespace ogl {
         if(zLog) buildAxisLogTicks(2, zRange, majorTickSize, minorTickColor, true);
         else     buildAxisLinearTicks(2, zRange, minorTickStep, minorTickSize, minorTickColor);
       }
+      
     }
 
     //****************************************************************************/
@@ -392,6 +399,7 @@ namespace ogl {
     void renderLabels(const glCamera * camera) {
 
       if(drawAxisLabels) {
+        
         float xOff = majorTickSize * 2.2f;
         float yOff = majorTickSize * 2.2f;
         float zOff = majorTickSize * 2.2f;
@@ -399,9 +407,11 @@ namespace ogl {
         axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(xRange.max, xOff, 0.0f), axisColor, axisLabelScale);
         axisLabelPrinter.render(camera, yAxisLabel, glm::vec3(yOff, yRange.max, 0.0f), axisColor, axisLabelScale);
         axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(0.0f, zOff, zRange.max), axisColor, axisLabelScale);
+        
       }
 
       if(drawTickLabels && drawMajorTicks) {
+        
         if(xLog) renderAxisLogTickLabels(camera, 0, xRange);
         else renderAxisLinearTickLabels(camera, 0, xRange, majorTickStep);
 
@@ -410,7 +420,9 @@ namespace ogl {
 
         if(zLog) renderAxisLogTickLabels(camera, 2, zRange);
         else renderAxisLinearTickLabels(camera, 2, zRange, majorTickStep);
+        
       }
+      
     }
 
     //****************************************************************************/
@@ -430,6 +442,7 @@ namespace ogl {
         if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(-off, v, 0.0f), majorTickColor, tickLabelScale);
         if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(0.0f, -off, v), majorTickColor, tickLabelScale);
       }
+      
     }
 
     //****************************************************************************/
@@ -452,6 +465,7 @@ namespace ogl {
         if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(-off, major, 0.0f), majorTickColor, tickLabelScale);
         if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(0.0f, -off, major), majorTickColor, tickLabelScale);
       }
+      
     }
 
     //****************************************************************************/
@@ -511,6 +525,7 @@ namespace ogl {
       glBindVertexArray(0);
 
       glCheckError();
+      
     }
 
     //****************************************************************************/
@@ -525,6 +540,7 @@ namespace ogl {
       vao = 0;
       vbo = 0;
       ibo = 0;
+      
       isInitedInGpu = false;
 
     }
@@ -535,16 +551,20 @@ namespace ogl {
     AxisRange sanitizeRange(const AxisRange & range) const {
 
       AxisRange out = range;
+      
       if(out.min > out.max) {
         float tmp = out.min;
         out.min = out.max;
         out.max = tmp;
       }
+      
       if(std::fabs(out.max - out.min) < 1e-6f) {
         out.min -= 1.0f;
         out.max += 1.0f;
       }
+      
       return out;
+      
     }
 
     //****************************************************************************/
