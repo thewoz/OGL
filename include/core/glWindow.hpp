@@ -38,6 +38,32 @@ namespace ogl {
   class glWindow {
     
   private:
+
+    inline void processKeyboardInput() {
+
+      if(!keybord || currentCamera == nullptr) return;
+
+      bool canMoveWithKeyboard = (currentCamera->getMode() == glCamera::MODE::FREE);
+
+      if(currentCamera->getMode() == glCamera::MODE::BILLBOARD) {
+        canMoveWithKeyboard = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
+      }
+
+      if(canMoveWithKeyboard) {
+
+        // Keep camera movement frame-based to avoid key-repeat stuttering.
+        if(/*keys[GLFW_KEY_W] || */ keys[GLFW_KEY_UP])    currentCamera->processKeyboard(glCamera::MOVEMENT::FORWARD, deltaTime);
+        if(/*keys[GLFW_KEY_S] || */ keys[GLFW_KEY_DOWN])  currentCamera->processKeyboard(glCamera::MOVEMENT::BACKWARD, deltaTime);
+        if(/*keys[GLFW_KEY_A] || */ keys[GLFW_KEY_LEFT])  currentCamera->processKeyboard(glCamera::MOVEMENT::LEFT, deltaTime);
+        if(/*keys[GLFW_KEY_D] || */ keys[GLFW_KEY_RIGHT]) currentCamera->processKeyboard(glCamera::MOVEMENT::RIGHT, deltaTime);
+
+      }
+
+      if(cameras.size() > 1 && keys[GLFW_KEY_C]) {
+        changeCamera();
+      }
+
+    }
     
     // Indice della camera corrente
     unsigned int currentCameraIndex;
@@ -364,18 +390,6 @@ namespace ogl {
           keys[key] = false;
         }
 
-        if(currentCamera->getMode() == glCamera::MODE::FREE || (currentCamera->getMode() == glCamera::MODE::BILLBOARD && mods == GLFW_MOD_SHIFT)) {
-        
-          //Moves/alters the camera positions based on user input
-          if(/*keys[GLFW_KEY_W] || */ keys[GLFW_KEY_UP])    currentCamera->processKeyboard(glCamera::MOVEMENT::FORWARD, deltaTime);
-          if(/*keys[GLFW_KEY_S] || */ keys[GLFW_KEY_DOWN])  currentCamera->processKeyboard(glCamera::MOVEMENT::BACKWARD, deltaTime);
-          if(/*keys[GLFW_KEY_A] || */ keys[GLFW_KEY_LEFT])  currentCamera->processKeyboard(glCamera::MOVEMENT::LEFT, deltaTime);
-          if(/*keys[GLFW_KEY_D] || */ keys[GLFW_KEY_RIGHT]) currentCamera->processKeyboard(glCamera::MOVEMENT::RIGHT, deltaTime);
-          
-        }
-        
-        if(cameras.size() > 1) if(keys[GLFW_KEY_C]) { changeCamera(); }
-        
         keyboard(key, scancode, action, mods);
 
       }
@@ -574,6 +588,8 @@ namespace ogl {
       
       deltaTime = currentTime - lastTime;
       lastTime  = currentTime;
+
+      processKeyboardInput();
                         
       glViewport(0, 0, currentCamera->getWidth(), currentCamera->getHeight());
 
