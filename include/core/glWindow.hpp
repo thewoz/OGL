@@ -92,6 +92,8 @@ namespace ogl {
     
     bool keybord = false;
 
+    bool imguiFrameActive = false;
+
   protected:
     
     // Contatore del numero di finestre create
@@ -602,9 +604,19 @@ namespace ogl {
       #ifndef OGL_WITHOUT_IMGUI
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
+        // On macOS the system can drop all monitors after a display sleep,
+        // and ImGui::NewFrame() asserts when the monitor list is empty.
+        // Skip the ImGui frame until at least one monitor is back.
+        int monitorCount = 0;
+        glfwGetMonitors(&monitorCount);
+        if(monitorCount > 0) {
+          ImGui_ImplOpenGL3_NewFrame();
+          ImGui_ImplGlfw_NewFrame();
+          ImGui::NewFrame();
+          imguiFrameActive = true;
+        } else {
+          imguiFrameActive = false;
+        }
       #endif
       
     }
@@ -615,8 +627,11 @@ namespace ogl {
     inline void renderEnd() {
       
       #ifndef OGL_WITHOUT_IMGUI
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        if(imguiFrameActive) {
+          ImGui::Render();
+          ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+          imguiFrameActive = false;
+        }
         glDisable(GL_DEPTH_TEST);
       #endif
     
