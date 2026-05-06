@@ -447,6 +447,10 @@ namespace ogl {
     inline bool shouldClose() {
       return glfwWindowShouldClose(window);
     }
+
+    inline bool isImGuiFrameActive() const {
+      return imguiFrameActive;
+    }
     
     inline void setShouldClose(bool mode) {
       glfwSetWindowShouldClose(window, mode);
