@@ -39,19 +39,16 @@ GLenum glCheckError_(const char *file, int line) {
   
   while ((errorCode = glGetError()) != GL_NO_ERROR) {
     
-    std::string error;
+    std::string error = "Unknown";
     
-    switch (errorCode)
-    {
+    switch (errorCode) {
       case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; getError = true; break;
       case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; getError = true; break;
       case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; getError = true; break;
-      case GL_STACK_OVERFLOW:                error = "STACK_OVERFLOW"; getError = true; break;
-      case GL_STACK_UNDERFLOW:               error = "STACK_UNDERFLOW"; getError = true; break;
       case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; getError = true; break;
       case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; getError = true; break;
     }
-    
+
     std::cout << error << " | " << file << " (" << line << ")" << std::endl;
     
   }
@@ -72,10 +69,10 @@ GLenum glCheckError_(const char *file, int line) {
 
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
 
-void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam) {
-  fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
-          ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
-          type, severity, message );
+#ifndef __APPLE__
+void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
 }
+#endif
 
 #endif /* _H_OGL_ERROR_H_ */

@@ -161,7 +161,7 @@ namespace ogl {
       
       glfwMakeContextCurrent(window);
       
-      if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+      if(!gladLoadGL((GLADloadfunc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
@@ -197,11 +197,12 @@ namespace ogl {
       currentCameraIndex = 0;
 
       currentCamera = &cameras[currentCameraIndex];
-        
-      // Funziona con OpenGL >= 4.3
-      // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
-      // glEnable(GL_DEBUG_OUTPUT);
-      // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+      
+      #ifndef __APPLE__
+          glEnable(GL_DEBUG_OUTPUT);
+          glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+          glDebugMessageCallback(glDebugOutput, 0);
+      #endif
       
       #ifndef OGL_WITHOUT_IMGUI
         IMGUI_CHECKVERSION();
@@ -241,7 +242,7 @@ namespace ogl {
       
       glfwMakeContextCurrent(window);
       
-      if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
+      if(!gladLoadGL((GLADloadfunc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
