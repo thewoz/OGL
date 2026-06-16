@@ -449,9 +449,9 @@ namespace ogl {
       return glfwWindowShouldClose(window);
     }
 
-    inline bool isImGuiFrameActive() const {
-      return imguiFrameActive;
-    }
+//    inline bool isImGuiFrameActive() const {
+//      return imguiFrameActive;
+//    }
     
     inline void setShouldClose(bool mode) {
       glfwSetWindowShouldClose(window, mode);
@@ -609,8 +609,7 @@ namespace ogl {
       #ifndef OGL_WITHOUT_IMGUI
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
-        // On macOS the system can drop all monitors after a display sleep,
-        // and ImGui::NewFrame() asserts when the monitor list is empty.
+        // On macOS the system can drop all monitors after a display sleep, and ImGui::NewFrame() asserts when the monitor list is empty.
         // Skip the ImGui frame until at least one monitor is back.
         int monitorCount = 0;
         glfwGetMonitors(&monitorCount);
