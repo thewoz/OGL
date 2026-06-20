@@ -21,6 +21,7 @@ in  vec3 fragNormal;   // fragment normal   in view space
 out vec4 outColor;
 
 const float shininess = 32.0;
+const float gamma     = 2.2;
 
 void main() {
 
@@ -45,5 +46,7 @@ void main() {
     vec3 diffuse  = light.diffuse  * diff * color;
     vec3 specular = light.specular * spec;
 
-    outColor = vec4(ambient + diffuse + specular, 1.0);
+    // Gamma-correct the final color for display (consistent with model.fs).
+    vec3 lighting = ambient + diffuse + specular;
+    outColor = vec4(pow(lighting, vec3(1.0 / gamma)), 1.0);
 }

@@ -39,7 +39,7 @@ namespace ogl {
   // Renders a small orientation gizmo (XYZ axes) in the bottom-right corner of
   // the viewport. The gizmo always tracks the camera orientation: it uses only
   // the rotation part of the view matrix so the axes stay centred as the camera
-  // moves. Works correctly with all three camera modes (FREE, TARGET, BILLBOARD).
+  // moves. Works correctly with all three camera modes (FLY, ORBIT, PAN).
   //
   // Axis colors: X = red, Y = green, Z = blue.
   // Axis labels (X, Y, Z) are rendered as 2D text overlaid on the main
@@ -145,9 +145,9 @@ namespace ogl {
 
       // Extract only the rotation from the view matrix by keeping the upper-left
       // 3×3 block and setting the 4th column to identity. This is correct for
-      // all camera modes: FREE/TARGET use lookAt (rotation is the 3×3 block),
-      // BILLBOARD composes T1*R*T2 (the 3×3 block is still just R after the
-      // radians fix in glCamera::rotation()).
+      // all camera modes: FLY/ORBIT use lookAt (rotation is the 3×3 block),
+      // PAN composes T1*R*T2 (the 3×3 block is still just R after the
+      // radians fix in glCamera::eulerRotation()).
       glm::mat4 viewRotOnly = glm::mat4(glm::mat3(camera->getView()));
 
       shader.setUniform("projection", projection);

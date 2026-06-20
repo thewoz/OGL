@@ -62,7 +62,7 @@ in mat3 TBN;        // tangent-space → view-space, built in model.vs
 /*****************************************************************************/
 // Output
 /*****************************************************************************/
-out vec4 color;
+out vec4 outColor;
 
 /*****************************************************************************/
 // Constants
@@ -117,6 +117,6 @@ void main() {
     // Gamma correction.
     vec3 gammaCorrected = pow(lighting, vec3(1.0 / gamma));
 
-    color = vec4(gammaCorrected, opacity);
+    outColor = vec4(gammaCorrected, opacity);
 
 }

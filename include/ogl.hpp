@@ -66,6 +66,9 @@
 #include <ogl/core/glObject.hpp>
 #include <ogl/core/glColors.hpp>
 #include <ogl/core/glFont.hpp>
+#ifndef OGL_WITHOUT_IMGUI
+  #include <ogl/core/glDraw.hpp>
+#endif
 
 // Model
 #include <ogl/model/glLight.hpp>

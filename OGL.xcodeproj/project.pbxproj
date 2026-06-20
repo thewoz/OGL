@@ -42,6 +42,7 @@
 		3A3D08CA2F33B882008EAF80 /* wireframe.gs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.gs; sourceTree = "<group>"; };
 		3A3D08CB2F33B882008EAF80 /* wireframe.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.vs; sourceTree = "<group>"; };
 		3A83B8882DBE9E9B00E0397A /* glQuad2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad2D.hpp; sourceTree = "<group>"; };
+		3AAB1A9F2FE74F9C00157213 /* glDraw.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glDraw.hpp; sourceTree = "<group>"; };
 		3AB7EB3C2DBE770C00A73EF1 /* glQuad.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad.hpp; sourceTree = "<group>"; };
 		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AC10E802DBE35F7000C540C /* glCamera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glCamera.hpp; sourceTree = "<group>"; };
@@ -109,6 +110,7 @@
 				3AC10E802DBE35F7000C540C /* glCamera.hpp */,
 				3AC10E812DBE35F7000C540C /* glColors.hpp */,
 				3AC10E822DBE35F7000C540C /* glObject.hpp */,
+				3AAB1A9F2FE74F9C00157213 /* glDraw.hpp */,
 				3AC10E832DBE35F7000C540C /* glShader.hpp */,
 				3AC10E842DBE35F7000C540C /* glTexture.hpp */,
 				3AC10E852DBE35F7000C540C /* glWindow.hpp */,

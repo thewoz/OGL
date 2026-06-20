@@ -20,56 +20,50 @@
 #include <cstdio>
 #include <cstdlib>
 
-//#define DEBUG_OGL
 #define OGL_WITHOUT_IMGUI
 #include <ogl/ogl.hpp>
 
 //*****************************************************************************/
 // main
 //*****************************************************************************/
-int main(int argc, char * const argv []) {
+int main(int argc, char * const argv[]) {
 
   ogl::glWindow window;
-  
+
   window.create(800, 600);
 
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-  
+
+  // The default camera is a FLY (free-fly) camera.
   window.getCurrentCamera()->setPosition(3, 1.5, 0);
   window.getCurrentCamera()->setYaw(180);
   window.getCurrentCamera()->setPitch(-20);
 
-  ogl::glAxes axes;
-  ogl::glGrid grid(10, 10, 0.5, ogl::glColors::cyan);
-  
-  ogl::glCuboid test(glm::vec3(0.5, 0.5, 0.5), ogl::glShader::STYLE::SOLID, ogl::glColors::white); test.setLight(glm::vec3(1.0, 0, 0), glm::vec3(-1.0));
-  
-  //ogl::glEllipse test(0.5, 1, 1.5, 20, 20, ogl::glShader::STYLE::WIREFRAME, ogl::glColors::white); test.setLineWidth(2);
-  //std::vector<glm::vec3> vertices; vertices.push_back(glm::vec3(0,0,0)); vertices.push_back(glm::vec3(1,1,0.5)); vertices.push_back(glm::vec3(2,2,0.5));
-  //ogl::glLine test(vertices, ogl::glColors::white); test.setLineWidth(5);
-  //ogl::glSphere test(0.5, 20, 20, ogl::glShader::STYLE::SOLID, ogl::glColors::white); test.setLineWidth(2);
- // ogl::glBox test(glm::vec3(1,0.5, 0.25), ogl::glColors::white); test.setLineWidth(2);
+  ogl::glAxes  axes;
+  ogl::glGrid  grid(10, 10, 0.5, ogl::glColors::cyan);
 
-  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5, "FPS: ");
-    
-  ogl::glReferenceAxes referenceAxes; referenceAxes.setLineWidth(2);
-  
+  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
+  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
+
+  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5);
+
+  ogl::glReferenceAxes referenceAxes;
+  referenceAxes.setLineWidth(2);
+
   while(!window.shouldClose()) {
-    
+
     window.renderBegin();
-  
+
       axes.render(window.getCurrentCamera());
       grid.render(window.getCurrentCamera());
-      test.render(window.getCurrentCamera());
       model.render(window.getCurrentCamera());
       text.render(window.getCurrentCamera(), "FPS: " + std::to_string(window.getFPS()));
       referenceAxes.render(window.getCurrentCamera());
-    
+
     window.renderEnd();
 
   }
-  
+
   return 0;
-  
+
 }

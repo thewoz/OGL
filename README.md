@@ -11,20 +11,6 @@ OGL provides a simple API for:
 
 ---
 
-## Version 4.2
-
-Current release. Highlights:
-
-- Phong lighting for solid objects (sphere, ellipse, cuboid) with directional / point / head-light fallback
-- Thick line rendering
-- 3D plot axis (`glPlot`)
-- Improved color management and camera handling
-- Simplified material model (clean Phong subset, no unnecessary complexity)
-
-See [docs/lighting_and_materials.md](docs/lighting_and_materials.md) for the full lighting and material reference.
-
----
-
 ## ✨ Features
 
 OGL allows you to render:
@@ -146,45 +132,91 @@ make uninstall
 
 ## 🛠 Example Code
 
-Here is a simple example showing how to create a window, set up a camera, and render basic objects:
+Here is a simple example showing how to create a window, set up a camera, and
+render basic objects. It is the same program as [`src/main.cpp`](src/main.cpp)
+(built by `make example`):
 
 ```cpp
 #define OGL_WITHOUT_IMGUI
 #include <ogl/ogl.hpp>
 
-int main(int argc, char* const argv[]) {
+int main(int argc, char * const argv[]) {
 
   ogl::glWindow window;
-  
+
   window.create(800, 600);
 
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
-  
+
+  // The default camera is a FLY (free-fly) camera.
   window.getCurrentCamera()->setPosition(3, 1.5, 0);
   window.getCurrentCamera()->setYaw(180);
   window.getCurrentCamera()->setPitch(-20);
 
-  ogl::glAxes axes;
-  ogl::glGrid grid(10, 10, 0.5, ogl::glColors::cyan);
-  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx"); model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
-  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5, "FPS: ");
-    
+  ogl::glAxes  axes;
+  ogl::glGrid  grid(10, 10, 0.5, ogl::glColors::cyan);
+
+  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
+  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
+
+  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5);
+
+  ogl::glReferenceAxes referenceAxes;
+  referenceAxes.setLineWidth(2);
+
   while(!window.shouldClose()) {
-    
+
     window.renderBegin();
-  
+
       axes.render(window.getCurrentCamera());
       grid.render(window.getCurrentCamera());
       model.render(window.getCurrentCamera());
       text.render(window.getCurrentCamera(), "FPS: " + std::to_string(window.getFPS()));
-    
+      referenceAxes.render(window.getCurrentCamera());
+
     window.renderEnd();
 
   }
-  
+
   return 0;
-  
+
 }
+```
+
+### With ImGui
+
+OGL can also drive an [ImGui](https://github.com/ocornut/imgui) overlay. Simply
+**do not** define `OGL_WITHOUT_IMGUI`: `glWindow` then creates the ImGui context
+and runs the frame lifecycle for you (`renderBegin()` calls `ImGui::NewFrame()`,
+`renderEnd()` calls `ImGui::Render()`), so you just issue your `ImGui::` widgets
+in between:
+
+```cpp
+#include <ogl/ogl.hpp>   // OGL_WITHOUT_IMGUI NOT defined
+
+// ... create window and scene objects ...
+
+while(!window.shouldClose()) {
+
+  window.renderBegin();
+
+    ImGui::Begin("Scene Controls");
+    ImGui::Text("FPS: %d", window.getFPS());
+    ImGui::End();
+
+    // ... render your scene ...
+
+  window.renderEnd();
+
+}
+```
+
+A complete, runnable ImGui example is in [`src/main_imgui.cpp`](src/main_imgui.cpp).
+Build and run it with:
+
+```bash
+make example_imgui
+~/bin/ogl_imgui
 ```
 
 ---
@@ -207,7 +239,6 @@ The Makefile automatically detects whether you are on **Linux** or **macOS**.
 - Add shadow mapping (currently lights shade surfaces directly, with no shadows)
 - Add support for multiple lights per object/model
 - Add render-to-texture support
-- Rewrite camera class
 - Improve key input management
 
 ---

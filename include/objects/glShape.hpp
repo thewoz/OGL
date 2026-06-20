@@ -35,11 +35,11 @@ namespace ogl {
   //****************************************************************************/
   // Class glShape
   //****************************************************************************/
-  // Intermediate base for the solid/wireframe primitives (glSphere, glEllipse,
-  // glCuboid, glQuad). On top of glObject (transform, shader, style, lineWidth,
-  // color) it adds the per-object light used for Phong shading in SOLID mode,
-  // so the light handling is written once instead of being copied into every
-  // shape. Still abstract: subclasses implement setInGpu()/cleanInGpu().
+  // Intermediate base for the lit objects (glSphere, glEllipse, glCuboid,
+  // glQuad and the glPoints impostors). On top of glObject (transform, shader,
+  // style, lineWidth, color) it adds the per-object light used for Phong
+  // shading, so the light handling is written once instead of being copied into
+  // every object. Still abstract: subclasses implement setInGpu()/cleanInGpu().
   //****************************************************************************/
   class glShape : public glObject {
 

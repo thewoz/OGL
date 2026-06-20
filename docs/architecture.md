@@ -100,3 +100,25 @@ while(!window.shouldClose()) {
 `renderBegin()` / `renderEnd()` are provided by
 [`glWindow`](../include/ogl/core/glWindow.hpp); the camera supplies the
 projection and view matrices through `getProjection()` / `getView()`.
+
+## Cameras
+
+[`glCamera`](../include/ogl/core/glCamera.hpp) is an abstract base that holds all
+the mode-independent state (perspective projection, position/orientation,
+viewport) and every getter/setter. The behavior that actually differs between
+modes — how the view matrix is built and how mouse/keyboard input is
+interpreted — is virtual and lives in three concrete subclasses:
+
+| mode    | subclass         | behaviour                                   |
+|:--------|:-----------------|:--------------------------------------------|
+| `FLY`   | `glCameraFly`    | free-fly first person (WASD/arrows + mouse) |
+| `ORBIT` | `glCameraOrbit`  | always looks at a fixed target point        |
+| `PAN`   | `glCameraPan`    | pan on the screen plane + wheel zoom        |
+
+`glWindow` owns the cameras (`std::vector<std::unique_ptr<glCamera>>`) and
+creates them by mode; you normally don't construct a camera yourself — get the
+active one with `glWindow::getCurrentCamera()`, add more with
+`glWindow::addCamera(...)`, and change the active camera's mode with
+`glWindow::updateCurrentCamera(...)` (which swaps in the matching subclass).
+Every setter is always active: the current mode only decides how the stored
+state is interpreted, it never makes a setter silently do nothing.

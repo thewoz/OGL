@@ -31,6 +31,7 @@
 #include <deque>
 #include <vector>
 #include <string>
+#include <memory>
 
 //*****************************************************************************/
 // namespace ogl
@@ -48,9 +49,9 @@ namespace ogl {
 
       if(!keybord || currentCamera == nullptr) return;
 
-      bool canMoveWithKeyboard = (currentCamera->getMode() == glCamera::MODE::FREE);
+      bool canMoveWithKeyboard = (currentCamera->getMode() == glCamera::MODE::FLY);
 
-      if(currentCamera->getMode() == glCamera::MODE::BILLBOARD) {
+      if(currentCamera->getMode() == glCamera::MODE::PAN) {
         canMoveWithKeyboard = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
       }
 
@@ -82,7 +83,9 @@ namespace ogl {
     // Variabile vera se il mouse e' sopra la finestra
     bool onFocus;
     
-    std::vector<ogl::glCamera> cameras;
+    // Cameras are polymorphic (one subclass per mode), so they are owned through
+    // pointers. currentCamera is a non-owning observer into this vector.
+    std::vector<std::unique_ptr<ogl::glCamera>> cameras;
 
     GLfloat lastTime = 0;
 
@@ -210,11 +213,11 @@ namespace ogl {
 
       background = glm::vec3(0.0f, 0.1f, 0.2f);
 
-      cameras.push_back(glCamera(width, height));
+      cameras.push_back(std::make_unique<glCameraFly>(width, height));
 
       currentCameraIndex = 0;
 
-      currentCamera = &cameras[currentCameraIndex];
+      currentCamera = cameras[currentCameraIndex].get();
 
       #ifndef __APPLE__
           glEnable(GL_DEBUG_OUTPUT);
@@ -302,11 +305,11 @@ namespace ogl {
 
       background = glm::vec3(0.0f, 0.1f, 0.2f);
 
-      cameras.push_back(glCamera(width, height));
+      cameras.push_back(std::make_unique<glCameraFly>(width, height));
 
       currentCameraIndex = 0;
 
-      currentCamera = &cameras[currentCameraIndex];
+      currentCamera = cameras[currentCameraIndex].get();
 
       // Funziona con OpenGL >= 4.3
       // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
@@ -339,6 +342,18 @@ namespace ogl {
   private:
 
     //****************************************************************************//
+    // makeCamera() - build the camera subclass matching the requested mode
+    //****************************************************************************//
+    static std::unique_ptr<glCamera> makeCamera(glCamera::MODE mode, GLsizei width, GLsizei height, GLfloat fov, const glm::vec3 & position, const glm::vec3 & target) {
+      switch(mode) {
+        case glCamera::ORBIT: return std::make_unique<glCameraOrbit>(width, height, fov, position, target);
+        case glCamera::PAN:   return std::make_unique<glCameraPan>(width, height, fov, position, target);
+        case glCamera::FLY:
+        default:              return std::make_unique<glCameraFly>(width, height, fov, position);
+      }
+    }
+
+    //****************************************************************************//
     // shutdownImGui() - tear down ImGui, but only from the window that created it
     //****************************************************************************//
     inline void shutdownImGui() {
@@ -358,10 +373,17 @@ namespace ogl {
     //****************************************************************************//
     // updateCurrentCamera() -
     //****************************************************************************//
-    void updateCurrentCamera(float fov, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::MODE::FREE, glm::vec3 target = glm::vec3(0.0f)) {
-      
-      currentCamera->init(currentCamera->getWidth(), currentCamera->getHeight(), fov, position, mode, target);
-      
+    void updateCurrentCamera(float fov, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::MODE::FLY, glm::vec3 target = glm::vec3(0.0f)) {
+
+      // Changing mode means swapping the camera for a different subclass, keeping
+      // the same viewport.
+      GLsizei w = currentCamera->getWidth();
+      GLsizei h = currentCamera->getHeight();
+
+      cameras[currentCameraIndex] = makeCamera(mode, w, h, fov, position, target);
+
+      currentCamera = cameras[currentCameraIndex].get();
+
     }
     
     //****************************************************************************//
@@ -421,7 +443,7 @@ namespace ogl {
     
     inline void sizeCallback(int width, int height) {
       for(std::size_t i=0; i<cameras.size(); ++i)
-        cameras[i].setViewport(width, height);
+        cameras[i]->setViewport(width, height);
     }
     
     inline void scrollCallback(double xoffset, double yoffset) {
@@ -523,7 +545,7 @@ namespace ogl {
     inline void setSize(int width, int height) {
       glfwSetWindowSize(window, width, height);
       for(std::size_t i=0; i<cameras.size(); ++i)
-        cameras[i].setViewport(width, height);
+        cameras[i]->setViewport(width, height);
     }
     
     inline void setBackground(const glm::vec3 & _background) {
@@ -579,9 +601,11 @@ namespace ogl {
     //****************************************************************************//
     // addCamera()
     //****************************************************************************//
-    inline void addCamera(float fov, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::FREE, glm::vec3 target = glm::vec3(0.0f)) {
-      cameras.push_back(glCamera(currentCamera->getWidth(), currentCamera->getHeight(), fov, position, mode, target));
-      currentCamera = &cameras[currentCameraIndex];
+    inline void addCamera(float fov, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::FLY, glm::vec3 target = glm::vec3(0.0f)) {
+      cameras.push_back(makeCamera(mode, currentCamera->getWidth(), currentCamera->getHeight(), fov, position, target));
+      // unique_ptr storage keeps the existing cameras alive across reallocation,
+      // so currentCamera stays valid; refresh it for clarity.
+      currentCamera = cameras[currentCameraIndex].get();
     }
 
     //*****************************************************************************/
@@ -761,7 +785,7 @@ namespace ogl {
       
       if(currentCameraIndex + 1 < cameras.size()) { ++currentCameraIndex; } else { currentCameraIndex = 0; }
       
-      currentCamera = &cameras[currentCameraIndex];
+      currentCamera = cameras[currentCameraIndex].get();
 
     }
     

@@ -39,7 +39,12 @@ namespace ogl {
   //****************************************************************************/
   // Class glPoints
   //****************************************************************************/
-  class glPoints : public glObject {
+  // Renders a point cloud as sphere impostors (one GL_POINTS vertex per point,
+  // shaded as a little 3D sphere in points.fs). It derives from glShape to reuse
+  // the per-object light, so the points react to setLight() just like the solid
+  // primitives; with no explicit light they fall back to a camera head light.
+  //****************************************************************************/
+  class glPoints : public glShape {
     
   private:
         
@@ -136,6 +141,9 @@ namespace ogl {
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("pointSize",  radius);
+
+      // Shade the impostors with the scene light (head-light fallback by default).
+      light.setInShader(shader, camera->getView());
             
       if(to == -1) to = (int) points.size();
 
