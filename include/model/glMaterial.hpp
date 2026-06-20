@@ -88,12 +88,14 @@ namespace ogl {
       
       name = tmpName.C_Str();
       
-      material->Get(AI_MATKEY_COLOR_EMISSIVE,    ke[0]);
-      material->Get(AI_MATKEY_COLOR_AMBIENT,     ka[0]);
-      material->Get(AI_MATKEY_COLOR_DIFFUSE,     kd[0]);
-      material->Get(AI_MATKEY_COLOR_SPECULAR,    ks[0]);
-      material->Get(AI_MATKEY_COLOR_REFLECTIVE,  kr[0]);
-      material->Get(AI_MATKEY_COLOR_TRANSPARENT, kt[0]);
+      aiColor3D tmpColor;
+
+      if(material->Get(AI_MATKEY_COLOR_EMISSIVE,    tmpColor) == AI_SUCCESS) ke = glm::vec3(tmpColor.r, tmpColor.g, tmpColor.b);
+      if(material->Get(AI_MATKEY_COLOR_AMBIENT,     tmpColor) == AI_SUCCESS) ka = glm::vec3(tmpColor.r, tmpColor.g, tmpColor.b);
+      if(material->Get(AI_MATKEY_COLOR_DIFFUSE,     tmpColor) == AI_SUCCESS) kd = glm::vec3(tmpColor.r, tmpColor.g, tmpColor.b);
+      if(material->Get(AI_MATKEY_COLOR_SPECULAR,    tmpColor) == AI_SUCCESS) ks = glm::vec3(tmpColor.r, tmpColor.g, tmpColor.b);
+      if(material->Get(AI_MATKEY_COLOR_REFLECTIVE,  tmpColor) == AI_SUCCESS) kr = glm::vec3(tmpColor.r, tmpColor.g, tmpColor.b);
+      if(material->Get(AI_MATKEY_COLOR_TRANSPARENT, tmpColor) == AI_SUCCESS) kt = glm::vec3(tmpColor.r, tmpColor.g, tmpColor.b);
       
       material->Get(AI_MATKEY_SHININESS, ns);
       
@@ -109,7 +111,7 @@ namespace ogl {
       loadTextures(material, aiTextureType_AMBIENT, "ambientTexture", path);
       
       // 4. Emissive maps
-      loadTextures(material, aiTextureType_EMISSIVE, "emissimeTexture", path);
+      loadTextures(material, aiTextureType_EMISSIVE, "emissiveTexture", path);
       
       // 5. Height maps
       //loadTextures(material, aiTextureType_HEIGHT, "heightTexture", path);

@@ -81,7 +81,10 @@ namespace ogl {
     std::vector<ogl::glCamera> cameras;
         
     // Tempo dell'ultimo rendering
-    GLfloat lastTime;
+    GLfloat lastTime = 0;
+
+    // vera se questa finestra ha effettivamente creato un contesto GLFW
+    bool created = false;
 
     // Background color
     glm::vec3 background;
@@ -96,8 +99,11 @@ namespace ogl {
 
   protected:
     
-    // Contatore del numero di finestre create
+    // Contatore monotono usato per assegnare un id univoco ad ogni finestra
     static uint32_t windowsCounter;
+
+    // Numero di finestre attualmente vive (per sapere quando terminare GLFW)
+    static uint32_t windowsAlive;
     
     // Camera corrente
     ogl::glCamera * currentCamera;
@@ -131,8 +137,11 @@ namespace ogl {
         ImGui::DestroyContext();
       #endif
       if(window != NULL) { glfwDestroyWindow(window); window = NULL; }
-      if(windowsCounter == 0) { glfw::terminate(); }
-      
+      if(created) {
+        created = false;
+        if(windowsAlive > 0 && --windowsAlive == 0) { glfw::terminate(); }
+      }
+
     }
     
     //*****************************************************************************/
@@ -190,6 +199,11 @@ namespace ogl {
       
       id = windowsCounter++;
 
+      ++windowsAlive;
+      created = true;
+
+      lastTime = glfwGetTime();
+
       background = glm::vec3(0.0f, 0.1f, 0.2f);
 
       cameras.push_back(glCamera(width, height));
@@ -197,7 +211,7 @@ namespace ogl {
       currentCameraIndex = 0;
 
       currentCamera = &cameras[currentCameraIndex];
-      
+
       #ifndef __APPLE__
           glEnable(GL_DEBUG_OUTPUT);
           glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -270,15 +284,20 @@ namespace ogl {
       isFullscreen = false;
 
       id = windowsCounter++;
-      
+
+      ++windowsAlive;
+      created = true;
+
+      lastTime = glfwGetTime();
+
       background = glm::vec3(0.0f, 0.1f, 0.2f);
-      
+
       cameras.push_back(glCamera(width, height));
-      
+
       currentCameraIndex = 0;
-      
+
       currentCamera = &cameras[currentCameraIndex];
-            
+
       // Funziona con OpenGL >= 4.3
       // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
       // glEnable(GL_DEBUG_OUTPUT);
@@ -516,10 +535,12 @@ namespace ogl {
       }
       
       double sum = 0;
-      
-      for(int i=0; i<deltas.size(); ++i)
+
+      for(std::size_t i=0; i<deltas.size(); ++i)
         sum += deltas[i];
-      
+
+      if(sum <= 0.0) return 0; // avoid division by zero on the very first frames
+
       return 1.0 / (sum / (double) deltas.size());
       
     }
@@ -714,8 +735,9 @@ namespace ogl {
     
   };
   
-  uint32_t glWindow::windowsCounter = 0;
-  
+  inline uint32_t glWindow::windowsCounter = 0;
+  inline uint32_t glWindow::windowsAlive   = 0;
+
 } /* namespace ogl */
 
 #endif /* _H_OGL_GLWINDOW_H_ */

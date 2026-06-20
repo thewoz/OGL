@@ -96,11 +96,16 @@ namespace ogl {
       shader.initLine();
       
       vertices = _vertices;
-      
+
       colors = _color;
-            
+
+      // the color buffer must cover every vertex, otherwise the GPU reads past
+      // the end of the color VBO during rendering
+      if(colors.size() < vertices.size())
+        colors.resize(vertices.size(), colors.empty() ? glm::vec4(1.0f) : colors.back());
+
       isInited = true;
-      
+
     }
     
     //****************************************************************************/

@@ -81,11 +81,12 @@ namespace ogl {
       const aiScene *scene = importer.ReadFile(path, aiProcess_CalcTangentSpace
                                                | aiProcess_Triangulate
                                                | aiProcess_JoinIdenticalVertices
+                                               | aiProcess_GenSmoothNormals
                                                | aiProcess_FlipUVs
                                                );
-      
+
       // Check for errors - if is Not Zero
-      if(!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+      if(!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode) {
         fprintf(stderr, "ERROR::ASSIMP:: %s\n", importer.GetErrorString());
         abort();
       }
@@ -258,9 +259,11 @@ namespace ogl {
       glm::vec3 center; glm::vec3 size; float radius = 0.0f;
       
       getBounds(center, size, radius);
-            
+
+      if(radius <= 0.0f) return; // degenerate model (e.g. single point): nothing to normalize
+
       double scalingFactor = normalizeTo / radius;
-      
+
       for(std::size_t i=0; i<meshes.size(); ++i)
         meshes[i].scale(scalingFactor, glm::vec3(0.0f));
       

@@ -26,6 +26,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <utility>
 
 
 //****************************************************************************//
@@ -102,10 +103,12 @@ namespace ogl {
         vertex.Position = vector;
         
         // Normals
-        vector.x = mesh->mNormals[i].x;
-        vector.y = mesh->mNormals[i].y;
-        vector.z = mesh->mNormals[i].z;
-        vertex.Normal = vector;
+        if(mesh->HasNormals()) {
+          vector.x = mesh->mNormals[i].x;
+          vector.y = mesh->mNormals[i].y;
+          vector.z = mesh->mNormals[i].z;
+          vertex.Normal = vector;
+        } else { vertex.Normal = glm::vec3(0.0f); }
                 
         // Texture Coordinates
         if(mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
@@ -150,6 +153,21 @@ namespace ogl {
     // ~glMesh -
     //****************************************************************************//
     ~glMesh() { cleanInGpu(); }
+
+    //****************************************************************************//
+    // glMesh owns GPU buffer handles (vao/vbo/ebo): make it movable but not
+    // copyable, otherwise copying (e.g. on vector reallocation) would duplicate
+    // the handles and the destructor of each copy would delete the same buffers.
+    //****************************************************************************//
+    glMesh(const glMesh &) = delete;
+    glMesh & operator = (const glMesh &) = delete;
+
+    glMesh(glMesh && other) noexcept { moveFrom(std::move(other)); }
+
+    glMesh & operator = (glMesh && other) noexcept {
+      if(this != &other) { cleanInGpu(); moveFrom(std::move(other)); }
+      return *this;
+    }
     
     
     //****************************************************************************//
@@ -260,10 +278,10 @@ namespace ogl {
       // A great thing about structs is that their memory layout is sequential for all its items.
       // The effect is that we can siogly pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
       // again translates to 3/2 floats which translates to a byte array.
-      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(ogl::glVertex), &vertices[0], GL_STATIC_DRAW);
-      
+      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(ogl::glVertex), vertices.data(), GL_STATIC_DRAW);
+
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
       
       std::size_t offset = 0;
       
@@ -323,26 +341,49 @@ namespace ogl {
     // cleanInGpu() -
     //****************************************************************************//
     void cleanInGpu() {
-      
+
       if(isInitedInGpu) {
-        
+
         glDeleteBuffers(1, &vbo);
         glDeleteBuffers(1, &ebo);
 
         glDeleteVertexArrays(1, &vao);
 
         material.cleanInGpu();
-        
+
         isInitedInGpu = false;
 
       }
-      
+
     }
-    
+
+  private:
+
+    //****************************************************************************//
+    // moveFrom() - transfer ownership and neutralize the source object
+    //****************************************************************************//
+    void moveFrom(glMesh && other) {
+
+      id            = other.id;
+      vao           = other.vao;
+      vbo           = other.vbo;
+      ebo           = other.ebo;
+      vertices      = std::move(other.vertices);
+      indices       = std::move(other.indices);
+      material      = std::move(other.material);
+      isInited      = other.isInited;
+      isInitedInGpu = other.isInitedInGpu;
+      name          = std::move(other.name);
+
+      // the moved-from object must not delete the GPU buffers we just took over
+      other.isInitedInGpu = false;
+
+    }
+
   };
   
-  GLuint glMesh::globalId = 0;
-  
+  inline GLuint glMesh::globalId = 0;
+
 } /* namspace ogl */
 
 #endif /* _H_OGL_GLMESH_H_ */

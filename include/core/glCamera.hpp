@@ -269,7 +269,7 @@ namespace ogl {
       if(mode == FREE)   return glm::lookAt(position, position + front, up);
       if(mode == TARGET) return glm::lookAt(position, target          , up);
       if(mode == BILLBOARD) {
-        glm::mat4 t1(1.0f); t1[3] = glm::vec4( target.x-position.x,  target.y-position.y,  target.z+position.z, 1.0f);
+        glm::mat4 t1(1.0f); t1[3] = glm::vec4( target.x-position.x,  target.y-position.y,  target.z-position.z, 1.0f);
         glm::mat4 t2(1.0f); t2[3] = glm::vec4(-target.x, -target.y, -target.z           , 1.0f);
         glm::mat4 r = rotation(pitch, yaw, 0);
         return t1 * r * t2;

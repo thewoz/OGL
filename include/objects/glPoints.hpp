@@ -133,19 +133,22 @@ namespace ogl {
       shader.setUniform("pointSize",  radius);
             
       if(to == -1) to = (int) points.size();
-      
-      if(index != -1) { from += index; to = 1; }
-      
+
+      // 'to' is an end index (exclusive); the draw call needs a vertex count
+      int count = to - from;
+
+      if(index != -1) { from += index; count = 1; }
+
       glEnable(GL_PROGRAM_POINT_SIZE);
 
       glBindVertexArray(vao);
-      
+
       //glEnable(GL_CULL_FACE);
       //glCullFace(GL_BACK);
 
       glDisable(GL_BLEND);
 
-      glDrawArrays(GL_POINTS, from, to);
+      glDrawArrays(GL_POINTS, from, count);
 
       glDisable(GL_PROGRAM_POINT_SIZE);
 

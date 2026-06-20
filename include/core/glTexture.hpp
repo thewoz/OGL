@@ -224,8 +224,8 @@ namespace ogl {
     
   };
 
-std::unordered_map<std::string, int> glTextures::textureMap = std::unordered_map<std::string, int>();
-std::vector<glTexture>               glTextures::textures   = std::vector<glTexture>();
+inline std::unordered_map<std::string, int> glTextures::textureMap = std::unordered_map<std::string, int>();
+inline std::vector<glTexture>               glTextures::textures   = std::vector<glTexture>();
 
 } /* namespace ogl */
 

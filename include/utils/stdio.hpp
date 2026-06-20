@@ -53,10 +53,19 @@ namespace ogl::io {
         strcat(dst, path);
       } else if(path[0]=='~') {
         struct passwd * passwdEnt = getpwuid(getuid());
+        if(passwdEnt == NULL) {
+          fprintf(stderr, "error getpwuid(): cannot resolve home directory\n");
+          abort();
+        }
         strcpy(dst, passwdEnt->pw_dir);
         strcat(dst, &path[1]);
       } else {
-        dst[0] = '/'; dst[0] = '\0';
+        // bare relative path: resolve it against the current working directory
+        if(getcwd(dst, PATH_MAX)==NULL) {
+          fprintf(stderr, "error getcwd(): (%d) %s\n", errno, strerror(errno));
+          abort();
+        }
+        strcat(dst, "/");
         strcat(dst, path);
       }
       
@@ -85,9 +94,12 @@ namespace ogl::io {
       
       while ((s=strstr(path, "/./"))!=NULL) { removeJunk(s, s+2); }
       while ((s=strstr(path, "//"))!=NULL) { removeJunk(s, s+1); }
-      
-      s = path + (strlen(path)-1);
-      
+
+      size_t len = strlen(path);
+      if(len == 0) return path; // empty path: nothing to fold (avoid pointer underflow below)
+
+      s = path + (len-1);
+
       if (s!=path && *s=='/') { *s=0; }
       
       return path;
@@ -106,7 +118,8 @@ namespace ogl::io {
     wordexp_t p;
     
     if(wordexp(srcPath, &p, 0)==0){
-      util::appendCwd(p.we_wordv[0], buff);
+      if(p.we_wordc > 0) util::appendCwd(p.we_wordv[0], buff);
+      else               util::appendCwd(srcPath, buff);
       wordfree(&p);
     } else {
       util::appendCwd(srcPath, buff);

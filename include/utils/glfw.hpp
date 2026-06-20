@@ -31,18 +31,18 @@ namespace glfw {
   //****************************************************************************//
   // glfwErrorCallback
   //****************************************************************************//
-  static void glfwErrorCallback(int error, const char * description) {
-    
+  inline void glfwErrorCallback(int error, const char * description) {
+
     fprintf(stderr, "GLFW error (%d): %s\n", error, description);
-    
+
   }
-  
-  static bool inited = false;
-  
+
+  inline bool inited = false;
+
   //****************************************************************************//
   // init
   //****************************************************************************//
-  void init() {
+  inline void init() {
     
     if(!inited) {
       
@@ -95,7 +95,7 @@ namespace glfw {
   //****************************************************************************//
   // terminate
   //****************************************************************************//
-  void terminate() {
+  inline void terminate() {
     
     DEBUG_LOG("glfw::terminate()");
 

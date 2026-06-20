@@ -40,7 +40,7 @@ namespace ogl {
     
   private:
     
-    uint32_t windowID;
+    uint32_t windowID = 0;
 
     GLuint program = -1;
     
@@ -295,7 +295,7 @@ namespace ogl {
         glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
          
         if(!success) {
-          glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+          glGetShaderInfoLog(geometry, 512, NULL, infoLog);
           std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
           abort();
         }
@@ -351,8 +351,8 @@ namespace ogl {
       
     }
     
-    inline void setUniform(GLint location, const unsigned int   & value) const { glUniform1i(location, value); }
-    inline void setUniform(GLint location, const int   & value) const { glUniform1ui(location, value); }
+    inline void setUniform(GLint location, const unsigned int   & value) const { glUniform1ui(location, value); }
+    inline void setUniform(GLint location, const int   & value) const { glUniform1i(location, value); }
     inline void setUniform(GLint location, const float & value) const { glUniform1f(location, value); }
     inline void setUniform(GLint location, const glm::vec3 & value) const { glUniform3fv(location, 1, &value[0]); }
     
