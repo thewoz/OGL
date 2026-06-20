@@ -20,6 +20,11 @@
 #ifndef _H_OGL_COLORS_H_
 #define _H_OGL_COLORS_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -222,7 +227,11 @@ namespace ogl {
     // get()
     //****************************************************************************//
     static const glm::vec4 & get(const std::string & str, bool create = false) {
-   
+
+      // Populate the named palette on first use, so get("red") works even if
+      // loadPalette() was never called explicitly.
+      if(colors.empty()) loadPalette();
+
       std::string key = normalize(str);
 
       auto colorMap = colors.find(key);
@@ -246,19 +255,37 @@ namespace ogl {
     }
     
     //****************************************************************************//
-    // heatMap()
+    // heatMap() - classic blue -> cyan -> green -> yellow -> red gradient.
+    // 'value' is clamped to [0,1]; 0 maps to blue (cold), 1 to red (hot).
     //****************************************************************************//
     static const glm::vec4 heatMap(double value) {
-            
-      double color1[3] = {1.0, 1.0, 1.0}; // white
-      double color2[3] = {1.0, 0.0, 0.0}; // red
-      
-      double R = color1[0] + value * (color2[0] - color1[0]);
-      double G = color1[1] + value * (color2[1] - color1[1]);
-      double B = color1[2] + value * (color2[2] - color1[2]);
-      
+
+      if(value < 0.0) value = 0.0;
+      if(value > 1.0) value = 1.0;
+
+      // Four linear segments across the [0,1] range.
+      double R, G, B;
+
+      if(value < 0.25) {        // blue -> cyan
+        R = 0.0;
+        G = value / 0.25;
+        B = 1.0;
+      } else if(value < 0.5) {  // cyan -> green
+        R = 0.0;
+        G = 1.0;
+        B = 1.0 - (value - 0.25) / 0.25;
+      } else if(value < 0.75) { // green -> yellow
+        R = (value - 0.5) / 0.25;
+        G = 1.0;
+        B = 0.0;
+      } else {                  // yellow -> red
+        R = 1.0;
+        G = 1.0 - (value - 0.75) / 0.25;
+        B = 0.0;
+      }
+
       return glm::vec4(R, G, B, 1.0);
-      
+
     }
     
     //****************************************************************************//
@@ -447,6 +474,21 @@ namespace ogl {
   }; /* class glColors */
 
   inline std::map<std::string, glm::vec4> glColors::colors = std::map<std::string, glm::vec4>();
+
+  //****************************************************************************/
+  // ogl::imgui::color() - pack a glm color (+ alpha) into an ImGui ImU32.
+  // Lives here, next to the rest of the color helpers. Only available when
+  // ImGui is enabled (i.e. OGL_WITHOUT_IMGUI is not defined).
+  //****************************************************************************/
+  #ifndef OGL_WITHOUT_IMGUI
+  namespace imgui {
+
+    inline int color(const glm::vec4 & _color, double alpha) {
+      return ImGui::ColorConvertFloat4ToU32(ImVec4(_color[0], _color[1], _color[2], alpha));
+    }
+
+  } /* namespace imgui */
+  #endif
 
 } /* namespace ogl */
 

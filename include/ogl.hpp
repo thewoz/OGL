@@ -44,16 +44,9 @@
   #ifndef OGL_WITHOUT_ICONS_FONT_AWESOME
     #include <ogl/utils/IconsFontAwesome6.h>
   #endif
-
-namespace ogl::imgui {
-
-  static int color(const glm::vec4 & _color, double alpha) { return ImGui::ColorConvertFloat4ToU32(ImVec4(_color[0], _color[1], _color[2], alpha)); }
-
-}
-
 #endif
 
-#define OGL_LIB_VERSION "OGL Lib v4.2.3"
+#define OGL_LIB_VERSION "OGL Lib v5.0"
 
 // Debug
 //#define DEBUG_OGL
@@ -72,6 +65,7 @@ namespace ogl::imgui {
 #include <ogl/core/glTexture.hpp>
 #include <ogl/core/glObject.hpp>
 #include <ogl/core/glColors.hpp>
+#include <ogl/core/glFont.hpp>
 
 // Model
 #include <ogl/model/glLight.hpp>
@@ -80,12 +74,13 @@ namespace ogl::imgui {
 #include <ogl/model/glModel.hpp>
 
 // Objects
+#include <ogl/objects/glShape.hpp>
 #include <ogl/objects/glPrint2D.hpp>
 #include <ogl/objects/glPrint3D.hpp>
 #include <ogl/objects/glLine.hpp>
 #include <ogl/objects/glLines.hpp>
-#include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glEllipse.hpp>
+#include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glGrid.hpp>
 #include <ogl/objects/glBox.hpp>
 #include <ogl/objects/glCuboid.hpp>

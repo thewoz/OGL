@@ -20,9 +20,16 @@
 #ifndef _H_OGL_STDIO_H_
 #define _H_OGL_STDIO_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 
+#include <climits>
 #include <unistd.h>
 #include <pwd.h>
 #include <wordexp.h>

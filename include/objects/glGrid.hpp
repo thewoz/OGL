@@ -20,6 +20,11 @@
 #ifndef _H_OGL_GRID_H_
 #define _H_OGL_GRID_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -42,11 +47,9 @@ namespace ogl {
     
     int rows;
     int cols;
-    
+
     float cellSize;
-    
-    glm::vec3 color;
-    
+
     std::vector<GLuint> indices;
     
   public:

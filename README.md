@@ -215,7 +215,7 @@ The Makefile automatically detects whether you are on **Linux** or **macOS**.
 ## Known Issues
 
 - Multi-Sample Anti-Aliasing does not work on Linux (driver/context limitation)
-- `glMaterial::cleanInGpu()` deletes entries from the global texture cache `glTextures`. If two meshes share the same texture (common in multi-mesh models), cleaning one mesh's material will invalidate the texture for the other. Avoid calling `cleanInGpu()` manually on materials belonging to a `glModel`; the model destructor handles cleanup in the correct order.
+- **Shared textures are not reference-counted.** `glTextures::load()` de-duplicates textures by file path, so two materials that reference the same image share a single GPU texture. However `glMaterial::cleanInGpu()` (and `~glMaterial`) deletes that texture outright, so destroying one material invalidates the texture for any *other* material still using it. In practice this is safe within a single `glModel` (the model owns its meshes/materials and tears them down together), but sharing a texture across two independent materials/models and destroying one will break the other. A proper fix would reference-count entries in `glTextures`; until then, avoid destroying one of two materials that share an image while the other is still in use.
 
 ---
 

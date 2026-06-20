@@ -20,11 +20,17 @@
 #ifndef _H_OGL_GLMATERIAL_H_
 #define _H_OGL_GLMATERIAL_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 
 #include <vector>
 #include <string>
+#include <utility>
 
 //****************************************************************************//
 // namespace ogl
@@ -114,6 +120,21 @@ namespace ogl {
     // ~glMaterial
     //****************************************************************************//
     ~glMaterial() { cleanInGpu(); }
+
+    //****************************************************************************//
+    // A material releases its textures in the destructor, so it must be movable
+    // and not copyable: when glMesh is moved the source material has to be
+    // neutralized, otherwise it would free textures the destination still uses.
+    //****************************************************************************//
+    glMaterial(const glMaterial &) = delete;
+    glMaterial & operator = (const glMaterial &) = delete;
+
+    glMaterial(glMaterial && other) noexcept { moveFrom(std::move(other)); }
+
+    glMaterial & operator = (glMaterial && other) noexcept {
+      if(this != &other) { cleanInGpu(); moveFrom(std::move(other)); }
+      return *this;
+    }
 
     //****************************************************************************//
     // setInShader - upload colors, flags and bind textures
@@ -207,6 +228,33 @@ namespace ogl {
     }
 
   private:
+
+    //****************************************************************************//
+    // moveFrom() - transfer the material and neutralize the source object
+    //****************************************************************************//
+    void moveFrom(glMaterial && other) {
+
+      name                = std::move(other.name);
+      ke                  = other.ke;
+      ka                  = other.ka;
+      kd                  = other.kd;
+      ks                  = other.ks;
+      ns                  = other.ns;
+      d                   = other.d;
+      textures            = std::move(other.textures);
+      haveDiffuseTexture  = other.haveDiffuseTexture;
+      haveSpecularTexture = other.haveSpecularTexture;
+      haveAmbientTexture  = other.haveAmbientTexture;
+      haveEmissiveTexture = other.haveEmissiveTexture;
+      haveNormalsTexture  = other.haveNormalsTexture;
+      haveOpacityTexture  = other.haveOpacityTexture;
+      isInited            = other.isInited;
+      isInitedInGpu       = other.isInitedInGpu;
+
+      // the moved-from material must not release the textures we just took over
+      other.isInitedInGpu = false;
+
+    }
 
     //****************************************************************************//
     // loadTexture - load the first texture of a given type, if any

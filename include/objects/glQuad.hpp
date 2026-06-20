@@ -20,12 +20,15 @@
 #ifndef _H_OGL_GLQUAD_H_
 #define _H_OGL_GLQUAD_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 
 #include <vector>
-
-#include <ogl/model/glLight.hpp>
 
 //****************************************************************************/
 // namespace ogl
@@ -35,17 +38,15 @@ namespace ogl {
   //****************************************************************************/
   // class glQuad
   //****************************************************************************/
-  class glQuad : public glObject {
-      
+  class glQuad : public glShape {
+
     private:
-    
+
       GLuint vao = 0;
       GLuint vbo[2];
-      glm::vec3 color;
       glm::vec2 size;
-      ogl::glLight light;
       bool cullFaceEnabled = false;
-    
+
       std::vector<glm::vec3> vertices;
 
     public:
@@ -164,16 +165,6 @@ namespace ogl {
         glBindVertexArray(0);
 
         glCheckError();
-        
-      }
-
-      //****************************************************************************/
-      // setLight() - Set the light
-      //****************************************************************************/
-      void setLight(const glm::vec3 & _position, const glm::vec3 & _direction) {
-
-        light.setPosition(_position);
-        light.setDirection(_direction);
 
       }
 

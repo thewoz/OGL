@@ -20,10 +20,13 @@
 #ifndef _H_OGL_CUBOID_H_
 #define _H_OGL_CUBOID_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
-
-#include <ogl/model/glLight.hpp>
 
 //****************************************************************************/
 // namespace ogl
@@ -38,16 +41,14 @@ namespace ogl {
   // verts) so each face can carry its own flat outward normal. Supports SOLID
   // and WIREFRAME styles. In SOLID mode Phong shading uses the glLight member.
   //****************************************************************************/
-  class glCuboid : public glObject {
+  class glCuboid : public glShape {
 
   private:
 
       GLuint vao = 0; // 0 = not yet allocated
       GLuint vbo[4];
-    
-      glm::vec3 color;
+
       glm::vec3 size;
-      ogl::glLight light;
 
   public:
 
@@ -59,7 +60,7 @@ namespace ogl {
     //****************************************************************************/
     // Class glCuboid
     //****************************************************************************/
-    glCuboid(const glm::vec3 & _size, int _style = glShader::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
+    glCuboid(const glm::vec3 & _size, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
       name = _name;
       init(_size, _style, _color);
     }
@@ -131,21 +132,11 @@ namespace ogl {
       glBindVertexArray(0);
 
       glCheckError();
-      
-    }
-
-    //****************************************************************************/
-    // setLight() - Set the light
-    //****************************************************************************/
-    void setLight(const glm::vec3 & _position, const glm::vec3 & _direction) {
-
-      light.setPosition(_position);
-      light.setDirection(_direction);
 
     }
 
   private:
-    
+
     //****************************************************************************/
     // setInGpu()
     //****************************************************************************/

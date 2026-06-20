@@ -5,23 +5,42 @@ through the single umbrella header [`ogl.hpp`](../include/ogl.hpp). There is no
 library to link against — you only link the third-party dependencies (GLFW,
 GLM, GLAD, Assimp, SOIL2, Freetype, libtiff, and optionally ImGui).
 
+`ogl.hpp` is the **only** supported entry point: it defines the third-party
+include order the internal headers rely on. Including an internal header
+directly (e.g. `<ogl/objects/glSphere.hpp>`) triggers a `#error` — always
+include `<ogl/ogl.hpp>` instead.
+
 ## Source layout
 
 ```
 include/
   core/      glWindow, glCamera, glShader, glTexture, glColors, glObject (base class)
+             glFont (shared glyph atlas used by the text objects)
   model/     glLight, glMaterial, glMesh, glModel  (Assimp import + Phong shading)
   objects/   ready-to-use drawables:
-               glSphere, glEllipse, glCuboid       — solid/wireframe 3D shapes
+               glShape                             — base for the lit primitives (adds the light)
+               glEllipse, glSphere, glCuboid, glQuad — solid/wireframe 3D shapes
                glBox, glLine, glLines              — edge/line primitives
                glGrid, glAxes, glReferenceAxes     — scene helpers
                glPoints                            — point clouds
                glPrint2D, glPrint3D               — text
-               glPlot, glQuad, glQuad2D            — misc
+               glPlot, glQuad2D                    — misc
   shader/    GLSL programs (.vs vertex, .gs geometry, .fs fragment)
   utils/     logging, error checking, GLFW helpers, snapshots
   data/      fonts and the sample Trex model
 ```
+
+## Class relationships
+
+Every drawable derives from `glObject` (transform, shader, `style`, `lineWidth`,
+`color`). Drawables own GPU handles, so `glObject` is **non-copyable and
+non-movable** (a virtual destructor makes deletion through a `glObject*` safe);
+pass drawables by reference or pointer. The lit primitives derive from an
+intermediate `glShape : glObject`, which adds the `glLight` member and
+`setLight()`. `glSphere` is a thin subclass of `glEllipse` (a sphere is an
+ellipsoid with equal semi-axes). Text objects (`glPrint2D`/`glPrint3D`) share a
+single process-wide glyph atlas through `glFont` instead of each loading their
+own copy.
 
 ## The drawable object model
 

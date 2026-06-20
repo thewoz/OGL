@@ -20,6 +20,11 @@
 #ifndef _H_OGL_GLWINDOW_H_
 #define _H_OGL_GLWINDOW_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 
@@ -93,6 +98,13 @@ namespace ogl {
 
     bool imguiFrameActive = false;
 
+    // ImGui keeps a single global context, so it is created exactly once (by the
+    // first on-screen window) and torn down by that same window. Offscreen
+    // windows never initialise it. 'imguiOwner' marks the window responsible for
+    // the shutdown; 'imguiInitialized' is the shared "context exists" flag.
+    static bool imguiInitialized;
+    bool imguiOwner = false;
+
     // FPS tracking — per-window (not static) so multiple windows don't share state.
     std::deque<double> fpsDeltas;
     double fpsLastTimestamp = 0.0;
@@ -127,11 +139,7 @@ namespace ogl {
     //*****************************************************************************/
     ~glWindow() {
       DEBUG_LOG("glWindow::destroy() windowID " + std::to_string(id));
-      #ifndef OGL_WITHOUT_IMGUI
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplGlfw_Shutdown();
-        ImGui::DestroyContext();
-      #endif
+      shutdownImGui();
       if(window != NULL) { glfwDestroyWindow(window); window = NULL; }
       if(created) {
         created = false;
@@ -215,14 +223,20 @@ namespace ogl {
       #endif
       
       #ifndef OGL_WITHOUT_IMGUI
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGui::GetIO().IniFilename = nullptr;  // <-- DISABILITA imgui.ini
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 150");
-        ImGui::StyleColorsDark();
+        // ImGui has a single global context: initialise it only once, and let
+        // this window own its lifetime.
+        if(!imguiInitialized) {
+          IMGUI_CHECKVERSION();
+          ImGui::CreateContext();
+          ImGui::GetIO().IniFilename = nullptr;  // <-- DISABILITA imgui.ini
+          ImGui_ImplGlfw_InitForOpenGL(window, true);
+          ImGui_ImplOpenGL3_Init("#version 150");
+          ImGui::StyleColorsDark();
+          imguiInitialized = true;
+          imguiOwner       = true;
+        }
       #endif
-      
+
     }
     
     //*****************************************************************************/
@@ -308,6 +322,8 @@ namespace ogl {
 
       DEBUG_LOG("glWindow::destroy() windowID " + std::to_string(id));
 
+      shutdownImGui();
+
       if(window != NULL) {
         glfwDestroyWindow(window);
         window = NULL;
@@ -319,6 +335,25 @@ namespace ogl {
       }
 
     }
+
+  private:
+
+    //****************************************************************************//
+    // shutdownImGui() - tear down ImGui, but only from the window that created it
+    //****************************************************************************//
+    inline void shutdownImGui() {
+      #ifndef OGL_WITHOUT_IMGUI
+        if(imguiOwner) {
+          ImGui_ImplOpenGL3_Shutdown();
+          ImGui_ImplGlfw_Shutdown();
+          ImGui::DestroyContext();
+          imguiOwner       = false;
+          imguiInitialized = false;
+        }
+      #endif
+    }
+
+  public:
     
     //****************************************************************************//
     // updateCurrentCamera() -
@@ -629,9 +664,10 @@ namespace ogl {
       #ifndef OGL_WITHOUT_IMGUI
         // On macOS the system can drop all monitors after a display sleep, and ImGui::NewFrame() asserts when the monitor list is empty.
         // Skip the ImGui frame until at least one monitor is back.
+        // Offscreen windows never initialise ImGui, so guard on imguiInitialized too.
         int monitorCount = 0;
         glfwGetMonitors(&monitorCount);
-        if(monitorCount > 0) {
+        if(imguiInitialized && monitorCount > 0) {
           ImGui_ImplOpenGL3_NewFrame();
           ImGui_ImplGlfw_NewFrame();
           ImGui::NewFrame();
@@ -733,6 +769,7 @@ namespace ogl {
   
   inline uint32_t glWindow::windowsCounter = 0;
   inline uint32_t glWindow::windowsAlive   = 0;
+  inline bool     glWindow::imguiInitialized = false;
 
 } /* namespace ogl */
 

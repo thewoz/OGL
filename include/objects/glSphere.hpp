@@ -20,10 +20,12 @@
 #ifndef _H_OGL_SPHERE_H_
 #define _H_OGL_SPHERE_H_
 
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
-
-#include <ogl/model/glLight.hpp>
 
 //****************************************************************************/
 // namespace ogl
@@ -33,253 +35,41 @@ namespace ogl {
   //****************************************************************************/
   // Class glSphere
   //****************************************************************************/
-  // UV-sphere (latitude/longitude tessellation). Supports two rendering styles:
-  //   SOLID     — filled triangles with Phong shading (uses solid.vs/.fs)
-  //   WIREFRAME — triangle edges drawn as thick lines (uses wireframe.vs/.gs/.fs)
-  // A glLight member provides per-object Phong lighting in SOLID mode; the
-  // default head-light fallback guarantees shading even without calling setLight().
+  // A UV-sphere is just an ellipsoid with three equal semi-axes, so glSphere is
+  // a thin wrapper over glEllipse: it reuses the same geometry generation,
+  // shading, SOLID/WIREFRAME handling and setLight() instead of duplicating
+  // them. Supports two rendering styles:
+  //   SOLID     — filled triangles with Phong shading
+  //   WIREFRAME — triangle edges drawn as thick lines
   //****************************************************************************/
-  class glSphere : public glObject {
-    
-    private:
-      
-      GLuint vao;
-      GLuint vbo[4];
-      
-      float radius;
-      int   slices;
-      int   stacks;
-    
-      glm::vec3 color;
-      ogl::glLight light;
-      
-    public:
-      
-      //****************************************************************************/
-      // glSphere()
-      //****************************************************************************/
-      glSphere(const std::string & _name = "") { name = _name; }
-      
-      //****************************************************************************/
-      // glSphere()
-      //****************************************************************************/
-      glSphere(float _radius, int _slices, int _stacks, int _style = glShader::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
-        name = _name;
-        init(_radius, _slices, _stacks, _style, _color);
-      }
-      
-      //****************************************************************************/
-      // ~glSphere()
-      //****************************************************************************/
-      ~glSphere() { cleanInGpu(); }
-      
-      //****************************************************************************/
-      // init()
-      //****************************************************************************/
-      void init(float _radius, int _slices, int _stacks, int _style = glShader::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
-        
-        DEBUG_LOG("glSphere::init(" + name + ")");
+  class glSphere : public glEllipse {
 
-        shader.setName(name);
-        
-        if(_style == glShader::STYLE::WIREFRAME) {
-          shader.initWireframe();
-        } else {
-          shader.initSolid();
-        }
-        
-        radius = _radius;
-        
-        slices = _slices;
-        stacks = _stacks;
-        
-        style = _style;
-        
-        color = _color;
-        
-        isInited = true;
-        
-      }
-      
-      //****************************************************************************/
-      // render()
-      //****************************************************************************/
-      void render(const glCamera * camera) {
-        
-        DEBUG_LOG("gSphere::render(" + name + ")");
-        
-        if(!isInited){
-          fprintf(stderr, "glSphere must be inited before render\n");
-          abort();
-        }
-        
-        if(isToInitInGpu()) initInGpu();
+  public:
 
-        shader.use();
-
-        shader.setUniform("projection", camera->getProjection());
-        shader.setUniform("view",       camera->getView());
-        shader.setUniform("model",      modelMatrix);
-        shader.setUniform("color",      color);
-        if(style == glShader::STYLE::SOLID) {
-          light.setInShader(shader, camera->getView());
-        }
-                        
-        glBindVertexArray(vao);
-        
-        if(style == glShader::STYLE::WIREFRAME) {
-          shader.setUniform("lineWidth", lineWidth);
-          shader.setUniform("viewport",  camera->getViewport());
-          glDisable(GL_CULL_FACE);
-        }
-        
-        if(style == glShader::STYLE::SOLID) {
-          glEnable(GL_CULL_FACE);
-          glCullFace(GL_BACK);
-        }
-        
-        glDrawElements(GL_TRIANGLES, slices * stacks * 6, GL_UNSIGNED_INT, nullptr);
-
-        glBindVertexArray(0);
-        
-        glCheckError();
-        
-      }
-
-      //****************************************************************************/
-      // setLight() - Set the light
-      //****************************************************************************/
-      void setLight(const glm::vec3 & _position, const glm::vec3 & _direction) {
-
-        light.setPosition(_position);
-        light.setDirection(_direction);
-
-      }
-      
-    private:
-      
-      //****************************************************************************/
-      // setInGpu - generate the sphere geometry and upload it to the GPU.
-      // Uses 4 separate VBOs: positions (0), normals (1), texcoords (2), indices (3).
-      // Normals equal the normalised position on a unit sphere, then scaled — this
-      // is correct because a unit sphere's normal at point P is just normalize(P).
-      //****************************************************************************/
-      void setInGpu() {
-
-        DEBUG_LOG("glSphere::setInGpu(" + name + ")");
-
-        if(!isInitedInGpu) {
-
-          std::vector<glm::vec3> positions;
-          std::vector<glm::vec3> normals;
-          std::vector<glm::vec2> textureCoords;
-          
-          for(int i = 0; i <= stacks; ++i) {
-            
-            // V texture coordinate.
-            float V = i / (float)stacks;
-            float phi = V * M_PI;
-            
-            for( int j = 0; j <= slices; ++j) {
-              
-              // U texture coordinate.
-              float U = j / (float)slices;
-              float theta = U * 2.0f * M_PI;
-              
-              float X = cos(theta) * sin(phi);
-              float Y = cos(phi);
-              float Z = sin(theta) * sin(phi);
-              
-              positions.push_back(glm::vec3( X, Y, Z) * radius);
-              normals.push_back(glm::vec3(X, Y, Z));
-              textureCoords.push_back(glm::vec2(U, V));
-              
-            }
-            
-          }
-          
-          // Now generate the index buffer
-          std::vector<GLuint> indicies;
-          
-          int noPerSlice = slices + 1;
-          
-          for(int i=0; i < stacks; ++i) {
-            
-            for (int j=0; j < slices; ++j) {
-              
-              int start_i = (i * noPerSlice) + j;
-              
-              indicies.push_back( start_i );
-              indicies.push_back( start_i + noPerSlice + 1 );
-              indicies.push_back( start_i + noPerSlice );
-              
-              indicies.push_back( start_i + noPerSlice + 1 );
-              indicies.push_back( start_i );
-              indicies.push_back( start_i + 1 );
-              
-            }
-            
-          }
-          
-          glGenVertexArrays(1, &vao);
-          glBindVertexArray(vao);
-          
-          glGenBuffers(4, vbo);
-          
-          glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-          
-          glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-          glEnableVertexAttribArray(0);
-          
-          glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_STATIC_DRAW);
-          
-          glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-          
-          glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
-          glEnableVertexAttribArray(1);
-          
-          glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);
-          
-          glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-          
-          glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-          glEnableVertexAttribArray(2);
-          
-          glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(glm::vec2), textureCoords.data(), GL_STATIC_DRAW);
-          
-          glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
-          glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(GLuint), indicies.data(), GL_STATIC_DRAW);
-          
-          glBindBuffer(GL_ARRAY_BUFFER, 0);
-          glBindVertexArray(0);
-          
-          glCheckError();
-
-        }
-        
-        isInitedInGpu = true;
-        
-      }
-    
-    
-  private:
-    
     //****************************************************************************/
-    // cleanInGpu()
+    // glSphere()
     //****************************************************************************/
-    void cleanInGpu() {
-      
-      if(isInitedInGpu) {
-        
-        glDeleteBuffers(4, vbo);
-        glDeleteVertexArrays(1, &vao);
-        
-        isInitedInGpu = false;
+    glSphere(const std::string & _name = "") : glEllipse(_name) { }
 
-      }
-      
+    //****************************************************************************/
+    // glSphere()
+    //****************************************************************************/
+    glSphere(float _radius, int _slices, int _stacks, int _style = glShader::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0), const std::string & _name = "") {
+      name = _name;
+      init(_radius, _slices, _stacks, _style, _color);
     }
-    
+
+    //****************************************************************************/
+    // init() - a sphere is an ellipsoid with equal semi-axes (a = b = c = radius)
+    //****************************************************************************/
+    void init(float _radius, int _slices, int _stacks, int _style = glShader::STYLE::WIREFRAME, const glm::vec3 & _color = glm::vec3(1.0)) {
+
+      DEBUG_LOG("glSphere::init(" + name + ")");
+
+      glEllipse::init(_radius, _radius, _radius, _stacks, _slices, _style, _color);
+
+    }
+
   };
 
 } /* namespace ogl */

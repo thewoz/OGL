@@ -20,6 +20,11 @@
 #ifndef _H_OGL_BOX_H_
 #define _H_OGL_BOX_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -37,9 +42,7 @@ namespace ogl {
     
     GLuint vao;
     GLuint vbo[2];
-    
-    glm::vec3 color;
-    
+
     constexpr static const GLfloat vertices[] = {
       -0.5,  0.5,  0.5,
        0.5,  0.5,  0.5,

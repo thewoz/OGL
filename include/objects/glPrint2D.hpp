@@ -20,14 +20,15 @@
 #ifndef _H_OGL_PRINT_H_
 #define _H_OGL_PRINT_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 
-#include <map>
 #include <string>
-
-#include <freetype2/ft2build.h>
-#include FT_FREETYPE_H
 
 //****************************************************************************/
 // namespace ogl
@@ -37,35 +38,24 @@ namespace ogl {
   //****************************************************************************/
   // Class glPrint2D
   //****************************************************************************/
+  // Draws text in screen space. The glyph atlas is shared through glFont, so
+  // this object only owns the small dynamic quad buffer (vao/vbo). 'color' is
+  // inherited from glObject.
+  //****************************************************************************/
   class glPrint2D : public glObject {
-    
+
   private:
-    
+
     GLuint vao;
     GLuint vbo;
-    
-    unsigned int textureID;
 
     float x;
     float y;
-    
+
     float scale;
-    
-    glm::vec3 color;
-    
+
     std::string text;
-    
-    struct Character_t {
-      unsigned int TextureID; // ID handle of the glyph texture
-      glm::ivec2   Size;      // Size of glyph
-      glm::ivec2   Bearing;   // Offset from baseline to left/top of glyph
-      unsigned int Advance;   // Horizontal offset to advance to next glyph
-    };
-    
-    std::map<GLchar, Character_t> Characters;
-    
-    std::vector<GLuint> characterTextures;
-    
+
   public:
     
     //****************************************************************************/
@@ -210,18 +200,17 @@ namespace ogl {
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
         
         if(*c == '\n') {
-          auto itA = Characters.find('a');
-          float lineHeight = (itA != Characters.end()) ? itA->second.Size.y * scale : 0.0f;
+          const glFont::Character_t * chA = glFont::instance().get('a');
+          float lineHeight = chA ? chA->Size.y * scale : 0.0f;
           tmpX  = x;
           tmpY -= 2 * lineHeight;
           continue;
         }
 
-        // skip characters that were not loaded (e.g. non-ASCII): using operator[]
-        // here would silently insert a zeroed glyph into the map on every frame.
-        auto it = Characters.find(*c);
-        if(it == Characters.end()) continue;
-        const Character_t & ch = it->second;
+        // skip characters that were not loaded (e.g. non-ASCII)
+        const glFont::Character_t * chp = glFont::instance().get(*c);
+        if(chp == nullptr) continue;
+        const glFont::Character_t & ch = *chp;
                 
         float xpos = tmpX + ch.Bearing.x * scale;
         float ypos = tmpY - (ch.Size.y - ch.Bearing.y) * scale;
@@ -269,79 +258,12 @@ namespace ogl {
     // setInGpu()
     //****************************************************************************/
     void setInGpu() {
-      
+
       DEBUG_LOG("glPrint2D::setInGpu(" + name + ")");
-      
-      FT_Library ft;
-      
-      // All functions return a value different than 0 whenever an error occurred
-      if (FT_Init_FreeType(&ft)) {
-        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-        abort();
-      }
 
-      // load font as face
-      FT_Face face;
-      if (FT_New_Face(ft, "/usr/local/include/ogl/data/fonts/arial.ttf", 0, &face)) {
-        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
-        abort();
-      }
-      
-      // set size to load glyphs as
-      FT_Set_Pixel_Sizes(face, 0, 48);
-      
-      // disable byte-alignment restriction
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      
-      // load first 128 characters of ASCII set
-      for(unsigned char c = 0; c < 128; c++) {
-        
-        // Load character glyph
-        if(FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-          std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-          continue;
-        }
-        
-        // generate texture
-        glGenTextures(1, &textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        
-        characterTextures.push_back(textureID);
+      // Build the shared glyph atlas once (no-op if another text object already did).
+      glFont::instance().load();
 
-        glTexImage2D(GL_TEXTURE_2D,
-                     0,
-                     GL_RED,
-                     face->glyph->bitmap.width,
-                     face->glyph->bitmap.rows,
-                     0,
-                     GL_RED,
-                     GL_UNSIGNED_BYTE,
-                     face->glyph->bitmap.buffer);
-        
-        // set texture options
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        
-        // now store character for later use
-        Character_t character = {
-          textureID,
-          glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-          glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-          (unsigned int)face->glyph->advance.x
-        };
-        
-        Characters.insert(std::pair<char, Character_t>(c, character));
-        
-      }
-      
-      glBindTexture(GL_TEXTURE_2D, 0);
-      
-      // destroy FreeType once we're finished
-      FT_Done_Face(face);
-      FT_Done_FreeType(ft);
-      
       // configure VAO/VBO for texture quads
       glGenVertexArrays(1, &vao);
       glBindVertexArray(vao);
@@ -367,21 +289,19 @@ namespace ogl {
     void cleanInGpu() {
       
       if(isInitedInGpu) {
-        
+
+        // Only the per-instance quad buffer is freed here; the glyph textures
+        // belong to the shared glFont atlas and must outlive this object.
         glDeleteBuffers(1, &vbo);
         glDeleteVertexArrays(1, &vao);
-        
-        glDeleteTextures((GLsizei)characterTextures.size(), characterTextures.data());
-
-        characterTextures.clear();
 
         isInitedInGpu = false;
-        
+
       }
-      
+
     }
-    
-    
+
+
   };
 
 

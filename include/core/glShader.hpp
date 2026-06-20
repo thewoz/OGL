@@ -20,6 +20,11 @@
 #ifndef _H_OGL_GLSHADER_H_
 #define _H_OGL_GLSHADER_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 
@@ -75,6 +80,14 @@ namespace ogl {
     // ~glShader
     //****************************************************************************/
     ~glShader() { if(program != 0) glDeleteProgram(program); }
+
+    //****************************************************************************/
+    // A shader owns a GL program handle, so it is non-copyable: copying would
+    // duplicate the handle and double-delete it. (glShader instances live as
+    // members of the non-copyable glObject, never in containers by value.)
+    //****************************************************************************/
+    glShader(const glShader &) = delete;
+    glShader & operator = (const glShader &) = delete;
     
     //****************************************************************************/
     // initModel
@@ -256,6 +269,10 @@ namespace ogl {
         fprintf(stderr, "shader must be inited before set in GPU\n");
         abort();
       }
+
+      // Recompiling (e.g. after a context change): drop the previous program so
+      // its handle is not leaked.
+      if(program != 0) { glDeleteProgram(program); program = 0; }
 
       const GLchar * vShaderCode = vertexCode.c_str();
       const GLchar * fShaderCode = fragmentCode.c_str();

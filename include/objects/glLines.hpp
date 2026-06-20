@@ -20,6 +20,11 @@
 #ifndef _H_OGL_LINES_H_
 #define _H_OGL_LINES_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 

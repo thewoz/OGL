@@ -20,24 +20,23 @@
 #ifndef _H_OGL_SNAPSHOT_H_
 #define _H_OGL_SNAPSHOT_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 #include <cerrno>
 #include <cstring>
 
-#ifdef __APPLE__
-  #include <OpenGL/gl.h>
-#else
-  #include <GL/gl.h>
-#endif
+#include <tiffio.h>
 
 //****************************************************************************//
 // namespace ogl
 //****************************************************************************//
 namespace ogl {
-  
-#include <tiffio.h>
-  
+
 //****************************************************************************//
 // snapshot()
 //****************************************************************************//

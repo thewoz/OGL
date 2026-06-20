@@ -20,10 +20,16 @@
 #ifndef _H_OGL_GLTEXTURE_H_
 #define _H_OGL_GLTEXTURE_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdlib>
 #include <cstdio>
 
 #include <string>
+#include <utility>
 #include <unordered_map>
 
 //****************************************************************************/
@@ -78,7 +84,23 @@ namespace ogl {
     // ~glTexture
     //****************************************************************************/
     ~glTexture() { cleanInGpu(); }
-    
+
+    //****************************************************************************/
+    // glTexture owns a GL texture handle — movable, not copyable. Required
+    // because glTextures stores them in a std::vector, whose reallocation must
+    // move (not copy) the elements or the moved-from copy would delete the
+    // texture still in use.
+    //****************************************************************************/
+    glTexture(const glTexture &) = delete;
+    glTexture & operator = (const glTexture &) = delete;
+
+    glTexture(glTexture && other) noexcept { moveFrom(std::move(other)); }
+
+    glTexture & operator = (glTexture && other) noexcept {
+      if(this != &other) { cleanInGpu(); moveFrom(std::move(other)); }
+      return *this;
+    }
+
     //****************************************************************************/
     // init
     //****************************************************************************/
@@ -187,7 +209,29 @@ namespace ogl {
     // getType
     //****************************************************************************/
     inline std::string getType() const { return type; }
-    
+
+  private:
+
+    //****************************************************************************/
+    // moveFrom() - transfer ownership and neutralize the source object
+    //****************************************************************************/
+    void moveFrom(glTexture && other) {
+
+      id            = other.id;
+      name          = std::move(other.name);
+      isInited      = other.isInited;
+      isInitedInGpu = other.isInitedInGpu;
+      type          = std::move(other.type);
+      path          = std::move(other.path);
+      width         = other.width;
+      height        = other.height;
+      image         = std::move(other.image);
+
+      // the moved-from object must not delete the GPU texture we just took over
+      other.isInitedInGpu = false;
+
+    }
+
   };
 
 

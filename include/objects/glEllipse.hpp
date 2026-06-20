@@ -20,41 +20,41 @@
 #ifndef _H_OGL_ELLIPSE_H_
 #define _H_OGL_ELLIPSE_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
-
-#include <ogl/model/glLight.hpp>
 
 //****************************************************************************/
 // namespace ogl
 //****************************************************************************/
 namespace ogl {
-  
+
   //****************************************************************************/
   // Class glEllipse
   //****************************************************************************/
   // Ellipsoid with semi-axes a (X), b (Y), c (Z). Supports SOLID and WIREFRAME
-  // styles, matching glSphere. In SOLID mode the surface normal is the gradient
-  // of the implicit equation (X/a², Y/b², Z/c²), not the position vector, so
-  // the shading is correct even for non-spherical shapes.
+  // styles. In SOLID mode the surface normal is the gradient of the implicit
+  // equation (X/a², Y/b², Z/c²), not the position vector, so the shading is
+  // correct even for non-spherical shapes. glSphere is the special case a=b=c.
   //****************************************************************************/
-  class glEllipse : public glObject {
-    
+  class glEllipse : public glShape {
+
   private:
-    
+
     GLuint vao;
     GLuint vbo[4];
 
     int stacks;
     int slices;
-    
+
     float a;
     float b;
     float c;
-    
-    glm::vec3 color;
-    ogl::glLight light;
-    
+
   public:
         
     //****************************************************************************/
@@ -146,21 +146,11 @@ namespace ogl {
       glDrawElements(GL_TRIANGLES, slices * stacks * 6, GL_UNSIGNED_INT, nullptr);
       
       glBindVertexArray(0);
-      
+
       glCheckError();
-      
-    }
-
-    //****************************************************************************/
-    // setLight() - Set the light
-    //****************************************************************************/
-    void setLight(const glm::vec3 & _position, const glm::vec3 & _direction) {
-
-      light.setPosition(_position);
-      light.setDirection(_direction);
 
     }
-    
+
     private:
 
     //****************************************************************************/

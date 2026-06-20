@@ -20,6 +20,11 @@
 #ifndef _H_OGL_OBJECT_H_
 #define _H_OGL_OBJECT_H_
 
+
+#ifndef _H_OGL_H_
+  #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
+#endif
+
 #include <cstdio>
 #include <cstdlib>
 
@@ -63,23 +68,27 @@ namespace ogl {
     glm::vec3 _scale;
     
     glm::mat4 modelMatrix;
-    
+
     int style;
     float lineWidth;
-    
+
+    // Single solid color, shared by every drawable that needs one. Per-vertex
+    // color objects (glLines, glPoints, glPlot) keep their own color buffers.
+    glm::vec3 color;
+
   public:
-    
+
     //***************************************************************************
     // glObject()
     //***************************************************************************
     glObject(const std::string & _name = "") {
-      
+
       name = _name;
-      
+
       _position = glm::vec3(0.0);
       _rotation = glm::vec3(0.0);
       _scale    = glm::vec3(1.0);
-      
+
       windowID = 0;
 
       isInited        = false;
@@ -89,9 +98,23 @@ namespace ogl {
       style     = 0;
       lineWidth = 1.0f;
 
+      color = glm::vec3(1.0f);
+
       updateModelMatrix();
-      
+
     }
+
+    //***************************************************************************
+    // glObject owns GPU resources through its subclasses (vao/vbo/program), so
+    // copying would duplicate the handles and double-free them on destruction.
+    // Drawables are therefore non-copyable and non-movable; pass them by
+    // reference or pointer. The virtual destructor makes deletion through a
+    // glObject* well defined.
+    //***************************************************************************
+    virtual ~glObject() { }
+
+    glObject(const glObject &) = delete;
+    glObject & operator = (const glObject &) = delete;
     
     //****************************************************************************
     // initInGpu() -
@@ -147,6 +170,12 @@ namespace ogl {
     // setStyle()
     //****************************************************************************
     inline void setStyle(int _style) { style = _style; }
+
+    //****************************************************************************
+    // setColor() / getColor()
+    //****************************************************************************
+    inline void setColor(const glm::vec3 & _color) { color = _color; }
+    inline glm::vec3 getColor() const { return color; }
 
     //****************************************************************************
     // setLineWidth()
