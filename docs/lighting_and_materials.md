@@ -105,7 +105,10 @@ with a standard gamma of `2.2`.
 To keep the engine small and easy to reason about, the following are **not**
 implemented:
 
-- **Shadows.** There is no shadow mapping; lights only shade surfaces directly.
+- **Shadows.** The model shader carries a shadow-mapping path (PCF soft
+  shadows), but it is not driven yet: no depth pass is rendered and the
+  light-space matrix is not set, so `withShadow` stays `false` and shadows are
+  effectively disabled. Base objects have no shadow support at all.
 - **Reflection / refraction**, environment maps, and transparency blending
   beyond a simple per-fragment opacity (`d`).
 - **Multiple lights.** Each object/model is lit by a single `glLight`.

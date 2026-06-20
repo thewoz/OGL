@@ -31,7 +31,9 @@ Version 4.2 of the library has been released. Among the highlights (along with o
 - Simplified `glMaterial` down to a clean Phong subset
   (emissive / ambient / diffuse / specular + shininess + opacity, plus the
   common texture maps).
-- Removed dead, non-functional shadow code from the model shaders.
+
+The model shaders still carry a shadow-mapping path; it is kept for future work
+but is not driven yet (no depth pass), so shadows are currently disabled.
 
 See [docs/lighting_and_materials.md](docs/lighting_and_materials.md) for details.
 
@@ -180,7 +182,7 @@ int main(int argc, char* const argv[]) {
 
 ## 🧰 TODO
 
-- Add shadow mapping (currently lights shade surfaces directly, with no shadows)
+- Finish shadow mapping (the model shader already supports it; a depth pass and the light-space matrix still need to be driven)
 - Add support for multiple lights per object/model
 - Add render-to-texture support
 - Add axis labels (X,Y,Z) to `glReferenceAxes` for better visualization
