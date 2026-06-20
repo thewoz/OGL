@@ -172,7 +172,7 @@ namespace ogl {
     //****************************************************************************/
     // renderEnd()
     //****************************************************************************/
-    void renderEnd() { glDisable(GL_DEPTH_TEST); }
+    void renderEnd() { glDisable(GL_CULL_FACE); }
     
     //****************************************************************************/
     // getBounds() - Compute the bounds of the model (center, size, radius)

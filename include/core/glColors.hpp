@@ -450,4 +450,4 @@ namespace ogl {
 
 } /* namespace ogl */
 
-#endif /* _H_OGL_OBJECT_H_ */
+#endif /* _H_OGL_COLORS_H_ */

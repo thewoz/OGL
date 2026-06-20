@@ -174,6 +174,6 @@ namespace ogl {
     
   };
   
-} /* namspace ogl */
+} /* namespace ogl */
 
 #endif /* _H_OGL_GLQUAD2D_H_ */

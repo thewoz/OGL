@@ -77,16 +77,12 @@ namespace ogl {
     // Variabile vera se il mouse e' sopra la finestra
     bool onFocus;
     
-    // Vettore delle telecamere attive nella finestra
     std::vector<ogl::glCamera> cameras;
-        
-    // Tempo dell'ultimo rendering
+
     GLfloat lastTime = 0;
 
-    // vera se questa finestra ha effettivamente creato un contesto GLFW
     bool created = false;
 
-    // Background color
     glm::vec3 background;
         
     bool isProcessMouseMovement = true;
@@ -97,15 +93,15 @@ namespace ogl {
 
     bool imguiFrameActive = false;
 
+    // FPS tracking — per-window (not static) so multiple windows don't share state.
+    std::deque<double> fpsDeltas;
+    double fpsLastTimestamp = 0.0;
+
   protected:
     
-    // Contatore monotono usato per assegnare un id univoco ad ogni finestra
     static uint32_t windowsCounter;
-
-    // Numero di finestre attualmente vive (per sapere quando terminare GLFW)
     static uint32_t windowsAlive;
-    
-    // Camera corrente
+
     ogl::glCamera * currentCamera;
     
     bool keys[1024] = {false, };
@@ -309,14 +305,19 @@ namespace ogl {
     // destroy() -
     //*****************************************************************************/
     void destroy() {
-      
+
       DEBUG_LOG("glWindow::destroy() windowID " + std::to_string(id));
-      
+
       if(window != NULL) {
         glfwDestroyWindow(window);
         window = NULL;
       }
-      
+
+      if(created) {
+        created = false;
+        if(windowsAlive > 0 && --windowsAlive == 0) { glfw::terminate(); }
+      }
+
     }
     
     //****************************************************************************//
@@ -385,7 +386,7 @@ namespace ogl {
     
     inline void sizeCallback(int width, int height) {
       for(std::size_t i=0; i<cameras.size(); ++i)
-        cameras[i].setSensorSize(width, height);
+        cameras[i].setViewport(width, height);
     }
     
     inline void scrollCallback(double xoffset, double yoffset) {
@@ -487,7 +488,7 @@ namespace ogl {
     inline void setSize(int width, int height) {
       glfwSetWindowSize(window, width, height);
       for(std::size_t i=0; i<cameras.size(); ++i)
-        cameras[i].setSensorSize(width, height);
+        cameras[i].setViewport(width, height);
     }
     
     inline void setBackground(const glm::vec3 & _background) {
@@ -517,32 +518,27 @@ namespace ogl {
     // FPS
     //*****************************************************************************/
     inline int getFPS() {
-      
-      static std::deque<double> deltas;
 
-      static double lastFrameTimestamp = glfwGetTime();
-    
-      double currentFrameTimestamp = glfwGetTime();
-      
-      double delta = currentFrameTimestamp - lastFrameTimestamp;
-      
-      lastFrameTimestamp = currentFrameTimestamp;
-      
-      if(deltas.size() < 60) deltas.push_back(delta);
+      double now = glfwGetTime();
+
+      if(fpsLastTimestamp == 0.0) { fpsLastTimestamp = now; return 0; }
+
+      double delta = now - fpsLastTimestamp;
+      fpsLastTimestamp = now;
+
+      if(fpsDeltas.size() < 60) fpsDeltas.push_back(delta);
       else {
-        deltas.pop_front();
-        deltas.push_back(delta);
+        fpsDeltas.pop_front();
+        fpsDeltas.push_back(delta);
       }
-      
+
       double sum = 0;
+      for(std::size_t i = 0; i < fpsDeltas.size(); ++i) sum += fpsDeltas[i];
 
-      for(std::size_t i=0; i<deltas.size(); ++i)
-        sum += deltas[i];
+      if(sum <= 0.0) return 0;
 
-      if(sum <= 0.0) return 0; // avoid division by zero on the very first frames
+      return static_cast<int>(1.0 / (sum / static_cast<double>(fpsDeltas.size())));
 
-      return 1.0 / (sum / (double) deltas.size());
-      
     }
     
     //****************************************************************************//
@@ -624,12 +620,13 @@ namespace ogl {
       glClearColor(background.r, background.g, background.b, 1.0f);
       
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      
+
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LEQUAL);
+
       keybord = true;
 
       #ifndef OGL_WITHOUT_IMGUI
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
         // On macOS the system can drop all monitors after a display sleep, and ImGui::NewFrame() asserts when the monitor list is empty.
         // Skip the ImGui frame until at least one monitor is back.
         int monitorCount = 0;
@@ -657,7 +654,6 @@ namespace ogl {
           ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
           imguiFrameActive = false;
         }
-        glDisable(GL_DEPTH_TEST);
       #endif
     
       glfwSwapBuffers(window);

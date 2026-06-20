@@ -37,29 +37,23 @@ namespace ogl {
     
   public:
     
-    // Tipi di telecamera
     enum MODE { FREE, TARGET, BILLBOARD };
-    
-    // Tipi di movimento della camera
     enum MOVEMENT { FORWARD, BACKWARD, LEFT, RIGHT };
 
   private:
-    
-    // Tipologia della camera
+
     MODE mode;
-    
-    // Constanti
+
     GLfloat speed       = 3.0f;
     GLfloat sensitivity = 0.3f;
 
-    // Camera Attributes
     glm::vec3 position;
     glm::vec3 front;
     glm::vec3 right;
     glm::vec3 up;
     glm::vec3 worldUp;
-    
-    // Eular Angles
+
+    // Euler angles (degrees).
     GLfloat yaw;
     GLfloat pitch;
     
@@ -396,15 +390,13 @@ namespace ogl {
     //****************************************************************************/
     // computeCameraDistanceToFitObject()
     //****************************************************************************/
-    // Calcola la distanza minima per far entrare l’oggetto nella vista
     float computeCameraDistanceToFitObject(float boundingRadius) const {
-     
+
       std::pair<float,float> fov = getFOV();
-      
+
       float distVertical   = boundingRadius / sin(fov.first  / 2.0f);
       float distHorizontal = boundingRadius / sin(fov.second / 2.0f);
 
-      // Distanza finale
       return std::max(distVertical, distHorizontal);
       
     }

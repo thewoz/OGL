@@ -28,4 +28,4 @@
   #define DEBUG_LOG(x)
 #endif
 
-#endif /* _H_MPL_DEBUG_H_ */
+#endif /* _H_OGL_DEBUG_H_ */

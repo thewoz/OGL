@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef _H_OGL_SNAPSHOPT_H_
-#define _H_OGL_SNAPSHOPT_H_
+#ifndef _H_OGL_SNAPSHOT_H_
+#define _H_OGL_SNAPSHOT_H_
 
 #include <cstdlib>
 #include <cstdio>
@@ -171,4 +171,4 @@ inline void snapshotPBO(int width, int height, const char* outputfile, bool comp
 } /* namespace ogl */
 
 
-#endif /* _H_OGL_SNAPSHOPT_H_ */
+#endif /* _H_OGL_SNAPSHOT_H_ */

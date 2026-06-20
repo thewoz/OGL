@@ -197,10 +197,8 @@ namespace ogl::io {
     const char * p = strrchr(filename.c_str(), '/');
     
     if(p) return std::string(p + 1);
-    else  return filename;
-    
     return filename;
-    
+
   }
 
   //*****************************************************************************
