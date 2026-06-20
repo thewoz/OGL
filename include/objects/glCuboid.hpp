@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -33,11 +33,16 @@ namespace ogl {
   //****************************************************************************/
   // Class glCuboid
   //****************************************************************************/
+  // Axis-aligned solid box. Because a cube's 8 corners are shared by faces with
+  // different normals, the geometry is expanded to 36 vertices (6 faces × 6
+  // verts) so each face can carry its own flat outward normal. Supports SOLID
+  // and WIREFRAME styles. In SOLID mode Phong shading uses the glLight member.
+  //****************************************************************************/
   class glCuboid : public glObject {
 
   private:
 
-      GLuint vao = -1;
+      GLuint vao = 0; // 0 = not yet allocated
       GLuint vbo[4];
     
       glm::vec3 color;

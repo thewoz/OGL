@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -84,9 +84,7 @@ namespace ogl {
     glMesh(const aiMesh * mesh, const aiScene * scene, const std::string & path) : isInitedInGpu(false) {
       
       name = mesh->mName.C_Str();
-      
-      //printf("%s\n", name.c_str());
-      
+
       id = globalId++;
       
       // Walk through each of the mesh's vertices
@@ -129,7 +127,7 @@ namespace ogl {
         
       }
       
-      // Now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
+      // Walk through each face and collect the vertex indices.
       for(GLuint i=0; i<mesh->mNumFaces; i++) {
         
         aiFace face = mesh->mFaces[i];
@@ -140,8 +138,6 @@ namespace ogl {
         }
         
       }
-      
-      //fprintf(stderr, "DEBUG CREATE MESH %d\n", id);
       
       material = ogl::glMaterial(scene->mMaterials[mesh->mMaterialIndex], path);
       
@@ -156,9 +152,9 @@ namespace ogl {
     ~glMesh() { cleanInGpu(); }
 
     //****************************************************************************//
-    // glMesh owns GPU buffer handles (vao/vbo/ebo): make it movable but not
-    // copyable, otherwise copying (e.g. on vector reallocation) would duplicate
-    // the handles and the destructor of each copy would delete the same buffers.
+    // glMesh owns GPU handles (vao/vbo/ebo) — movable, not copyable.
+    // Without this, vector<glMesh> reallocation would copy the handle values and
+    // both the old and new object would call glDelete* on the same buffers.
     //****************************************************************************//
     glMesh(const glMesh &) = delete;
     glMesh & operator = (const glMesh &) = delete;
@@ -199,34 +195,22 @@ namespace ogl {
     // bounds
     //****************************************************************************//
     void bounds(glm::vec3 & center, glm::vec3 & size, float & radius) const {
-          
-      double xMax = std::numeric_limits<double>::lowest();
-      double yMax = std::numeric_limits<double>::lowest();
-      double zMax = std::numeric_limits<double>::lowest();
-        
-      double xMin = std::numeric_limits<double>::max();
-      double yMin = std::numeric_limits<double>::max();
-      double zMin = std::numeric_limits<double>::max();
-        
-      for(std::size_t i=0; i<vertices.size(); ++i) {
-        
-        const glm::vec3& pos = vertices[i].Position;
 
-        if(pos.x < xMin) xMin = pos.x;
-        if(pos.x > xMax) xMax = pos.x;
-        
-        if(pos.y < yMin) yMin = pos.y;
-        if(pos.y > yMax) yMax = pos.y;
-        
-        if(pos.z < zMin) zMin = pos.z;
-        if(pos.z > zMax) zMax = pos.z;
-        
+      float xMin =  FLT_MAX, xMax = -FLT_MAX;
+      float yMin =  FLT_MAX, yMax = -FLT_MAX;
+      float zMin =  FLT_MAX, zMax = -FLT_MAX;
+
+      for(std::size_t i=0; i<vertices.size(); ++i) {
+        const glm::vec3 & pos = vertices[i].Position;
+        if(pos.x < xMin) xMin = pos.x;  if(pos.x > xMax) xMax = pos.x;
+        if(pos.y < yMin) yMin = pos.y;  if(pos.y > yMax) yMax = pos.y;
+        if(pos.z < zMin) zMin = pos.z;  if(pos.z > zMax) zMax = pos.z;
       }
-        
+
       center.x = (xMin + xMax) * 0.5f;
       center.y = (yMin + yMax) * 0.5f;
       center.z = (zMin + zMax) * 0.5f;
-        
+
       size.x = xMax - xMin;
       size.y = yMax - yMin;
       size.z = zMax - zMin;
@@ -269,16 +253,12 @@ namespace ogl {
       glGenBuffers(1, &vbo);
       glGenBuffers(1, &ebo);
       
-      //fprintf(stderr, "DEBUG MESH (%d) VAO: %d VBO: %d EBO: %d\n", id, VAO, VBO, EBO);
-      
       glBindVertexArray(vao);
       
       // Load data into vertex buffers
       glBindBuffer(GL_ARRAY_BUFFER, vbo);
       
-      // A great thing about structs is that their memory layout is sequential for all its items.
-      // The effect is that we can siogly pass a pointer to the struct and it translates perfectly to a glm::vec3/2 array which
-      // again translates to 3/2 floats which translates to a byte array.
+      // glVertex is a plain struct: sequential layout, safe to pass directly to the GPU.
       glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(ogl::glVertex), vertices.data(), GL_STATIC_DRAW);
 
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
@@ -385,7 +365,7 @@ namespace ogl {
   
   inline GLuint glMesh::globalId = 0;
 
-} /* namspace ogl */
+} /* namespace ogl */
 
 #endif /* _H_OGL_GLMESH_H_ */
 

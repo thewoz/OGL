@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -439,9 +439,10 @@ namespace ogl {
     //****************************************************************************//
     glm::mat4 rotation(float _pitch, float _yaw, float _roll) const {
             
-      glm::mat4 RX = glm::rotate(glm::mat4(1.0f), _pitch, glm::vec3(1,0,0));
-      glm::mat4 RY = glm::rotate(glm::mat4(1.0f), _yaw,   glm::vec3(0,1,0));
-      glm::mat4 RZ = glm::rotate(glm::mat4(1.0f), _roll,  glm::vec3(0,0,1));
+      // glm::rotate expects radians; pitch/yaw/roll are stored in degrees.
+      glm::mat4 RX = glm::rotate(glm::mat4(1.0f), glm::radians(_pitch), glm::vec3(1,0,0));
+      glm::mat4 RY = glm::rotate(glm::mat4(1.0f), glm::radians(_yaw),   glm::vec3(0,1,0));
+      glm::mat4 RZ = glm::rotate(glm::mat4(1.0f), glm::radians(_roll),  glm::vec3(0,0,1));
       
       return RX * RY * RZ;
       

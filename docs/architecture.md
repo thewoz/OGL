@@ -9,9 +9,15 @@ GLM, GLAD, Assimp, SOIL2, Freetype, libtiff, and optionally ImGui).
 
 ```
 include/
-  core/      window, camera, shader, texture, colors, base object
-  model/     light, material, mesh, model (Assimp import + Phong shading)
-  objects/   ready-to-use drawables (sphere, cuboid, grid, lines, text, ...)
+  core/      glWindow, glCamera, glShader, glTexture, glColors, glObject (base class)
+  model/     glLight, glMaterial, glMesh, glModel  (Assimp import + Phong shading)
+  objects/   ready-to-use drawables:
+               glSphere, glEllipse, glCuboid       — solid/wireframe 3D shapes
+               glBox, glLine, glLines              — edge/line primitives
+               glGrid, glAxes, glReferenceAxes     — scene helpers
+               glPoints                            — point clouds
+               glPrint2D, glPrint3D               — text
+               glPlot, glQuad, glQuad2D            — misc
   shader/    GLSL programs (.vs vertex, .gs geometry, .fs fragment)
   utils/     logging, error checking, GLFW helpers, snapshots
   data/      fonts and the sample Trex model
@@ -20,13 +26,14 @@ include/
 ## The drawable object model
 
 Every drawable derives from [`glObject`](../include/ogl/core/glObject.hpp),
-which holds the transform (`translate` / `rotate` / `scale`), a `glShader`, and
-the bookkeeping flags used by the lazy GPU upload (see below).
+which holds the TRS transform (`translate` / `rotate` / `scale`), a `glShader`,
+and the bookkeeping flags used by the lazy GPU upload (see below).
 
 A typical object exposes three things:
 
-- a constructor / `init(...)` that fills CPU-side data and picks a shader;
-- a `render(camera)` method;
+- a constructor / `init(...)` that fills CPU-side data, picks a shader, and
+  sets `isInited = true`;
+- a `render(camera)` method that calls `isToInitInGpu()` and then draws;
 - private `setInGpu()` / `cleanInGpu()` that manage the OpenGL buffers.
 
 ## GPU life-cycle (lazy upload)
@@ -49,15 +56,15 @@ Shaders are plain GLSL files loaded at runtime from
 `/usr/local/include/ogl/shader/` (installed by `make install`). `glShader`
 offers a small set of presets:
 
-| preset           | files                       | used by                       |
-|:-----------------|:----------------------------|:------------------------------|
-| `initSolid`      | `solid.vs/.fs`              | sphere, ellipse, cuboid (solid) |
-| `initWireframe`  | `wireframe.vs/.gs/.fs`      | solid shapes drawn as wireframe |
-| `initLine`       | `line.vs/.gs/.fs`           | thick lines, boxes              |
-| `initPoints`     | `points.vs/.fs`             | point clouds                    |
-| `initModel`      | `model.vs/.fs`              | imported 3D models              |
-| `initText`       | `text.vs/.fs`               | 2D/3D text                      |
-| `initPlain2D`    | `plain2D.vs/.fs`            | 2D overlays                     |
+| preset           | files                       | used by                              |
+|:-----------------|:----------------------------|:-------------------------------------|
+| `initSolid`      | `solid.vs/.fs`              | sphere, ellipse, cuboid (SOLID mode) |
+| `initWireframe`  | `wireframe.vs/.gs/.fs`      | sphere, ellipse, cuboid (WIREFRAME)  |
+| `initLine`       | `line.vs/.gs/.fs`           | thick lines, glBox edges             |
+| `initPoints`     | `points.vs/.fs`             | point clouds                         |
+| `initModel`      | `model.vs/.fs`              | imported 3D models (glModel)         |
+| `initText`       | `text.vs/.fs`               | 2D/3D text                           |
+| `initPlain2D`    | `plain2D.vs/.fs`            | 2D overlays                          |
 
 Uniforms are set through the templated `glShader::setUniform(name, value)`.
 

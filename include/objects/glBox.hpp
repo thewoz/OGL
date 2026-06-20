@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -173,24 +173,21 @@ namespace ogl {
         3, 7
       };
       
-      // Crea e bind del VAO
       glGenVertexArrays(1, &vao);
       glBindVertexArray(vao);
 
-      // Crea i VBO
       glGenBuffers(2, vbo);
 
-      // VBO per i vertici
+      // Vertex positions.
       glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
       glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(0);
 
-      // VBO per gli indici
+      // Edge index buffer (pairs of vertex indices for GL_LINES).
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-      // Unbind del VAO (buona pratica)
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       

@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,179 +31,218 @@ namespace ogl {
   //****************************************************************************/
   // Class glReferenceAxes
   //****************************************************************************/
+  // Renders a small orientation gizmo (XYZ axes) in the bottom-right corner of
+  // the viewport. The gizmo always tracks the camera orientation: it uses only
+  // the rotation part of the view matrix so the axes stay centred as the camera
+  // moves. Works correctly with all three camera modes (FREE, TARGET, BILLBOARD).
+  //
+  // Axis colors: X = red, Y = green, Z = blue.
+  // Axis labels (X, Y, Z) are rendered as 2D text overlaid on the main
+  // framebuffer at the projected tip positions of the gizmo axes.
+  //
+  // Depends on glPrint2D being declared before this class (guaranteed by the
+  // include order in ogl.hpp).
+  //****************************************************************************/
   class glReferenceAxes : public glObject {
-    
-    private:
-      
-      GLuint vao;
-      GLuint vbo;
-      
-      std::vector<glm::vec3> colors;
-      std::vector<glm::vec3> vertices;
 
-      //glPrint3D xlabel;
-      //glPrint3D ylabel;
-      //glPrint3D zlabel;
-
-    public:
-        
-      //****************************************************************************/
-      // glReferenceAxes()
-      //****************************************************************************/
-      glReferenceAxes(float _scale = 1.0, const std::string & _name = " "){
-        name = _name;
-        init(_scale);
-      }
-      
-      //****************************************************************************/
-      // ~glReferenceAxes()
-      //****************************************************************************/
-      ~glReferenceAxes() { cleanInGpu(); }
-    
-      //****************************************************************************/
-      // init()
-      //****************************************************************************/
-      void init(float _scale = 1.0) {
-        
-        DEBUG_LOG("glReferenceAxes::init(" + name + ")");
-        
-        shader.setName(name);
-        
-        shader.initLine();
-        
-        scale(glm::vec3(_scale));
-
-        vertices.resize(6);
-        
-        vertices[0] = glm::vec3(0.0f,0.0f,0.0f);
-        vertices[1] = glm::vec3(1.0f,0.0f,0.0f);
-        
-        vertices[2] = glm::vec3(0.0f,0.0f,0.0f);
-        vertices[3] = glm::vec3(0.0f,1.0f,0.0f);
-        
-        vertices[4] = glm::vec3(0.0f,0.0f,0.0f);
-        vertices[5] = glm::vec3(0.0f,0.0f,1.0f);
-        
-        colors.resize(3);
-        
-        colors[0] = glm::vec3(1.0f,0.0f,0.0f);
-        colors[1] = glm::vec3(0.0f,1.0f,0.0f);
-        colors[2] = glm::vec3(0.0f,0.0f,1.0f);
-        
-//        xAxeLabel.init(glm::vec3(1.01f,0.01f,0.01f), glm::vec3(1.0f), 0.5, "x");
-//        yAxeLabel.init(glm::vec3(0.01f,1.01f,0.01f), glm::vec3(1.0f), 0.5, "y");
-//        zAxeLabel.init(glm::vec3(0.01f,0.01f,1.01f), glm::vec3(1.0f), 0.5, "z");
-        
-        isInited = true;
-        
-      }
-    
-      //****************************************************************************/
-      // render()
-      //****************************************************************************/
-      void render(const glCamera * camera) {
-
-        DEBUG_LOG("glReferenceAxes::render(" + name + ")");
-        
-        if(!isInited){
-          fprintf(stderr, "glReferenceAxes must be inited before render\n");
-          abort();
-        }
-        
-        if(isToInitInGpu()) initInGpu();
-        
-        if(shader.style != glShader::STYLE::LINE) {
-          shader.setName(name);
-          shader.initLine();
-        }
-
-        shader.use();
-        
-        GLint viewport[4]; glGetIntegerv(GL_VIEWPORT, viewport);
-        constexpr GLint overlaySize = 160;
-        GLint overlayX = viewport[2] - overlaySize;
-        GLint overlayY = 10;
-
-        glViewport(overlayX, overlayY, overlaySize, overlaySize);
-
-        float aspect = 1.0f;
-        glm::mat4 projection = glm::ortho(-aspect, aspect, -1.0f, 1.0f, -1.0f, 1.0f);
-        shader.setUniform("projection", projection);
-        glm::mat4 viewNoTranslation = camera->getView();
-        viewNoTranslation[3] = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-        shader.setUniform("view",       viewNoTranslation);
-        shader.setUniform("model",      modelMatrix);
-        shader.setUniform("lineWidth",  lineWidth);
-        shader.setUniform("viewport",   glm::vec2(overlaySize, overlaySize));
-
-        glBindVertexArray(vao);
-
-        glDisable(GL_CULL_FACE);
-        glDisableVertexAttribArray(1);
-        glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
-
-        for(int i=0; i<3; ++i) {
-          
-          shader.setUniform("uniformColor", glm::vec4(colors[i], 1.0f));
-    
-          glDrawArrays(GL_LINES, i*2, 2);
-
-        }
-        
-        glBindVertexArray(0);
-      
-        glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-        
-        glCheckError();
-
-      }
-      
-      
-    private:
-      
-      //****************************************************************************/
-      // setInGpu()
-      //****************************************************************************/
-      void setInGpu() {
-        
-        DEBUG_LOG("glReferenceAxes::setInGpu(" + name + ")");
-        
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(0);
-        
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-        
-        glCheckError();
-                
-      }
-    
   private:
-    
+
+    GLuint vao = 0;
+    GLuint vbo = 0;
+
+    // Axis colors: X=red, Y=green, Z=blue.
+    const glm::vec3 colors[3] = {
+      glm::vec3(1.0f, 0.0f, 0.0f),
+      glm::vec3(0.0f, 1.0f, 0.0f),
+      glm::vec3(0.0f, 0.0f, 1.0f)
+    };
+
+    // Six vertices: origin + tip for each of the three axes.
+    std::vector<glm::vec3> vertices;
+
+    // One 2D label per axis, rendered in the main framebuffer coordinate system.
+    glPrint2D xlabel, ylabel, zlabel;
+
+  public:
+
+    //****************************************************************************/
+    // glReferenceAxes()
+    //****************************************************************************/
+    glReferenceAxes(float _scale = 1.0f, const std::string & _name = "") {
+      name = _name;
+      init(_scale);
+    }
+
+    //****************************************************************************/
+    // ~glReferenceAxes()
+    //****************************************************************************/
+    ~glReferenceAxes() { cleanInGpu(); }
+
+    //****************************************************************************/
+    // init()
+    //****************************************************************************/
+    void init(float _scale = 1.0f) {
+
+      DEBUG_LOG("glReferenceAxes::init(" + name + ")");
+
+      shader.setName(name);
+      shader.initLine();
+
+      scale(glm::vec3(_scale));
+
+      // Each axis: origin → unit tip.
+      vertices.resize(6);
+      vertices[0] = glm::vec3(0.0f, 0.0f, 0.0f);
+      vertices[1] = glm::vec3(1.0f, 0.0f, 0.0f); // X tip
+      vertices[2] = glm::vec3(0.0f, 0.0f, 0.0f);
+      vertices[3] = glm::vec3(0.0f, 1.0f, 0.0f); // Y tip
+      vertices[4] = glm::vec3(0.0f, 0.0f, 0.0f);
+      vertices[5] = glm::vec3(0.0f, 0.0f, 1.0f); // Z tip
+
+      isInited = true;
+
+    }
+
+    //****************************************************************************/
+    // render()
+    //****************************************************************************/
+    void render(const glCamera * camera) {
+
+      DEBUG_LOG("glReferenceAxes::render(" + name + ")");
+
+      if(!isInited) {
+        fprintf(stderr, "glReferenceAxes must be inited before render\n");
+        abort();
+      }
+
+      if(isToInitInGpu()) initInGpu();
+
+      // --- Save the current viewport ---
+
+      GLint viewport[4];
+      glGetIntegerv(GL_VIEWPORT, viewport);
+
+      // Place the gizmo in the bottom-right corner with a small margin.
+      constexpr GLint overlaySize = 160;
+      GLint overlayX = viewport[0] + viewport[2] - overlaySize - 10;
+      GLint overlayY = viewport[1] + 10;
+
+      glViewport(overlayX, overlayY, overlaySize, overlaySize);
+
+      glDisable(GL_DEPTH_TEST);
+      glDisable(GL_CULL_FACE);
+
+      // --- Draw the three axes ---
+
+      shader.use();
+
+      glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -2.0f, 2.0f);
+
+      // Extract only the rotation from the view matrix by keeping the upper-left
+      // 3×3 block and setting the 4th column to identity. This is correct for
+      // all camera modes: FREE/TARGET use lookAt (rotation is the 3×3 block),
+      // BILLBOARD composes T1*R*T2 (the 3×3 block is still just R after the
+      // radians fix in glCamera::rotation()).
+      glm::mat4 viewRotOnly = glm::mat4(glm::mat3(camera->getView()));
+
+      shader.setUniform("projection", projection);
+      shader.setUniform("view",       viewRotOnly);
+      shader.setUniform("model",      modelMatrix);
+      shader.setUniform("lineWidth",  lineWidth);
+      shader.setUniform("viewport",   glm::vec2(overlaySize, overlaySize));
+
+      glBindVertexArray(vao);
+      glDisableVertexAttribArray(1);
+      glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
+
+      for(int i = 0; i < 3; ++i) {
+        shader.setUniform("uniformColor", glm::vec4(colors[i], 1.0f));
+        glDrawArrays(GL_LINES, i * 2, 2);
+      }
+
+      glBindVertexArray(0);
+
+      // --- Restore main viewport before rendering labels ---
+      glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+      // --- Render X/Y/Z labels at the projected tip positions ---
+
+      // Tips are nudged slightly beyond 1.0 to give the label a small margin
+      // from the end of the axis line.
+      const glm::vec3 tips[3] = {
+        glm::vec3(1.18f, 0.0f,  0.0f),
+        glm::vec3(0.0f,  1.18f, 0.0f),
+        glm::vec3(0.0f,  0.0f,  1.18f)
+      };
+
+      glPrint2D * labels[3] = { &xlabel, &ylabel, &zlabel };
+      const char * labelText[3] = { "X", "Y", "Z" };
+
+      for(int i = 0; i < 3; ++i) {
+
+        // Project the tip through the same matrices used to draw the gizmo.
+        glm::vec4 clip = projection * viewRotOnly * glm::vec4(tips[i], 1.0f);
+
+        // NDC (ortho → w is always 1, but divide anyway for correctness).
+        float ndcX = clip.x / clip.w;
+        float ndcY = clip.y / clip.w;
+
+        // Convert from NDC to main-framebuffer pixel coordinates.
+        // getOrthoProjection() maps (0,0)-(width,height) → NDC, so pixel
+        // (0,0) is the bottom-left of the main viewport.
+        float px = overlayX + (ndcX + 1.0f) * 0.5f * overlaySize;
+        float py = overlayY + (ndcY + 1.0f) * 0.5f * overlaySize;
+
+        labels[i]->render(camera, labelText[i], px, py, colors[i], 0.35f);
+
+      }
+
+      glEnable(GL_DEPTH_TEST);
+
+      glCheckError();
+
+    }
+
+  private:
+
+    //****************************************************************************/
+    // setInGpu()
+    //****************************************************************************/
+    void setInGpu() {
+
+      DEBUG_LOG("glReferenceAxes::setInGpu(" + name + ")");
+
+      glGenVertexArrays(1, &vao);
+      glBindVertexArray(vao);
+
+      glGenBuffers(1, &vbo);
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+      glEnableVertexAttribArray(0);
+
+      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBindVertexArray(0);
+
+      glCheckError();
+
+    }
+
     //****************************************************************************/
     // cleanInGpu()
     //****************************************************************************/
     void cleanInGpu() {
-      
+
       if(isInitedInGpu) {
-        
         glDeleteBuffers(1, &vbo);
         glDeleteVertexArrays(1, &vao);
-        
         isInitedInGpu = false;
-
       }
-      
+
     }
-    
+
   };
 
 } /* namespace ogl */

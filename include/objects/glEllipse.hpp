@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,11 @@ namespace ogl {
   
   //****************************************************************************/
   // Class glEllipse
+  //****************************************************************************/
+  // Ellipsoid with semi-axes a (X), b (Y), c (Z). Supports SOLID and WIREFRAME
+  // styles, matching glSphere. In SOLID mode the surface normal is the gradient
+  // of the implicit equation (X/a², Y/b², Z/c²), not the position vector, so
+  // the shading is correct even for non-spherical shapes.
   //****************************************************************************/
   class glEllipse : public glObject {
     

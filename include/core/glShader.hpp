@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -36,13 +36,19 @@ namespace ogl {
   //****************************************************************************/
   // glShader
   //****************************************************************************/
+  // Manages a GLSL program (vertex + optional geometry + fragment).
+  // The source is loaded from disk at init() time; compilation and linking are
+  // deferred to the first use() call (when a GL context is guaranteed active).
+  // Each shader instance tracks the window it was compiled for; if the context
+  // changes, it recompiles automatically on the next use().
+  //****************************************************************************/
   class glShader {
     
   private:
     
     uint32_t windowID = 0;
 
-    GLuint program = -1;
+    GLuint program = 0; // 0 is the OpenGL null handle (no program compiled yet)
     
     std::string vertexCode;
     std::string fragmentCode;
@@ -68,7 +74,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glShader
     //****************************************************************************/
-    ~glShader() { if(program != -1) glDeleteProgram(program); }
+    ~glShader() { if(program != 0) glDeleteProgram(program); }
     
     //****************************************************************************/
     // initModel
@@ -131,9 +137,9 @@ namespace ogl {
     //****************************************************************************/
     void init(std::string vertexPath, std::string fragmentPath, std::string geometryPath = "") {
 
-      if(program != -1) {
+      if(program != 0) {
         glDeleteProgram(program);
-        program = -1;
+        program = 0;
       }
       isInitedInGpu = false;
 
@@ -212,25 +218,29 @@ namespace ogl {
     inline GLuint get() const { return program; }
     
     //****************************************************************************/
-    // setUniform
+    // setUniform - upload a typed value to a named uniform.
+    // Inactive uniforms (location == -1 with no GL error) are silently skipped;
+    // this avoids spurious aborts when the optimizer removes unused uniforms.
     //****************************************************************************/
     template <typename T>
     inline void setUniform(const std::string & name, const T & value) const {
-      
-      if(!isInitedInGpu){
+
+      if(!isInitedInGpu) {
         fprintf(stderr, "shader must be inited in gpu before use in render\n");
         abort();
       }
-      
+
       GLint location = glGetUniformLocation(program, name.c_str());
-      
-      if(location == -1 &&  glGetError() != 0){
-        fprintf(stderr, "error in get uniform location \"%s\" in program %d: %s\n", name.c_str(), program, "");
+
+      // Abort only if the lookup itself triggered a GL error (e.g. invalid program).
+      // A location of -1 without a GL error means the uniform is inactive/optimized-out.
+      if(location == -1 && glGetError() != 0) {
+        fprintf(stderr, "error in get uniform location \"%s\" in program %d\n", name.c_str(), program);
         abort();
       }
-            
+
       setUniform(location, value);
-      
+
     }
     
     //****************************************************************************/

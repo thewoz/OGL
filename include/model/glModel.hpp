@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -104,7 +104,7 @@ namespace ogl {
       // Process ASSIMP's root node recursively
       processNode(scene->mRootNode, scene, directory);
       
-      // messo qui senno normalize si incavola che non vede l'init
+      // isInited must be set before normalize() so getBounds() doesn't abort.
       isInited = true;
 
       if(normalizeTo !=0) normalize(normalizeTo);
@@ -280,25 +280,22 @@ namespace ogl {
     //****************************************************************************/
     void processNode(const aiNode * node, const aiScene * scene, const std::string & path) {
             
-      // Process each mesh located at the current node
+      // Process each mesh attached to this node.
       for(GLuint i=0; i<node->mNumMeshes; ++i) {
-        
-        // The node object only contains indices to index the actual objects in the scene.
-        // The scene contains all the data, node is just to keep stuff organized (like relations between nodes).
+
+        // Nodes only hold indices; the actual mesh data lives in the scene.
         aiMesh * mesh = scene->mMeshes[node->mMeshes[i]];
         
         meshes.push_back(glMesh(mesh, scene, path));
         
       }
       
-      // After we've processed all of the meshes (if any) we then recursively process each of the children nodes
+      // Recurse into children.
       for(GLuint i=0; i<node->mNumChildren; ++i) {
         processNode(node->mChildren[i], scene, path);
       }
       
     }
-    
-  private:
     
     //****************************************************************************/
     // cleanInGpu() -
@@ -319,4 +316,4 @@ namespace ogl {
   
 } /* namespace ogl */
 
-#endif /* _H_MPL_GLMODEL_H_ */
+#endif /* _H_OGL_GLMODEL_H_ */

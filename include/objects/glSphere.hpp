@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,12 @@ namespace ogl {
 
   //****************************************************************************/
   // Class glSphere
+  //****************************************************************************/
+  // UV-sphere (latitude/longitude tessellation). Supports two rendering styles:
+  //   SOLID     — filled triangles with Phong shading (uses solid.vs/.fs)
+  //   WIREFRAME — triangle edges drawn as thick lines (uses wireframe.vs/.gs/.fs)
+  // A glLight member provides per-object Phong lighting in SOLID mode; the
+  // default head-light fallback guarantees shading even without calling setLight().
   //****************************************************************************/
   class glSphere : public glObject {
     
@@ -153,14 +159,17 @@ namespace ogl {
     private:
       
       //****************************************************************************/
-      // setInGpu()
+      // setInGpu - generate the sphere geometry and upload it to the GPU.
+      // Uses 4 separate VBOs: positions (0), normals (1), texcoords (2), indices (3).
+      // Normals equal the normalised position on a unit sphere, then scaled — this
+      // is correct because a unit sphere's normal at point P is just normalize(P).
       //****************************************************************************/
       void setInGpu() {
-        
+
         DEBUG_LOG("glSphere::setInGpu(" + name + ")");
-        
+
         if(!isInitedInGpu) {
-          
+
           std::vector<glm::vec3> positions;
           std::vector<glm::vec3> normals;
           std::vector<glm::vec2> textureCoords;

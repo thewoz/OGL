@@ -11,29 +11,17 @@ OGL provides a simple API for:
 
 ---
 
-## 🆕 Version 4.2 Released
+## Version 4.2
 
-Version 4.2 of the library has been released. Among the highlights (along with other updates):
+Current release. Highlights:
 
-- Updated and improved color management
-- Implemented thick line rendering
-- Implemented lighting for objects like cuboids, spheres, ellipses
-- Camera Management Improvements
-- Added a class for 3D plot axis rendering
+- Phong lighting for solid objects (sphere, ellipse, cuboid) with directional / point / head-light fallback
+- Thick line rendering
+- 3D plot axis (`glPlot`)
+- Improved color management and camera handling
+- Simplified material model (clean Phong subset, no unnecessary complexity)
 
-### Recent fixes & clean-up
-
-- Fixed model texturing: each material texture is now bound to its own texture
-  unit and sampler (previously every sampler read texture unit 0, breaking
-  specular and normal maps).
-- Unified and simplified the lighting model across base objects and models
-  (directional → point → head-light fallback, so objects are always lit).
-- Simplified `glMaterial` down to a clean Phong subset
-  (emissive / ambient / diffuse / specular + shininess + opacity, plus the
-  common texture maps).
-- Removed dead, non-functional shadow code from the model shaders.
-
-See [docs/lighting_and_materials.md](docs/lighting_and_materials.md) for details.
+See [docs/lighting_and_materials.md](docs/lighting_and_materials.md) for the full lighting and material reference.
 
 ---
 
@@ -67,22 +55,27 @@ Detailed documentation lives in the [`docs/`](docs/) folder:
 
 ---
 
-## 📦 Dependencies
+## Dependencies
 
-You will need the following libraries installed:
+OGL requires the following libraries:
 
-- [GLFW](https://github.com/glfw/glfw)
-- [GLM](https://github.com/g-truc/glm)
-- [GLAD](https://glad.dav1d.de)
-- [ImGui](https://github.com/ocornut/imgui) *(optional)*
-- [SOIL2](https://github.com/SpartanJ/soil2)
-- [Assimp](https://github.com/assimp/assimp)
-- [Freetype2](https://gitlab.freedesktop.org/freetype/freetype)
-- [libtiff](http://www.simplesystems.org/libtiff/)
+| Library | Notes |
+|:--------|:------|
+| [GLFW](https://github.com/glfw/glfw) | window and input |
+| [GLM](https://github.com/g-truc/glm) | math |
+| [GLAD](https://glad.dav1d.de) | OpenGL loader — bundled in `external/glad/` |
+| [SOIL2](https://github.com/SpartanJ/soil2) | texture loading |
+| [Assimp](https://github.com/assimp/assimp) | 3D model import |
+| [Freetype2](https://gitlab.freedesktop.org/freetype/freetype) | text rendering |
+| [libtiff](http://www.simplesystems.org/libtiff/) | snapshot export |
+| [ImGui](https://github.com/ocornut/imgui) | GUI overlay — bundled in `external/imgui/`, optional |
+
+GLAD and ImGui are provided in the `external/` folder with their own Makefiles and
+do not need to be downloaded separately (see below).
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -91,29 +84,59 @@ git clone https://github.com/your_username/ogl.git
 cd ogl
 ```
 
-### 2. Install the headers
+### 2. Install system dependencies
+
+The `external/install.sh` script installs all required libraries. It handles
+both **macOS** (via Homebrew) and **Linux** (via apt), builds SOIL2 from source,
+and compiles and installs the bundled GLAD and ImGui:
+
+```bash
+cd external
+bash install.sh
+cd ..
+```
+
+> On macOS, Homebrew must already be installed. On Linux, the script uses `sudo apt`.
+
+The bundled libraries can also be installed individually:
+
+```bash
+# Install only GLAD
+cd external/glad && make install
+
+# Install only ImGui
+cd external/imgui && make install
+```
+
+### 3. Install the OGL headers
 
 ```bash
 make install
 ```
 
-This will create a symbolic link at `/usr/local/include/ogl` pointing to the `include/` directory.
+This creates a symbolic link at `/usr/local/include/ogl` pointing to the
+`include/` directory, so you can `#include <ogl/ogl.hpp>` in any project.
 
-### 3. Build the example program
+### 4. Build the example programs
 
 ```bash
+# Basic example (no ImGui)
 make example
+
+# ImGui integration example
+make example_imgui
 ```
 
-The example executable will be created inside your `~/bin/` folder.
+The executables are placed in `~/bin/ogl` and `~/bin/ogl_imgui`.
 
-### 4. Run the example
+### 5. Run the examples
 
 ```bash
 ~/bin/ogl
+~/bin/ogl_imgui
 ```
 
-### 5. Uninstall (if needed)
+### 6. Uninstall (if needed)
 
 ```bash
 make uninstall
@@ -166,45 +189,39 @@ int main(int argc, char* const argv[]) {
 
 ---
 
-## 📋 Makefile Commands
+## Makefile Commands
 
-| Command         | Description                                    |
-|:----------------|:-----------------------------------------------|
-| `make install`  | Install the OGL headers to `/usr/local/include/ogl` |
-| `make uninstall`| Remove the installed OGL headers                    |
-| `make example`  | Build the example program in `~/bin/ogl`            |
+| Command               | Description |
+|:----------------------|:------------|
+| `make install`        | Symlink `include/` to `/usr/local/include/ogl` |
+| `make uninstall`      | Remove the symlink |
+| `make example`        | Build the basic example to `~/bin/ogl` |
+| `make example_imgui`  | Build the ImGui integration example to `~/bin/ogl_imgui` |
 
-> Note: the Makefile automatically detects whether you are on **Linux** or **macOS**.
+The Makefile automatically detects whether you are on **Linux** or **macOS**.
 
 ---
 
-## 🧰 TODO
+## TODO
 
 - Add shadow mapping (currently lights shade surfaces directly, with no shadows)
 - Add support for multiple lights per object/model
 - Add render-to-texture support
-- Add axis labels (X,Y,Z) to `glReferenceAxes` for better visualization
-- Include an example with ImGui
 - Rewrite camera class
-- Improves key management
+- Improve key input management
 
 ---
 
-## 🐞 Known Issues
+## Known Issues
 
-- Multi-Sample Anti-Aliasing do not work on Linux
-- glReferenceAxes doesn't work well with all types of cameras
+- Multi-Sample Anti-Aliasing does not work on Linux (driver/context limitation)
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the **GNU General Public License v3.0** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
-# 🌟 Final Notes
-
 OGL was created to make OpenGL programming easier, cleaner, and faster for small to medium projects, educational purposes, and prototyping.
-
-Enjoy building with it! 🚀

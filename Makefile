@@ -51,3 +51,9 @@ example:
 	@mkdir -p ~/bin
 	$(COMPILER) -march=native -Os -std=c++17 -o ~/bin/ogl $(INCLUDE) ./src/main.cpp $(LIBS)
 	@echo "Example built at ~/bin/ogl"
+
+# Compile ImGui integration example
+example_imgui:
+	@mkdir -p ~/bin
+	$(COMPILER) -march=native -Os -std=c++17 -o ~/bin/ogl_imgui $(INCLUDE) ./src/main_imgui.cpp $(LIBS)
+	@echo "ImGui example built at ~/bin/ogl_imgui"

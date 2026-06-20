@@ -1,7 +1,7 @@
 /*
  * GNU GENERAL PUBLIC LICENSE
  *
- * Copyright (C) 2019
+ * Copyright (C) 2017-2026
  * Created by Leonardo Parisi (leonardo.parisi[at]gmail.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -32,6 +32,17 @@ namespace ogl {
   
   //****************************************************************************
   // Class glObject
+  //****************************************************************************
+  // Base class for every drawable. It holds the transform (TRS), a shader, and
+  // the bookkeeping flags that drive the lazy GPU upload pattern:
+  //   - isInited       : CPU-side data is ready (set by the subclass init/ctor)
+  //   - isInitedInGpu  : GPU buffers are uploaded for the current context
+  //   - isToUpdateInGpu: data changed, buffers must be re-uploaded next frame
+  //
+  // On the first render() call, isToInitInGpu() returns true and initInGpu()
+  // is called, which in turn calls the virtual setInGpu() implemented by each
+  // subclass. This keeps constructors fast and makes objects safe to create
+  // before a window/context exists.
   //****************************************************************************
   class glObject {
     
@@ -71,12 +82,13 @@ namespace ogl {
       
       windowID = 0;
 
-      isInited = false;
-      isInitedInGpu = false;
+      isInited        = false;
+      isInitedInGpu   = false;
       isToUpdateInGpu = false;
 
+      style     = 0;
       lineWidth = 1.0f;
-      
+
       updateModelMatrix();
       
     }
@@ -149,20 +161,18 @@ namespace ogl {
   protected:
     
     //****************************************************************************
-    // updateModelMatrix()
+    // updateModelMatrix - rebuild M = T * S * Rx * Ry * Rz.
+    // Called every time position/rotation/scale changes.
     //****************************************************************************
     inline void updateModelMatrix() {
-      
+
       modelMatrix = glm::mat4(1.0f);
-      
       modelMatrix = glm::translate(modelMatrix, _position);
+      modelMatrix = glm::scale    (modelMatrix, _scale);
+      modelMatrix = glm::rotate   (modelMatrix, _rotation.x, glm::vec3(1, 0, 0));
+      modelMatrix = glm::rotate   (modelMatrix, _rotation.y, glm::vec3(0, 1, 0));
+      modelMatrix = glm::rotate   (modelMatrix, _rotation.z, glm::vec3(0, 0, 1));
 
-      modelMatrix = glm::scale(modelMatrix, _scale);
-
-      modelMatrix  = glm::rotate(modelMatrix, _rotation.x, glm::vec3(1, 0, 0));
-      modelMatrix  = glm::rotate(modelMatrix, _rotation.y, glm::vec3(0, 1, 0));
-      modelMatrix  = glm::rotate(modelMatrix, _rotation.z, glm::vec3(0, 0, 1));
-      
     }
     
     //****************************************************************************
@@ -185,25 +195,26 @@ namespace ogl {
     }
     
     //****************************************************************************
-    // isToInitInGpu
+    // isToInitInGpu - returns true when GPU buffers need to be (re-)uploaded.
+    // This happens on the very first render, when the context changes (different
+    // window), or when the caller sets isToUpdateInGpu after a data change.
     //****************************************************************************
     inline bool isToInitInGpu() {
-      
+
       DEBUG_LOG("glObject::isToInitInGpu(" + name + ")");
-      
+
       if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) {
-        //cleanInGpu();
         isInitedInGpu = false;
         return true;
       }
-      
+
       if(isToUpdateInGpu) {
         isToUpdateInGpu = false;
         return true;
       }
-      
+
       return false;
-      
+
     }
     
   }; /* class glObject */
