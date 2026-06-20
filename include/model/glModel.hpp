@@ -35,12 +35,19 @@ namespace ogl {
   //****************************************************************************/
   // glModel
   //****************************************************************************/
+  // A renderable 3D model loaded from disk through Assimp. A model is a list of
+  // meshes (each with its own material) sharing a single light and the "model"
+  // shader. On construction the file is imported, triangulated and (optionally)
+  // normalized so that its bounding radius equals 'normalizeTo'.
+  //****************************************************************************/
   class glModel : public glObject {
-    
+
   private:
-    
+
+    // The meshes that make up the model.
     std::vector<glMesh> meshes;
-  
+
+    // The light used to shade every mesh of this model.
     ogl::glLight light;
 
   public:
@@ -148,11 +155,9 @@ namespace ogl {
       shader.setUniform("projection", camera->getProjection());
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
-      
-      shader.setUniform("withShadow", false);
-      
+
       light.setInShader(shader, camera->getView());
-    
+
       glEnable(GL_CULL_FACE);
       glCullFace(GL_BACK);
       
@@ -233,8 +238,8 @@ namespace ogl {
       DEBUG_LOG("glModel::setInGpu(" + name + ")");
       
       _setInGpu();
-      
-      for(int i=0; i<meshes.size(); ++i) meshes[i].setInGpu();
+
+      for(std::size_t i=0; i<meshes.size(); ++i) meshes[i].setInGpu();
       
     }
     
@@ -301,9 +306,9 @@ namespace ogl {
     void cleanInGpu() {
       
       if(isInitedInGpu) {
-        
-        for(int i=0; i<meshes.size(); ++i) meshes[i].cleanInGpu();
-        
+
+        for(std::size_t i=0; i<meshes.size(); ++i) meshes[i].cleanInGpu();
+
         isInitedInGpu = false;
         
       }

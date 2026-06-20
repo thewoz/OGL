@@ -146,20 +146,24 @@ namespace ogl {
     // setInShader
     //****************************************************************************/
     inline void setInShader(const ogl::glShader & shader, GLenum unit) {
-      
+
       if(!isInitedInGpu) {
         fprintf(stderr, "Error glTexture: the texture must be initialized in the GPU before being used\n");
         abort();
       }
-  
+
       // Active proper texture unit before binding
       glActiveTexture(GL_TEXTURE0 + unit);
-      
+
       // And finally bind the texture
       glBindTexture(GL_TEXTURE_2D, id);
-              
+
+      // Tell the matching sampler (e.g. "material.diffuseTexture") to read from
+      // this texture unit. Without this every sampler would default to unit 0.
+      shader.setUniform(type, (int)unit);
+
       glCheckError();
-                 
+
     }
     
     //****************************************************************************/
