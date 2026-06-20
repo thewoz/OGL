@@ -223,19 +223,22 @@ namespace ogl {
     //****************************************************************************//
     static const glm::vec4 & get(const std::string & str, bool create = false) {
    
-      auto colorMap = colors.find(normalize(str));
-      
+      std::string key = normalize(str);
+
+      auto colorMap = colors.find(key);
+
       if(colorMap == colors.end()) {
-        
+
         if(!create) {
           fprintf(stderr, "error: color \"%s\" not found ogl::glColor\n", str.c_str());
           abort();
         }
-        
-        add(str, getRandom());
-        
-        return colors[str];
-        
+
+        // insert under the normalized key so it can be found again on later lookups
+        add(key, getRandom());
+
+        return colors[key];
+
       }
       
       return colorMap->second;
@@ -443,8 +446,8 @@ namespace ogl {
     
   }; /* class glColors */
 
-  std::map<std::string, glm::vec4> glColors::colors = std::map<std::string, glm::vec4>();
-  
+  inline std::map<std::string, glm::vec4> glColors::colors = std::map<std::string, glm::vec4>();
+
 } /* namespace ogl */
 
 #endif /* _H_OGL_OBJECT_H_ */

@@ -69,6 +69,8 @@ namespace ogl {
       _rotation = glm::vec3(0.0);
       _scale    = glm::vec3(1.0);
       
+      windowID = 0;
+
       isInited = false;
       isInitedInGpu = false;
       isToUpdateInGpu = false;

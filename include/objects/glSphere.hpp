@@ -132,7 +132,7 @@ namespace ogl {
           glCullFace(GL_BACK);
         }
         
-        glDrawElements(GL_TRIANGLES, (slices * stacks + slices) * 6, GL_UNSIGNED_INT, nullptr);
+        glDrawElements(GL_TRIANGLES, slices * stacks * 6, GL_UNSIGNED_INT, nullptr);
 
         glBindVertexArray(0);
         

@@ -148,7 +148,7 @@ namespace ogl {
 
       DEBUG_LOG("glCuboid::setInGpu(" + name + ")");
 
-      std::vector<glm::vec3> positions = {
+      glm::vec3 corners[8] = {
           {-0.5f,  0.5f,  0.5f},
           { 0.5f,  0.5f,  0.5f},
           { 0.5f, -0.5f,  0.5f},
@@ -159,32 +159,41 @@ namespace ogl {
           {-0.5f, -0.5f, -0.5f}
       };
 
-      for(auto & v : positions) v *= size;
+      for(auto & v : corners) v *= size;
 
-      std::vector<glm::vec3> normals = {
-          { 0,  0,  1}, // Front
-          { 1,  0,  0}, // Right
-          { 0,  0, -1}, // Back
-          {-1,  0,  0}, // Left
-          { 0,  1,  0}, // Top
-          { 0, -1,  0}  // Bottom
+      // Six faces, each defined by two triangles (same winding as before) plus its
+      // own outward normal. The 8 shared corners cannot carry per-face normals, so
+      // we expand to 36 vertices and give each face a flat normal.
+      GLuint faceCorner[6][6] = {
+        { 0, 3, 2, 2, 1, 0 }, // Front
+        { 1, 2, 6, 6, 5, 1 }, // Right
+        { 5, 6, 7, 7, 4, 5 }, // Back
+        { 4, 7, 3, 3, 0, 4 }, // Left
+        { 4, 0, 1, 1, 5, 4 }, // Top
+        { 3, 7, 6, 6, 2, 3 }  // Bottom
       };
 
-      std::vector<GLuint> indices = {
-        // Front face
-           0, 3, 2, 2, 1, 0,
-           // Right face
-           1, 2, 6, 6, 5, 1,
-           // Back face
-           5, 6, 7, 7, 4, 5,
-           // Left face
-           4, 7, 3, 3, 0, 4,
-           // Top face
-           4, 0, 1, 1, 5, 4,
-           // Bottom face
-           3, 7, 6, 6, 2, 3
+      glm::vec3 faceNormal[6] = {
+        { 0,  0,  1}, // Front
+        { 1,  0,  0}, // Right
+        { 0,  0, -1}, // Back
+        {-1,  0,  0}, // Left
+        { 0,  1,  0}, // Top
+        { 0, -1,  0}  // Bottom
       };
-    
+
+      std::vector<glm::vec3> positions;
+      std::vector<glm::vec3> normals;
+      std::vector<GLuint>    indices;
+
+      for(int f=0; f<6; ++f) {
+        for(int k=0; k<6; ++k) {
+          positions.push_back(corners[faceCorner[f][k]]);
+          normals.push_back(faceNormal[f]);
+          indices.push_back((GLuint)indices.size());
+        }
+      }
+
       glGenVertexArrays(1, &vao);
       glBindVertexArray(vao);
 
@@ -196,18 +205,10 @@ namespace ogl {
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(0);
 
-      // Normals (fake: repeat per face for now if you want per-vertex)
-      std::vector<glm::vec3> expandedNormals;
-      for(int i=0; i<6; ++i) {
-        expandedNormals.push_back(normals[i]);
-        expandedNormals.push_back(normals[i]);
-        expandedNormals.push_back(normals[i]);
-        expandedNormals.push_back(normals[i]);
-      }
-
+      // Normals (one flat normal per face)
       glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-      glBufferData(GL_ARRAY_BUFFER, expandedNormals.size() * sizeof(glm::vec3), expandedNormals.data(), GL_STATIC_DRAW);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
+      glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
       glEnableVertexAttribArray(1);
 
       // TexCoords (dummy for now, optional)

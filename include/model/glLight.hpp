@@ -70,7 +70,9 @@ namespace ogl {
       // Match shader convention: light vectors are provided in view space
       // because fragPos/fragNormal are computed in view space in the vertex shader.
       glm::vec3 transformedPos = glm::vec3(view * glm::vec4(position, 1.0f));
-      glm::vec3 transformedDir = glm::normalize(glm::mat3(view) * direction);
+      glm::vec3 viewDir = glm::mat3(view) * direction;
+      // guard against a zero direction vector: normalize() would yield NaN
+      glm::vec3 transformedDir = (glm::length(viewDir) > 0.0f) ? glm::normalize(viewDir) : glm::vec3(0.0f, 0.0f, -1.0f);
 
       shader.setUniform("light.position", transformedPos);
       shader.setUniform("light.direction", transformedDir);
@@ -82,8 +84,8 @@ namespace ogl {
     
   };
   
-  GLuint glLight::counter = 0;
-  
+  inline GLuint glLight::counter = 0;
+
 } /* namespace ogl */
 
 #endif /* _H_OGL_GLLIGHT_H_ */

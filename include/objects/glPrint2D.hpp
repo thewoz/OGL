@@ -210,13 +210,18 @@ namespace ogl {
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
         
         if(*c == '\n') {
-          const Character_t & ch = Characters['a'];
+          auto itA = Characters.find('a');
+          float lineHeight = (itA != Characters.end()) ? itA->second.Size.y * scale : 0.0f;
           tmpX  = x;
-          tmpY -= 2 * (ch.Size.y * scale);
+          tmpY -= 2 * lineHeight;
           continue;
         }
-        
-        const Character_t & ch = Characters[*c];
+
+        // skip characters that were not loaded (e.g. non-ASCII): using operator[]
+        // here would silently insert a zeroed glyph into the map on every frame.
+        auto it = Characters.find(*c);
+        if(it == Characters.end()) continue;
+        const Character_t & ch = it->second;
                 
         float xpos = tmpX + ch.Bearing.x * scale;
         float ypos = tmpY - (ch.Size.y - ch.Bearing.y) * scale;
@@ -270,13 +275,17 @@ namespace ogl {
       FT_Library ft;
       
       // All functions return a value different than 0 whenever an error occurred
-      if (FT_Init_FreeType(&ft))
+      if (FT_Init_FreeType(&ft)) {
         std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
-      
+        abort();
+      }
+
       // load font as face
       FT_Face face;
-      if (FT_New_Face(ft, "/usr/local/include/ogl/data/fonts/arial.ttf", 0, &face))
+      if (FT_New_Face(ft, "/usr/local/include/ogl/data/fonts/arial.ttf", 0, &face)) {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        abort();
+      }
       
       // set size to load glyphs as
       FT_Set_Pixel_Sizes(face, 0, 48);

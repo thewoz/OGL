@@ -138,7 +138,7 @@ namespace ogl {
         glCullFace(GL_BACK);
       }
       
-      glDrawElements(GL_TRIANGLES, (slices * stacks + slices) * 6, GL_UNSIGNED_INT, nullptr);
+      glDrawElements(GL_TRIANGLES, slices * stacks * 6, GL_UNSIGNED_INT, nullptr);
       
       glBindVertexArray(0);
       
@@ -186,9 +186,14 @@ namespace ogl {
             float X = a * cos(phi) * cos(theta);
             float Y = b * cos(phi) * sin(theta);
             float Z = c * sin(phi);
-                      
+
+            // The surface normal of an ellipsoid is the gradient of its implicit
+            // equation: (X/a^2, Y/b^2, Z/c^2), not the surface position itself.
+            glm::vec3 normal = glm::vec3(X/(a*a), Y/(b*b), Z/(c*c));
+            if(glm::length(normal) > 0.0f) normal = glm::normalize(normal);
+
             positions.push_back( glm::vec3( X, Y, Z) );
-            normals.push_back( glm::vec3(X, Y, Z) );
+            normals.push_back( normal );
             textureCoords.push_back( glm::vec2(U, V) );
             
           }

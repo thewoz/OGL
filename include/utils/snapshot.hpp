@@ -41,11 +41,11 @@ namespace ogl {
 //****************************************************************************//
 // snapshot()
 //****************************************************************************//
-void snapshot(int width, int height, const char * outputfile, bool compress = false) {
-  
+inline void snapshot(int width, int height, const char * outputfile, bool compress = false) {
+
     static GLubyte * image = nullptr;
 
-    size_t requiredSize = width * height * 3;
+    size_t requiredSize = (size_t)width * (size_t)height * 3;
   
     image = (GLubyte*)realloc(image, requiredSize);
     if(image == nullptr) {
@@ -100,7 +100,7 @@ void snapshot(int width, int height, const char * outputfile, bool compress = fa
 //****************************************************************************//
 // snapshotPBO()
 //****************************************************************************//
-void snapshotPBO(int width, int height, const char* outputfile, bool compress = false) {
+inline void snapshotPBO(int width, int height, const char* outputfile, bool compress = false) {
   
     // 1. Creazione del PBO
     GLuint pbo = 0;
@@ -108,7 +108,7 @@ void snapshotPBO(int width, int height, const char* outputfile, bool compress = 
 
     // 2. Bind del PBO e allocazione spazio
     glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
-    glBufferData(GL_PIXEL_PACK_BUFFER, width * height * 3, NULL, GL_STREAM_READ);
+    glBufferData(GL_PIXEL_PACK_BUFFER, (size_t)width * (size_t)height * 3, NULL, GL_STREAM_READ);
 
     // 3. Impostazioni corrette
     glReadBuffer(GL_BACK);
