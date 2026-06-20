@@ -27,63 +27,78 @@
 // namespace ogl
 //****************************************************************************//
 namespace ogl {
-  
+
   //****************************************************************************//
   // glLight
   //****************************************************************************//
+  // A single light source described by the classic Phong triple
+  // (ambient/diffuse/specular) plus a geometry part.
+  //
+  // The geometry can describe two kinds of light, and the shaders pick which
+  // one to use at runtime:
+  //   - directional light: 'direction' is non-zero (e.g. the sun);
+  //   - point light:       'direction' is zero and 'position' is used instead.
+  // If both are zero the shaders fall back to a "head light" coming from the
+  // camera, so an object is always visibly shaded even without an explicit
+  // call to setLight().
+  //****************************************************************************//
   class glLight {
-    
-  private:
-    
-    // contatore del numero di luci create
-    static GLuint counter;
-    
-    glm::vec3 position;
-    glm::vec3 direction;
 
-    glm::vec3 ambient;
-    glm::vec3 diffuse;
-    glm::vec3 specular;
-    
+  private:
+
+    // Number of lights created so far (handy for debugging / future use).
+    static GLuint counter;
+
+    glm::vec3 position;   // world-space position  (used by point lights)
+    glm::vec3 direction;  // world-space direction (used by directional lights)
+
+    glm::vec3 ambient;    // ambient  contribution
+    glm::vec3 diffuse;    // diffuse  contribution
+    glm::vec3 specular;   // specular contribution
+
   public:
-    
+
     //****************************************************************************//
-    // glLight
+    // glLight - default values give a soft white light
     //****************************************************************************//
     glLight() : position(0.0f), direction(0.0f), ambient(0.2f), diffuse(0.5f), specular(1.0f) {
       counter++;
     }
-    
+
     //****************************************************************************//
-    // set()
+    // setters
     //****************************************************************************//
-    void setPosition(const glm::vec3& _position)   { position = _position; }
+    void setPosition(const glm::vec3& _position)   { position  = _position; }
     void setDirection(const glm::vec3& _direction) { direction = _direction; }
-    void setAmbient(const glm::vec3& _ambient)     { ambient = _ambient; }
-    void setDiffuse(const glm::vec3& _diffuse)     { diffuse = _diffuse; }
-    void setSpecular(const glm::vec3& _specular)   { specular = _specular; }
-    
+    void setAmbient(const glm::vec3& _ambient)     { ambient   = _ambient; }
+    void setDiffuse(const glm::vec3& _diffuse)     { diffuse   = _diffuse; }
+    void setSpecular(const glm::vec3& _specular)   { specular  = _specular; }
+
     //****************************************************************************//
-    // setInShader
+    // setInShader - upload the light to the given shader
     //****************************************************************************//
     void setInShader(const ogl::glShader & shader, const glm::mat4 & view) const {
-      // Match shader convention: light vectors are provided in view space
-      // because fragPos/fragNormal are computed in view space in the vertex shader.
-      glm::vec3 transformedPos = glm::vec3(view * glm::vec4(position, 1.0f));
-      glm::vec3 viewDir = glm::mat3(view) * direction;
-      // guard against a zero direction vector: normalize() would yield NaN
-      glm::vec3 transformedDir = (glm::length(viewDir) > 0.0f) ? glm::normalize(viewDir) : glm::vec3(0.0f, 0.0f, -1.0f);
 
-      shader.setUniform("light.position", transformedPos);
-      shader.setUniform("light.direction", transformedDir);
-      shader.setUniform("light.ambient", ambient);
-      shader.setUniform("light.diffuse", diffuse);
-      shader.setUniform("light.specular", specular);
-      
+      // The shaders work in view space (the camera is at the origin there), so
+      // the light position/direction are transformed by the view matrix to match
+      // fragPos and fragNormal.
+      glm::vec3 viewPos = glm::vec3(view * glm::vec4(position, 1.0f));
+      glm::vec3 viewDir = glm::mat3(view) * direction;
+
+      // Keep a null direction as zero: it tells the shader to use the point
+      // light position (or the head-light fallback) instead of a directional one.
+      if(glm::length(viewDir) > 0.0f) viewDir = glm::normalize(viewDir);
+
+      shader.setUniform("light.position",  viewPos);
+      shader.setUniform("light.direction", viewDir);
+      shader.setUniform("light.ambient",   ambient);
+      shader.setUniform("light.diffuse",   diffuse);
+      shader.setUniform("light.specular",  specular);
+
     }
-    
+
   };
-  
+
   inline GLuint glLight::counter = 0;
 
 } /* namespace ogl */

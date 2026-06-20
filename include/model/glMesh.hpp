@@ -35,21 +35,22 @@
 namespace ogl {
   
   //****************************************************************************//
-  // glVertex
+  // glVertex - a single vertex: position, normal and texture coordinates
   //****************************************************************************//
   struct glVertex {
-    
-    // Position
+
     glm::vec3 Position;
-    // Normal
     glm::vec3 Normal;
-    // TexCoords
     glm::vec2 TexCoords;
-    
+
   };
-  
+
   //****************************************************************************//
   // glMesh
+  //****************************************************************************//
+  // A single mesh of a model: a vertex/index buffer plus its material. It owns
+  // its GPU buffers (vao/vbo/ebo), so it is movable but not copyable. The mesh
+  // is uploaded to the GPU lazily on the first render() call.
   //****************************************************************************//
   class glMesh {
     

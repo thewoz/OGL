@@ -21,6 +21,20 @@ Version 4.2 of the library has been released. Among the highlights (along with o
 - Camera Management Improvements
 - Added a class for 3D plot axis rendering
 
+### Recent fixes & clean-up
+
+- Fixed model texturing: each material texture is now bound to its own texture
+  unit and sampler (previously every sampler read texture unit 0, breaking
+  specular and normal maps).
+- Unified and simplified the lighting model across base objects and models
+  (directional → point → head-light fallback, so objects are always lit).
+- Simplified `glMaterial` down to a clean Phong subset
+  (emissive / ambient / diffuse / specular + shininess + opacity, plus the
+  common texture maps).
+- Removed dead, non-functional shadow code from the model shaders.
+
+See [docs/lighting_and_materials.md](docs/lighting_and_materials.md) for details.
+
 ---
 
 ## ✨ Features
@@ -40,6 +54,16 @@ OGL allows you to render:
 - 3D Plot
 
 It also provides utilities like window management, camera control, and snapshot functionality.
+
+---
+
+## 📚 Documentation
+
+Detailed documentation lives in the [`docs/`](docs/) folder:
+
+- [Architecture](docs/architecture.md) — library layout, the GPU life-cycle and the rendering loop
+- [Lighting and Materials](docs/lighting_and_materials.md) — the Phong lighting and material model
+- [Adding a New Object](docs/adding_a_new_object.md) — how to write your own drawable
 
 ---
 
@@ -107,7 +131,7 @@ Here is a simple example showing how to create a window, set up a camera, and re
 
 int main(int argc, char* const argv[]) {
 
-  gl::glWindow window;
+  ogl::glWindow window;
   
   window.create(800, 600);
 
@@ -156,6 +180,8 @@ int main(int argc, char* const argv[]) {
 
 ## 🧰 TODO
 
+- Add shadow mapping (currently lights shade surfaces directly, with no shadows)
+- Add support for multiple lights per object/model
 - Add render-to-texture support
 - Add axis labels (X,Y,Z) to `glReferenceAxes` for better visualization
 - Include an example with ImGui
