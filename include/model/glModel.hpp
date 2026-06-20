@@ -156,9 +156,6 @@ namespace ogl {
       shader.setUniform("view",       camera->getView());
       shader.setUniform("model",      modelMatrix);
 
-      // Shadow mapping is wired in the shader but not driven yet (no depth pass).
-      shader.setUniform("withShadow", false);
-
       light.setInShader(shader, camera->getView());
 
       glEnable(GL_CULL_FACE);

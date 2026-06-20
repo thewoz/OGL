@@ -8,13 +8,11 @@ layout (location = 2) in vec2 texCoords;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform mat4 lightSpaceMatrix;   // world -> light clip space (shadow mapping)
 
 // Outputs to the fragment shader (positions/normals are in view space).
 out vec3 fragPos;
 out vec3 fragNormal;
 out vec2 fragTexCoord;
-out vec4 fragPosLightSpace;      // fragment position in light space
 
 void main() {
 
@@ -28,7 +26,4 @@ void main() {
     fragNormal = mat3(transpose(inverse(view * model))) * normal;
 
     fragTexCoord = texCoords;
-
-    // Fragment position in the light's clip space, used by the shadow map.
-    fragPosLightSpace = lightSpaceMatrix * model * vec4(position, 1.0);
 }
