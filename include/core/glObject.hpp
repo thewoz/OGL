@@ -116,9 +116,9 @@ namespace ogl {
     //****************************************************************************
     // Position fuction
     //****************************************************************************
-    inline void translate(const glm::vec3 & value) { _position = value; updateModelMatrix(); }
-    inline void rotate   (const glm::vec3 & value) { _rotation = value; updateModelMatrix(); }
-    inline void scale    (const glm::vec3 & value) { _scale    = value; updateModelMatrix(); }
+    virtual void translate(const glm::vec3 & value) { _position = value; updateModelMatrix(); }
+    inline  void rotate   (const glm::vec3 & value) { _rotation = value; updateModelMatrix(); }
+    inline  void scale    (const glm::vec3 & value) { _scale    = value; updateModelMatrix(); }
     
     inline void move(const glm::vec3 & value1, const glm::vec3 & value2, const glm::vec3 & value3) {
       _position = value1;

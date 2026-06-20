@@ -42,6 +42,8 @@ namespace ogl {
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
+    glm::vec3 Tangent;
+    glm::vec3 Bitangent;
 
   };
 
@@ -110,19 +112,24 @@ namespace ogl {
         } else { vertex.Normal = glm::vec3(0.0f); }
                 
         // Texture Coordinates
-        if(mesh->mTextureCoords[0]) { // Does the mesh contain texture coordinates?
-          
-          glm::vec2 vec;
-          
-          // A vertex can contain up to 8 different texture coordinates. We thus make the assumption that we won't
-          // use models where a vertex can have multiple texture coordinates so we always take the first set (0).
-          vec.x = mesh->mTextureCoords[0][i].x;
-          vec.y = mesh->mTextureCoords[0][i].y;
-          
-          vertex.TexCoords = vec;
-          
+        if(mesh->mTextureCoords[0]) {
+          vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
+          vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
         } else { vertex.TexCoords = glm::vec2(0.0f, 0.0f); }
-        
+
+        // Tangents and bitangents (present when aiProcess_CalcTangentSpace is used)
+        if(mesh->HasTangentsAndBitangents()) {
+          vertex.Tangent.x   = mesh->mTangents[i].x;
+          vertex.Tangent.y   = mesh->mTangents[i].y;
+          vertex.Tangent.z   = mesh->mTangents[i].z;
+          vertex.Bitangent.x = mesh->mBitangents[i].x;
+          vertex.Bitangent.y = mesh->mBitangents[i].y;
+          vertex.Bitangent.z = mesh->mBitangents[i].z;
+        } else {
+          vertex.Tangent   = glm::vec3(0.0f);
+          vertex.Bitangent = glm::vec3(0.0f);
+        }
+
         vertices.push_back(vertex);
         
       }
@@ -266,40 +273,30 @@ namespace ogl {
       
       std::size_t offset = 0;
       
-      // Vertex Positions
-      glVertexAttribPointer(/* index     = */ 0,
-                            /* size      = */ 3,
-                            /* type      = */ GL_FLOAT,
-                            /* normalize = */ GL_FALSE,
-                            /* stride    = */ sizeof(ogl::glVertex),
-                            /* offset    = */ reinterpret_cast<void *>(offset));
-      
+      // Position
+      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
       glEnableVertexAttribArray(0);
-            
       offset += sizeof(float) * 3;
-      
-      // Vertex Normals
-      glVertexAttribPointer(/* index     = */ 1,
-                            /* size      = */ 3,
-                            /* type      = */ GL_FLOAT,
-                            /* normalize = */ GL_FALSE,
-                            /* stride    = */ sizeof(ogl::glVertex),
-                            /* offset    = */ reinterpret_cast<void *>(offset));
-      
+
+      // Normal
+      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
       glEnableVertexAttribArray(1);
-      
       offset += sizeof(float) * 3;
       
       // Vertex Texture Coords
-      glVertexAttribPointer(/* index     = */ 2,
-                            /* size      = */ 2,
-                            /* type      = */ GL_FLOAT,
-                            /* normalize = */ GL_FALSE,
-                            /* stride    = */ sizeof(ogl::glVertex),
-                            /* offset    = */ reinterpret_cast<void *>(offset));
-      
+      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
       glEnableVertexAttribArray(2);
-      
+      offset += sizeof(float) * 2;
+
+      // Tangent
+      glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
+      glEnableVertexAttribArray(3);
+      offset += sizeof(float) * 3;
+
+      // Bitangent
+      glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
+      glEnableVertexAttribArray(4);
+
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
       

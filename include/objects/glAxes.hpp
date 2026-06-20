@@ -150,16 +150,16 @@ namespace ogl {
       //****************************************************************************/
       // translate()
       //****************************************************************************/
-      inline void translate(const glm::vec3 & value) {
-        
+      void translate(const glm::vec3 & value) override {
+
         _position = value;
-        
+
         xAxeLabel.translate(_position);
         yAxeLabel.translate(_position);
         zAxeLabel.translate(_position);
-        
+
         updateModelMatrix();
-        
+
       }
 
     
@@ -168,7 +168,7 @@ namespace ogl {
       //****************************************************************************/
       // setInGpu()
       //****************************************************************************/
-      void setInGpu() {
+      void setInGpu() override {
    
         DEBUG_LOG("glAxes::setInGpu(" + name + ")");
                   
@@ -195,8 +195,8 @@ namespace ogl {
     //****************************************************************************/
     // cleanInGpu()
     //****************************************************************************/
-    void cleanInGpu() {
-      
+    void cleanInGpu() override {
+
       if(isInitedInGpu) {
 
         glDeleteBuffers(1, &vbo);

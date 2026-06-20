@@ -57,6 +57,7 @@ uniform Light    light;
 in vec2 fragTexCoord;
 in vec3 fragNormal;
 in vec3 fragPos;
+in mat3 TBN;        // tangent-space → view-space, built in model.vs
 
 /*****************************************************************************/
 // Output
@@ -75,10 +76,11 @@ void main() {
 
     vec3 norm = normalize(fragNormal);
 
-    // Optional tangent-space normal map.
+    // Normal map: sample in tangent space, then transform to view space via TBN.
     if(material.haveNormalsTexture) {
-      norm = texture(material.normalsTexture, fragTexCoord).rgb;
-      norm = normalize(norm * 2.0 - 1.0);
+      vec3 tsNorm = texture(material.normalsTexture, fragTexCoord).rgb;
+      tsNorm = normalize(tsNorm * 2.0 - 1.0);
+      norm   = normalize(TBN * tsNorm);
     }
 
     // In view space the eye is at the origin, so -fragPos points to the camera.
