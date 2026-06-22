@@ -4,7 +4,7 @@
 
 OGL provides a simple API for:
 - Creating windows
-- Managing multiple cameras
+- Managing a camera with switchable modes (FLY, ORBIT, PAN)
 - Drawing 2D/3D basic shapes
 - Handling basic input
 - Integrating (optionally) ImGui
@@ -149,9 +149,9 @@ int main(int argc, char * const argv[]) {
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
 
   // The default camera is a FLY (free-fly) camera.
-  window.getCurrentCamera()->setPosition(3, 1.5, 0);
-  window.getCurrentCamera()->setYaw(180);
-  window.getCurrentCamera()->setPitch(-20);
+  window.getCamera().setPosition(3, 1.5, 0);
+  window.getCamera().setYaw(180);
+  window.getCamera().setPitch(-20);
 
   ogl::glAxes  axes;
   ogl::glGrid  grid(10, 10, 0.5, ogl::glColors::cyan);
@@ -168,11 +168,11 @@ int main(int argc, char * const argv[]) {
 
     window.renderBegin();
 
-      axes.render(window.getCurrentCamera());
-      grid.render(window.getCurrentCamera());
-      model.render(window.getCurrentCamera());
-      text.render(window.getCurrentCamera(), "FPS: " + std::to_string(window.getFPS()));
-      referenceAxes.render(window.getCurrentCamera());
+      axes.render(window.getCamera());
+      grid.render(window.getCamera());
+      model.render(window.getCamera());
+      text.render(window.getCamera(), "FPS: " + std::to_string(window.getFPS()));
+      referenceAxes.render(window.getCamera());
 
     window.renderEnd();
 

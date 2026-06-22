@@ -29,74 +29,58 @@
 #include <cstdio>
 
 #include <deque>
-#include <vector>
 #include <string>
-#include <memory>
 
 //*****************************************************************************/
 // namespace ogl
 //*****************************************************************************/
 namespace ogl {
-  
+
   //*****************************************************************************/
   // glWindow
   //*****************************************************************************/
   class glWindow {
-    
+
   private:
 
     inline void processKeyboardInput() {
 
-      if(!keybord || currentCamera == nullptr) return;
+      if(!keybord) return;
 
-      bool canMoveWithKeyboard = (currentCamera->getMode() == glCamera::MODE::FLY);
+      bool canMoveWithKeyboard = (camera.getMode() == glCamera::MODE::FLY);
 
-      if(currentCamera->getMode() == glCamera::MODE::PAN) {
+      if(camera.getMode() == glCamera::MODE::PAN) {
         canMoveWithKeyboard = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
       }
 
       if(canMoveWithKeyboard) {
-
-        // Keep camera movement frame-based to avoid key-repeat stuttering.
-        if(/*keys[GLFW_KEY_W] || */ keys[GLFW_KEY_UP])    currentCamera->processKeyboard(glCamera::MOVEMENT::FORWARD, deltaTime);
-        if(/*keys[GLFW_KEY_S] || */ keys[GLFW_KEY_DOWN])  currentCamera->processKeyboard(glCamera::MOVEMENT::BACKWARD, deltaTime);
-        if(/*keys[GLFW_KEY_A] || */ keys[GLFW_KEY_LEFT])  currentCamera->processKeyboard(glCamera::MOVEMENT::LEFT, deltaTime);
-        if(/*keys[GLFW_KEY_D] || */ keys[GLFW_KEY_RIGHT]) currentCamera->processKeyboard(glCamera::MOVEMENT::RIGHT, deltaTime);
-
-      }
-
-      if(cameras.size() > 1 && keys[GLFW_KEY_C]) {
-        changeCamera();
+        if(keys[GLFW_KEY_UP])    camera.processKeyboard(glCamera::MOVEMENT::FORWARD,  deltaTime);
+        if(keys[GLFW_KEY_DOWN])  camera.processKeyboard(glCamera::MOVEMENT::BACKWARD, deltaTime);
+        if(keys[GLFW_KEY_LEFT])  camera.processKeyboard(glCamera::MOVEMENT::LEFT,     deltaTime);
+        if(keys[GLFW_KEY_RIGHT]) camera.processKeyboard(glCamera::MOVEMENT::RIGHT,    deltaTime);
       }
 
     }
-    
-    // Indice della camera corrente
-    unsigned int currentCameraIndex;
-    
+
     // Ultima posizione del mouse nella finestra
     GLfloat lastX; GLfloat lastY;
-    
+
     // Variabile vera ogni volta che il mouse entra per la prima volta nella finestra
     bool firstMouse;
-    
+
     // Variabile vera se il mouse e' sopra la finestra
     bool onFocus;
-    
-    // Cameras are polymorphic (one subclass per mode), so they are owned through
-    // pointers. currentCamera is a non-owning observer into this vector.
-    std::vector<std::unique_ptr<ogl::glCamera>> cameras;
 
     GLfloat lastTime = 0;
 
     bool created = false;
 
     glm::vec3 background;
-        
+
     bool isProcessMouseMovement = true;
-    
+
     bool isFullscreen;
-    
+
     bool keybord = false;
 
     bool imguiFrameActive = false;
@@ -113,30 +97,30 @@ namespace ogl {
     double fpsLastTimestamp = 0.0;
 
   protected:
-    
+
     static uint32_t windowsCounter;
     static uint32_t windowsAlive;
 
-    ogl::glCamera * currentCamera;
-    
+    glCamera camera;
+
     bool keys[1024] = {false, };
 
     // Tempo passato dall'ultima volta che e' stato effettuato il rendering
     GLfloat deltaTime;
-    
+
   public:
-    
+
     // Puntatore della finestra GLFW
     GLFWwindow * window;
-    
+
     // Id univoco della finestra
     uint32_t id;
-    
+
     //*****************************************************************************/
     // glWindow() - Costruttore vuoto
     //*****************************************************************************/
     glWindow() { window = NULL;}
-    
+
     //*****************************************************************************/
     // ~glWindow() - Distruttore
     //*****************************************************************************/
@@ -150,44 +134,41 @@ namespace ogl {
       }
 
     }
-    
+
     //*****************************************************************************/
     // create() - Crea una nuova finestra
     //*****************************************************************************/
-    void create(GLint width, GLint height, bool resizable = false, const char * title = "OpenGL window") {
-      
+    void create(GLint width, GLint height, bool resizable = false, const char * title = "OpenGL window", glCamera::MODE cameraMode = glCamera::FLY) {
+
       DEBUG_LOG("glWindow::create() windowID " + std::to_string(windowsCounter));
-      
+
       glfw::init();
-            
+
       // Others Glfw options
       glfwWindowHint(GLFW_RESIZABLE, resizable);
 
-      // Funziona con OpenGL >= 4.3
-      // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-
       // Create a GLFWwindow object that we can use for GLFW's functions
       window = glfwCreateWindow(width, height, title, NULL, NULL);
-      
+
       if(window == NULL) {
         fprintf(stderr, "Failed to create GLFW window\n");
         glfwTerminate();
         abort();
       }
-      
+
       glfwMakeContextCurrent(window);
-      
+
       if(!gladLoadGL((GLADloadfunc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
-            
+
       glEnable(GL_MULTISAMPLE);
 
       glfwGetFramebufferSize(window, &width, &height);
-      
+
       glfwSetWindowUserPointer(window, this);
-      
+
       glfwSetWindowCloseCallback(window, windowCloseCallback);
       glfwSetCursorPosCallback(window, cursorPosCallback);
       glfwSetMouseButtonCallback(window, mouseButtonCallback);
@@ -195,15 +176,15 @@ namespace ogl {
       glfwSetKeyCallback(window, keyCallback);
       glfwSetCursorEnterCallback(window, cursorEnterCallback);
       glfwSetWindowSizeCallback(window, sizeCallback);
-      
+
       glfwSwapInterval(1);
-      
+
       firstMouse = true;
 
       onFocus = true;
 
       isFullscreen = false;
-      
+
       id = windowsCounter++;
 
       ++windowsAlive;
@@ -213,25 +194,19 @@ namespace ogl {
 
       background = glm::vec3(0.0f, 0.1f, 0.2f);
 
-      cameras.push_back(std::make_unique<glCameraFly>(width, height));
-
-      currentCameraIndex = 0;
-
-      currentCamera = cameras[currentCameraIndex].get();
+      camera = glCamera(cameraMode, width, height);
 
       #ifndef __APPLE__
           glEnable(GL_DEBUG_OUTPUT);
           glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
           glDebugMessageCallback(glDebugOutput, 0);
       #endif
-      
+
       #ifndef OGL_WITHOUT_IMGUI
-        // ImGui has a single global context: initialise it only once, and let
-        // this window own its lifetime.
         if(!imguiInitialized) {
           IMGUI_CHECKVERSION();
           ImGui::CreateContext();
-          ImGui::GetIO().IniFilename = nullptr;  // <-- DISABILITA imgui.ini
+          ImGui::GetIO().IniFilename = nullptr;
           ImGui_ImplGlfw_InitForOpenGL(window, true);
           ImGui_ImplOpenGL3_Init("#version 150");
           ImGui::StyleColorsDark();
@@ -241,45 +216,42 @@ namespace ogl {
       #endif
 
     }
-    
+
     //*****************************************************************************/
-    // createOffscreen() - Crea una nuova finestra
+    // createOffscreen() - Crea una nuova finestra offscreen
     //*****************************************************************************/
-    void createOffscreen(GLint width, GLint height) {
-      
+    void createOffscreen(GLint width, GLint height, glCamera::MODE cameraMode = glCamera::FLY) {
+
       DEBUG_LOG("glWindow::createOffscreen() windowID " + std::to_string(windowsCounter));
 
       glfw::init();
-      
+
       // Others Glfw options
       glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
       glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-      
-      // Funziona con OpenGL >= 4.3
-      // glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-      
+
       // Create a GLFWwindow object that we can use for GLFW's functions
       window = glfwCreateWindow(width, height, "notitle", NULL, NULL);
-      
+
       if(window == NULL) {
         fprintf(stderr, "Failed to create GLFW window\n");
         glfwTerminate();
         abort();
       }
-      
+
       glfwMakeContextCurrent(window);
-      
+
       if(!gladLoadGL((GLADloadfunc) glfwGetProcAddress)) {
         fprintf(stderr, "Failed to initialize GLAD\n");
         abort();
       }
-      
+
       glEnable(GL_MULTISAMPLE);
-      
+
       glfwGetFramebufferSize(window, &width, &height);
-     
+
       glfwSetWindowUserPointer(window, this);
-      
+
       glfwSetWindowCloseCallback(window, windowCloseCallback);
       glfwSetCursorPosCallback(window, cursorPosCallback);
       glfwSetMouseButtonCallback(window, mouseButtonCallback);
@@ -289,11 +261,11 @@ namespace ogl {
       glfwSetWindowSizeCallback(window, sizeCallback);
 
       glfwSwapInterval(1);
-      
+
       firstMouse = true;
-      
+
       onFocus = false;
-      
+
       isFullscreen = false;
 
       id = windowsCounter++;
@@ -305,19 +277,10 @@ namespace ogl {
 
       background = glm::vec3(0.0f, 0.1f, 0.2f);
 
-      cameras.push_back(std::make_unique<glCameraFly>(width, height));
+      camera = glCamera(cameraMode, width, height);
 
-      currentCameraIndex = 0;
-
-      currentCamera = cameras[currentCameraIndex].get();
-
-      // Funziona con OpenGL >= 4.3
-      // glDebugMessageCallback((GLDEBUGPROC)glDebugOutput, NULL);
-      // glEnable(GL_DEBUG_OUTPUT);
-      // glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-      
     }
-    
+
     //*****************************************************************************/
     // destroy() -
     //*****************************************************************************/
@@ -342,18 +305,6 @@ namespace ogl {
   private:
 
     //****************************************************************************//
-    // makeCamera() - build the camera subclass matching the requested mode
-    //****************************************************************************//
-    static std::unique_ptr<glCamera> makeCamera(glCamera::MODE mode, GLsizei width, GLsizei height, GLfloat fov, const glm::vec3 & position, const glm::vec3 & target) {
-      switch(mode) {
-        case glCamera::ORBIT: return std::make_unique<glCameraOrbit>(width, height, fov, position, target);
-        case glCamera::PAN:   return std::make_unique<glCameraPan>(width, height, fov, position, target);
-        case glCamera::FLY:
-        default:              return std::make_unique<glCameraFly>(width, height, fov, position);
-      }
-    }
-
-    //****************************************************************************//
     // shutdownImGui() - tear down ImGui, but only from the window that created it
     //****************************************************************************//
     inline void shutdownImGui() {
@@ -369,58 +320,53 @@ namespace ogl {
     }
 
   public:
-    
+
     //****************************************************************************//
-    // updateCurrentCamera() -
+    // getCamera() - returns a reference to the window's camera
     //****************************************************************************//
-    void updateCurrentCamera(float fov, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::MODE::FLY, glm::vec3 target = glm::vec3(0.0f)) {
+    glCamera & getCamera() { return camera; }
+    const glCamera & getCamera() const { return camera; }
 
-      // Changing mode means swapping the camera for a different subclass, keeping
-      // the same viewport.
-      GLsizei w = currentCamera->getWidth();
-      GLsizei h = currentCamera->getHeight();
-
-      cameras[currentCameraIndex] = makeCamera(mode, w, h, fov, position, target);
-
-      currentCamera = cameras[currentCameraIndex].get();
-
+    //****************************************************************************//
+    // setCamera() - reconfigure the camera (mode, fov, position, target)
+    //****************************************************************************//
+    void setCamera(glCamera::MODE mode, float fov = 45.0f,
+                   glm::vec3 position = glm::vec3(0.0f),
+                   glm::vec3 target   = glm::vec3(0.0f)) {
+      GLsizei w = camera.getWidth();
+      GLsizei h = camera.getHeight();
+      camera = glCamera(mode, w, h, fov, position, target);
     }
-    
-    //****************************************************************************//
-    // getCurrentCamera() -
-    //****************************************************************************//
-    ogl::glCamera * getCurrentCamera() { return currentCamera; }
-      
-    
+
   private:
-    
+
     //****************************************************************************//
     // CallBack GLFW Wrapper
     //****************************************************************************//
     static inline void windowCloseCallback(GLFWwindow* window) {
       ((glWindow*)glfwGetWindowUserPointer(window))->windowCloseCallback();
     }
-    
+
     static inline void cursorPosCallback(GLFWwindow* window, double xPos, double yPos) {
       ((glWindow*)glfwGetWindowUserPointer(window))->cursorPosCallback(xPos, yPos);
     }
-    
+
     static inline void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
       ((glWindow*)glfwGetWindowUserPointer(window))->mouseButtonCallback(button, action, mods);
     }
-    
+
     static inline void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
       ((glWindow*)glfwGetWindowUserPointer(window))->scrollCallback(xoffset, yoffset);
     }
-    
+
     static inline void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
       ((glWindow*)glfwGetWindowUserPointer(window))->keyCallback(key, scancode, action, mods);
     }
-    
+
     static inline void cursorEnterCallback(GLFWwindow* window, int entered) {
       ((glWindow*)glfwGetWindowUserPointer(window))->cursorEnter(entered);
     }
-    
+
     static inline void sizeCallback(GLFWwindow* window, int width, int height) {
       ((glWindow*)glfwGetWindowUserPointer(window))->sizeCallback(width, height);
     }
@@ -433,37 +379,33 @@ namespace ogl {
     inline void virtual cursorPos(double xPos, double yPos, double xoffset, double yoffset) { };
     inline void virtual mouseButton(int button, int action, int mods) { };
     inline void virtual cursorEnter(int entered) { if(entered) { onFocus = true; } else { onFocus = false; } }
-    
+
     //****************************************************************************//
     // Callback
     //****************************************************************************//
     inline void windowCloseCallback() {
       glfwSetWindowShouldClose(window, GL_TRUE);
     }
-    
+
     inline void sizeCallback(int width, int height) {
-      for(std::size_t i=0; i<cameras.size(); ++i)
-        cameras[i]->setViewport(width, height);
+      camera.setViewport(width, height);
     }
-    
+
     inline void scrollCallback(double xoffset, double yoffset) {
-      
-      currentCamera->processMouseScroll(yoffset);
-      
+      camera.processMouseScroll(yoffset);
       scroll(xoffset, yoffset);
-      
     }
-        
+
     inline void keyCallback(int key, int scancode, int action, int mods) {
-                  
+
       if(!keybord) return;
-                  
+
       if(GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
         setShouldClose(GL_TRUE);
       }
-      
+
       if(key >= 0 && key < 1024) {
-        
+
         if(action == GLFW_PRESS) {
           keys[key] = true;
         } else if (action == GLFW_RELEASE) {
@@ -473,87 +415,76 @@ namespace ogl {
         keyboard(key, scancode, action, mods);
 
       }
-      
+
     }
-    
+
     inline void cursorPosCallback(double xPos, double yPos) {
 
       if(onFocus) {
-      
+
         if(firstMouse) {
           lastX = xPos;
           lastY = yPos;
           firstMouse = false;
         }
-        
-        GLfloat xOffset;
-        GLfloat yOffset;
-        
-        xOffset = xPos - lastX;
-        yOffset = lastY - yPos;  // Reversed since y-coordinates go from bottom to left
-        
+
+        GLfloat xOffset = xPos - lastX;
+        GLfloat yOffset = lastY - yPos;  // Reversed since y-coordinates go from bottom to left
+
         lastX = xPos;
         lastY = yPos;
-        
+
         bool controllKey = GLFW_RELEASE;
         if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
           controllKey = GLFW_PRESS;
-        
-        if(isProcessMouseMovement) currentCamera->processMouseMovement(xOffset, yOffset, controllKey);
-        
+
+        if(isProcessMouseMovement) camera.processMouseMovement(xOffset, yOffset, controllKey);
+
         cursorPos(lastX, lastY, xOffset, yOffset);
-      
+
       }
-        
+
     }
-    
+
     inline void mouseButtonCallback(int button, int action, int mods) { mouseButton(button, action, mods); }
-    
+
   public:
-    
+
     //****************************************************************************//
     // Window Interface funtions
     //****************************************************************************//
     inline void setPosition(int xPos, int yPos) {
       glfwSetWindowPos(window, xPos, yPos);
     }
-    
+
     inline void setTitle(const std::string & title) {
       glfwSetWindowTitle(window, title.c_str());
     }
-    
+
     inline bool shouldClose() {
       return glfwWindowShouldClose(window);
     }
 
-//    inline bool isImGuiFrameActive() const {
-//      return imguiFrameActive;
-//    }
-    
     inline void setShouldClose(bool mode) {
       glfwSetWindowShouldClose(window, mode);
     }
-    
+
     inline void setCursorInputMode(int mode) {
       glfwSetInputMode(window, GLFW_CURSOR, mode);
     }
-    
+
     inline void getCursorPos(double & x, double & y) {
       glfwGetCursorPos(window, &x, &y);
     }
-    
+
     inline void setSize(int width, int height) {
       glfwSetWindowSize(window, width, height);
-      for(std::size_t i=0; i<cameras.size(); ++i)
-        cameras[i]->setViewport(width, height);
+      camera.setViewport(width, height);
     }
-    
+
     inline void setBackground(const glm::vec3 & _background) {
       background = _background;
     }
-    
-    //inline void disableInput() { inputDisable = true; }
-    //inline void enableInput() { inputDisable = false; }
 
     //*****************************************************************************/
     // disable/enable Keybord
@@ -562,11 +493,11 @@ namespace ogl {
     void enableKeybord()  { keybord = true;  }
 
     //*****************************************************************************/
-    // disable/enable mouseOnCamera() -
+    // disable/enable mouseOnCamera()
     //*****************************************************************************/
     void disableMouseOnCamera() { isProcessMouseMovement = false; }
     void enableMouseOnCamera()  { isProcessMouseMovement = true;  }
-    
+
     inline void hide() { glfwHideWindow(window); }
     inline void show() { glfwShowWindow(window); }
     inline void iconify() { glfwIconifyWindow(window); }
@@ -597,51 +528,41 @@ namespace ogl {
       return static_cast<int>(1.0 / (sum / static_cast<double>(fpsDeltas.size())));
 
     }
-    
-    //****************************************************************************//
-    // addCamera()
-    //****************************************************************************//
-    inline void addCamera(float fov, glm::vec3 position = glm::vec3(0.0f), glCamera::MODE mode = glCamera::FLY, glm::vec3 target = glm::vec3(0.0f)) {
-      cameras.push_back(makeCamera(mode, currentCamera->getWidth(), currentCamera->getHeight(), fov, position, target));
-      // unique_ptr storage keeps the existing cameras alive across reallocation,
-      // so currentCamera stays valid; refresh it for clarity.
-      currentCamera = cameras[currentCameraIndex].get();
-    }
 
     //*****************************************************************************/
     // get projection and view matrix
     //*****************************************************************************/
-    inline glm::mat4 getProjection()      const { return currentCamera->getProjection(); }
-    inline glm::mat4 getOrthoProjection() const { return currentCamera->getOrthoProjection(); }
+    inline glm::mat4 getProjection()      const { return camera.getProjection(); }
+    inline glm::mat4 getOrthoProjection() const { return camera.getOrthoProjection(); }
 
     //*****************************************************************************/
     // getViewport()
     //*****************************************************************************/
-    inline glm::vec2 getViewport() const { return currentCamera->getViewport(); }
-    
+    inline glm::vec2 getViewport() const { return camera.getViewport(); }
+
     //*****************************************************************************/
     // getView()
     //*****************************************************************************/
-    inline glm::mat4 getView() const { return currentCamera->getView(); }
+    inline glm::mat4 getView() const { return camera.getView(); }
 
     //*****************************************************************************/
     // getPitch() getYaw()
     //*****************************************************************************/
-    inline float getPitch() { return currentCamera->getPitch(); }
-    inline float getYaw() { return currentCamera->getYaw(); }
-    
+    inline float getPitch() { return camera.getPitch(); }
+    inline float getYaw()   { return camera.getYaw();   }
+
     //*****************************************************************************/
     // getCameraPosition()
     //*****************************************************************************/
-    inline glm::vec3 getCameraPosition() { return currentCamera->getPosition(); }
-    
+    inline glm::vec3 getCameraPosition() { return camera.getPosition(); }
+
     //*****************************************************************************/
     // isOnRetinaDisplay()
     //*****************************************************************************/
     bool isOnRetinaDisplay() {
-      
+
       float xScale, yScale;
-      
+
       glfwGetWindowContentScale(window, &xScale, &yScale);
 
       if(xScale != yScale) {
@@ -650,34 +571,34 @@ namespace ogl {
       }
 
       return (xScale == 2);
-      
+
     }
 
     //*****************************************************************************/
     // renderBegin()
     //*****************************************************************************/
     void renderBegin() {
-      
+
       if(window == NULL) {
         fprintf(stderr, "glWindow error: the window is not initialized\n");
         abort();
       }
-      
+
       glfwMakeContextCurrent(window);
-      
+
       glfwPollEvents();
-      
+
       GLfloat currentTime = glfwGetTime();
-      
+
       deltaTime = currentTime - lastTime;
       lastTime  = currentTime;
 
       processKeyboardInput();
-                        
-      glViewport(0, 0, currentCamera->getWidth(), currentCamera->getHeight());
+
+      glViewport(0, 0, camera.getWidth(), camera.getHeight());
 
       glClearColor(background.r, background.g, background.b, 1.0f);
-      
+
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       glEnable(GL_DEPTH_TEST);
@@ -686,9 +607,6 @@ namespace ogl {
       keybord = true;
 
       #ifndef OGL_WITHOUT_IMGUI
-        // On macOS the system can drop all monitors after a display sleep, and ImGui::NewFrame() asserts when the monitor list is empty.
-        // Skip the ImGui frame until at least one monitor is back.
-        // Offscreen windows never initialise ImGui, so guard on imguiInitialized too.
         int monitorCount = 0;
         glfwGetMonitors(&monitorCount);
         if(imguiInitialized && monitorCount > 0) {
@@ -700,14 +618,14 @@ namespace ogl {
           imguiFrameActive = false;
         }
       #endif
-      
+
     }
-    
+
     //*****************************************************************************/
     // renderEnd()
     //*****************************************************************************/
     inline void renderEnd() {
-      
+
       #ifndef OGL_WITHOUT_IMGUI
         if(imguiFrameActive) {
           ImGui::Render();
@@ -715,82 +633,70 @@ namespace ogl {
           imguiFrameActive = false;
         }
       #endif
-    
+
       glfwSwapBuffers(window);
-      
+
     }
 
     //*****************************************************************************/
     // snapshot()
     //*****************************************************************************/
     void snapshot(std::string path) {
-      
+
       glReadBuffer(GL_BACK);
 
       ogl::io::expandPath(path);
-      
-      ogl::snapshot(currentCamera->getWidth(), currentCamera->getHeight(), path.c_str());
-      
+
+      ogl::snapshot(camera.getWidth(), camera.getHeight(), path.c_str());
+
     }
-  
+
     //****************************************************************************
     // toggleFullscreen()
     //****************************************************************************
     void toggleFullscreen() {
-      
+
       static int oldWidth;
       static int oldHeight;
 
       GLFWmonitor * monitor = glfwGetPrimaryMonitor();
-      
+
       const GLFWvidmode * mode = glfwGetVideoMode(monitor);
-      
+
       if(!isFullscreen) {
-        
-        getCurrentCamera()->getViewport(oldWidth, oldHeight);
+
+        camera.getViewport(oldWidth, oldHeight);
 
 #ifdef __APPLE__
         oldWidth *= 0.5; oldHeight *= 0.5;
 #endif
 
         glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-        
+
         int width, height;
-        
+
         glfwGetFramebufferSize(window, &width, &height);
-        
-        getCurrentCamera()->setViewport(width, height);
-        
+
+        camera.setViewport(width, height);
+
         glfwFocusWindow(window);
-                
+
       } else {
-        
+
         glfwSetWindowMonitor(window, NULL, 0, 0, oldWidth, oldHeight, 0);
 
         glfwGetFramebufferSize(window, &oldWidth, &oldHeight);
-        
-        getCurrentCamera()->setViewport(oldWidth, oldHeight);
-        
+
+        camera.setViewport(oldWidth, oldHeight);
+
       }
-      
+
       isFullscreen = !isFullscreen;
-            
-    }
-    
-    
-    //*****************************************************************************/
-    // changeCamera()
-    //*****************************************************************************/
-    void changeCamera() {
-      
-      if(currentCameraIndex + 1 < cameras.size()) { ++currentCameraIndex; } else { currentCameraIndex = 0; }
-      
-      currentCamera = cameras[currentCameraIndex].get();
 
     }
-    
+
   };
-  
+
   inline uint32_t glWindow::windowsCounter = 0;
   inline uint32_t glWindow::windowsAlive   = 0;
   inline bool     glWindow::imguiInitialized = false;

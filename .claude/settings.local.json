@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL diff --stat)",
+      "Bash(make example *)",
+      "Bash(make example_imgui)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "Bash(git branch *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(grep -E '\\\\.\\(hpp|cpp|h\\)$')",
+      "Read(//usr/local/Cellar/freetype/2.14.3/include/freetype2/**)",
+      "Read(//usr/local/lib/**)",
+      "Bash(ls -la /Users/thewoz/Dropbox 2>&1 | head -3; echo \"---\"; ls -la /Users/thewoz/Dropbox/Research/OGL/include/ogl.hpp 2>&1; echo \"--- same file test ---\"; test /Users/thewoz/Dropbox/Research/OGL/include/ogl.hpp -ef \"/Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/ogl.hpp\" && echo \"SAME FILE\" || echo \"DIFFERENT\")"
+    ]
+  }
+}

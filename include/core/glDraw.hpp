@@ -80,17 +80,17 @@ namespace ogl::draw {
 
 
   //****************************************************************************//
-  // drawRotatedText()
+  // rotatedText()
   //****************************************************************************//
-  inline void drawRotatedText(ImDrawList * drawList, const std::string & text, ImFont * font, const ImVec2 & center, double angleDeg, float fontPx, ImU32 col) {
+  inline void rotatedText(ImDrawList * drawList, const std::string & text, ImFont * font, float fontSizePx, ImU32 color, const ImVec2 & center, double angleDeg)  {
 
-    ImVec2 textSize = font->CalcTextSizeA(fontPx, FLT_MAX, 0.0f, text.c_str());
+    ImVec2 textSize = font->CalcTextSizeA(fontSizePx, FLT_MAX, 0.0f, text.c_str());
 
     ImVec2 pos(center.x - textSize.x * 0.5f, center.y - textSize.y * 0.5f);
 
     int vtxStart = drawList->VtxBuffer.Size;
 
-    drawList->AddText(font, fontPx, pos, col, text.c_str());
+    drawList->AddText(font, fontSizePx, pos, color, text.c_str());
 
     int vtxEnd = drawList->VtxBuffer.Size;
 
@@ -111,27 +111,21 @@ namespace ogl::draw {
 
   }
 
-
   //****************************************************************************//
-  // drawDistMarker()
+  // distMarker()
   //****************************************************************************//
-  inline void drawDistMarker(ImDrawList * drawList,
-                             ImVec2 A,
-                             ImVec2 B,
-                             const std::string & label,
-                             ImFont * font,
-                             ImU32 col,
-                             float thickness = 2.0f,
-                             float textOffset = 15.0f,
-                             double fontScale = 0.8,
-                             float shrinkPx = 20.0f,
-                             float endMarkSizePx = 12.0f,
-                             float distMarkerFontPx = 16.0f) {
+  inline void distMarker(ImDrawList * drawList,
+                         ImVec2 A,
+                         ImVec2 B,
+                         float thicknessPx,
+                         ImU32 color,
+                         float shrinkPx = 20.0f,
+                         float endMarkSizePx = 12.0f) {
 
     if(shrinkPx != 0.0f) utils::shrinkLine(A, B, shrinkPx);
 
     // linea principale
-    drawList->AddLine(A, B, col, thickness);
+    drawList->AddLine(A, B, color, thicknessPx);
 
     // direzione della linea in coordinate schermo
     ImVec2 dir(B.x - A.x, B.y - A.y);
@@ -152,27 +146,61 @@ namespace ogl::draw {
     ImVec2 p2a(B.x + perp.x * endMarkSizePx, B.y + perp.y * endMarkSizePx);
     ImVec2 p2b(B.x - perp.x * endMarkSizePx, B.y - perp.y * endMarkSizePx);
 
-    drawList->AddLine(p1a, p1b, col, thickness);
-    drawList->AddLine(p2a, p2b, col, thickness);
+    drawList->AddLine(p1a, p1b, color, thicknessPx);
+    drawList->AddLine(p2a, p2b, color, thicknessPx);
+
+  }
+
+  //****************************************************************************//
+  // distMarker()
+  //****************************************************************************//
+  inline void distMarker(ImDrawList * drawList,
+                         ImVec2 A,
+                         ImVec2 B,
+                         float thicknessPx,
+                         const std::string & label,
+                         ImFont * font,
+                         float fontSizePx,
+                         ImU32 color,
+                         float textOffsetPx = 15.0f,
+                         float shrinkPx = 20.0f,
+                         float endMarkSizePx = 12.0f) {
+
+    if(shrinkPx != 0.0f) utils::shrinkLine(A, B, shrinkPx);
+
+    distMarker(drawList, A, B, thicknessPx, color, 0.0f, endMarkSizePx);
+
+    // direzione e perpendicolare del segmento accorciato
+    ImVec2 dir(B.x - A.x, B.y - A.y);
+
+    float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+    if(len < 1.0f) return;
+
+    dir.x /= len;
+    dir.y /= len;
+
+    ImVec2 perp(-dir.y, dir.x);
 
     // punto medio
     ImVec2 mid((A.x + B.x) * 0.5f, (A.y + B.y) * 0.5f);
 
+    // Il testo viene ruotato per allinearsi alla retta, quindi la sua altezza
+    // Aggiungo metà altezza del testo allo spostamento
+    ImVec2 textSize = font->CalcTextSizeA(fontSizePx, FLT_MAX, 0.0f, label.c_str());
+
+    float off = textOffsetPx + textSize.y * 0.5f;
+
     // centro del testo spostato lungo la perpendicolare
-    ImVec2 textCenter(mid.x + perp.x * textOffset, mid.y + perp.y * textOffset);
+    ImVec2 textCenter(mid.x + perp.x * off, mid.y + perp.y * off);
 
     // angolo della linea
-    double angleRad = std::atan2((double)(B.y - A.y), (double)(B.x - A.x));
-
-    double angleDeg = angleRad * 180.0 / M_PI;
+    double angleDeg = std::atan2((double)(B.y - A.y), (double)(B.x - A.x)) * 180.0 / M_PI;
 
     // mantiene il testo leggibile
     if(angleDeg >  90.0) angleDeg -= 180.0;
     else if(angleDeg < -90.0) angleDeg += 180.0;
 
-    float fontPx = distMarkerFontPx * (float)(fontScale / 0.8);
-
-    drawRotatedText(drawList, label, textCenter, font, angleDeg, fontPx, col);
+    rotatedText(drawList, label, font, fontSizePx, color, textCenter, angleDeg);
 
   }
 

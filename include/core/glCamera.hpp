@@ -36,27 +36,17 @@
 namespace ogl {
 
   //****************************************************************************/
-  // glCamera - abstract camera
+  // glCamera
   //****************************************************************************/
-  // A camera produces the projection and view matrices used to render a scene.
+  // A single camera class that changes behaviour according to its current mode:
   //
-  // The class is split in two parts:
-  //   - everything that is mode-independent (the perspective projection, the
-  //     position/orientation state, the viewport, and all the getters/setters)
-  //     lives here in the base class;
-  //   - the bits that actually differ between camera modes — how the view
-  //     matrix is built and how mouse/keyboard input is interpreted — are
-  //     virtual and implemented by the concrete subclasses:
+  //   FLY    free-fly first-person (arrow keys + mouse look / pan with modifier)
+  //   ORBIT  always looks at a fixed target; ignores keyboard and mouse input
+  //   PAN    orbits a target with mouse, pans with arrow keys, dollies with wheel
   //
-  //       glCameraFly      free-fly first-person camera (WASD/arrows + mouse look)
-  //       glCameraOrbit    always looks at a fixed target point
-  //       glCameraPan pans on the screen plane and zooms with the wheel
-  //
-  // The mode is therefore chosen by picking a subclass at construction time.
-  // glWindow owns the cameras and can swap the active one's mode through
-  // glWindow::updateCurrentCamera(). All the setters are always active: a setter
-  // never silently does nothing because of the current mode — the mode only
-  // decides how the stored state is interpreted by getView().
+  // The mode is set at construction time and can be changed at any time via
+  // setMode(). All setters are always active: the mode only decides how the
+  // stored state is interpreted when building the view matrix or processing input.
   //****************************************************************************/
   class glCamera {
 
@@ -65,7 +55,7 @@ namespace ogl {
     enum MODE     { FLY, ORBIT, PAN };
     enum MOVEMENT { FORWARD, BACKWARD, LEFT, RIGHT };
 
-  protected:
+  private:
 
     MODE mode;
 
@@ -93,34 +83,96 @@ namespace ogl {
     GLfloat zNear = 0.1f;
     GLfloat zFar  = 10.0f;
 
+  public:
+
     //****************************************************************************/
-    // glCamera() - protected: only subclasses (which fix the mode) construct it
+    // glCamera() - default: FLY mode, 1x1 viewport
     //****************************************************************************/
-    glCamera(MODE _mode, GLsizei _width, GLsizei _height, GLfloat _fov, const glm::vec3 & _position, const glm::vec3 & _target)
-      : mode(_mode), position(_position), target(_target), width(_width), height(_height), fov(_fov) {
+    glCamera() : mode(FLY) { updateBasis(); updateProjection(); }
+
+    //****************************************************************************/
+    // glCamera() - explicit construction
+    //****************************************************************************/
+    glCamera(MODE _mode, GLsizei _width, GLsizei _height, GLfloat _fov = 45.0f,
+             const glm::vec3 & _position = glm::vec3(0.0f),
+             const glm::vec3 & _target   = glm::vec3(0.0f))
+      : mode(_mode), position(_position), target(_target),
+        width(_width), height(_height), fov(_fov) {
       updateBasis();
       updateProjection();
     }
 
-  public:
-
-    virtual ~glCamera() = default;
-
     //==========================================================================
-    // Per-mode behavior (implemented by the subclasses)
+    // Mode
     //==========================================================================
 
-    //****************************************************************************/
-    // getView() - the view matrix for this camera mode
-    //****************************************************************************/
-    virtual glm::mat4 getView() const = 0;
+    inline MODE getMode() const { return mode; }
 
     //****************************************************************************/
-    // input handlers - default to "do nothing"; modes override what they need
+    // setMode() - switch behaviour at runtime; all other state is preserved
     //****************************************************************************/
-    virtual void processKeyboard(MOVEMENT /*direction*/, GLfloat /*deltaTime*/) { }
-    virtual void processMouseMovement(GLfloat /*xOffset*/, GLfloat /*yOffset*/, bool /*mods*/, GLboolean /*constrainPitch*/ = true) { }
-    virtual void processMouseScroll(GLfloat /*yOffset*/) { }
+    inline void setMode(MODE _mode) { mode = _mode; }
+
+    //==========================================================================
+    // View matrix — built according to the current mode
+    //==========================================================================
+
+    glm::mat4 getView() const {
+      switch(mode) {
+        case ORBIT:
+          return glm::lookAt(position, target, up);
+        case PAN: {
+          glm::mat4 t1(1.0f); t1[3] = glm::vec4(target - position, 1.0f);
+          glm::mat4 t2(1.0f); t2[3] = glm::vec4(-target, 1.0f);
+          return t1 * eulerRotation(pitch, yaw, 0.0f) * t2;
+        }
+        case FLY:
+        default:
+          return glm::lookAt(position, position + front, up);
+      }
+    }
+
+    //==========================================================================
+    // Input handlers — ORBIT ignores all input
+    //==========================================================================
+
+    void processKeyboard(MOVEMENT direction, GLfloat deltaTime) {
+      GLfloat velocity = speed * deltaTime;
+      switch(mode) {
+        case FLY:
+          if(direction == FORWARD)  position += front * velocity;
+          if(direction == BACKWARD) position -= front * velocity;
+          if(direction == LEFT)     position -= right * velocity;
+          if(direction == RIGHT)    position += right * velocity;
+          break;
+        case PAN:
+          if(direction == FORWARD)  position.y += velocity;
+          if(direction == BACKWARD) position.y -= velocity;
+          if(direction == LEFT)     position.x -= velocity;
+          if(direction == RIGHT)    position.x += velocity;
+          break;
+        default: break;
+      }
+    }
+
+    void processMouseMovement(GLfloat xOffset, GLfloat yOffset, bool mods, GLboolean constrainPitch = true) {
+      if(mode == ORBIT) return;
+      if(!mods) {
+        yaw   += xOffset * sensitivity;
+        pitch += yOffset * sensitivity;
+        if(constrainPitch) {
+          if(pitch >  89.0f) pitch =  89.0f;
+          if(pitch < -89.0f) pitch = -89.0f;
+        }
+        updateBasis();
+      } else {
+        updatePosition(xOffset, yOffset, 0.0f);
+      }
+    }
+
+    void processMouseScroll(GLfloat yOffset) {
+      if(mode == PAN) updatePosition(0.0f, 0.0f, yOffset);
+    }
 
     //==========================================================================
     // Projection / viewport
@@ -143,9 +195,6 @@ namespace ogl {
       return glm::ortho(-aspect, aspect, -1.0f, 1.0f, zNear, zFar);
     }
 
-    //****************************************************************************/
-    // viewport (the camera "sensor" size, in pixels)
-    //****************************************************************************/
     inline void setSensorSize(GLsizei _width, GLsizei _height) { setViewport(_width, _height); }
 
     inline void setViewport(GLsizei _width, GLsizei _height) {
@@ -160,9 +209,6 @@ namespace ogl {
     inline glm::vec2 getViewport() const { return glm::vec2(width, height); }
     inline void getViewport(int & _width, int & _height) const { _width = width; _height = height; }
 
-    //****************************************************************************/
-    // near/far planes and field of view
-    //****************************************************************************/
     inline void setzNearFar(float _zNear, float _zFar) {
       zNear = _zNear;
       zFar  = _zFar;
@@ -196,9 +242,6 @@ namespace ogl {
 
     }
 
-    //****************************************************************************/
-    // getAspect()
-    //****************************************************************************/
     float getAspect() const {
       return projection[1][1] / projection[0][0];
     }
@@ -219,9 +262,6 @@ namespace ogl {
 
     inline glm::vec3 getTarget() const { return target; }
 
-    //****************************************************************************/
-    // setFront() - override the look direction (keeps the basis consistent)
-    //****************************************************************************/
     inline void setFront(const glm::vec3 & _front) {
       front = glm::normalize(_front);
       right = glm::normalize(glm::cross(front, worldUp));
@@ -240,20 +280,13 @@ namespace ogl {
     // Misc
     //==========================================================================
 
-    inline MODE getMode() const { return mode; }
-
-    inline void setKeybordSpeed(GLfloat _speed)          { speed = _speed; }
+    inline void setKeybordSpeed(GLfloat _speed)           { speed = _speed; }
     inline void setMouseSensitivity(GLfloat _sensitivity) { sensitivity = _sensitivity; }
 
-    //****************************************************************************/
-    // getLookAt() - view matrix that looks at an arbitrary point from here
-    //****************************************************************************/
     inline glm::mat4 getLookAt(const glm::vec3 & _target) const { return glm::lookAt(position, _target, up); }
 
     //****************************************************************************/
-    // screenPosition() - project a world point to window pixels.
-    // Returns false (and leaves 'screen' at the projected xy) when the point is
-    // behind the camera or outside the depth range.
+    // screenPosition() - project a world point to window pixels
     //****************************************************************************/
     bool screenPosition(const glm::vec3 & _coord, const glm::mat4 & model, glm::vec2 & screen) const {
 
@@ -275,8 +308,7 @@ namespace ogl {
     }
 
     //****************************************************************************/
-    // computeCameraDistanceToFitObject() - distance at which a bounding sphere
-    // of the given radius exactly fills the frustum.
+    // computeCameraDistanceToFitObject()
     //****************************************************************************/
     float computeCameraDistanceToFitObject(float boundingRadius) const {
 
@@ -289,11 +321,8 @@ namespace ogl {
 
     }
 
-  protected:
+  private:
 
-    //****************************************************************************/
-    // updateBasis() - rebuild front/right/up from the Euler angles (degrees)
-    //****************************************************************************/
     void updateBasis() {
 
       glm::vec3 f;
@@ -307,145 +336,16 @@ namespace ogl {
 
     }
 
-    //****************************************************************************/
-    // updateProjection() - rebuild the perspective matrix
-    //****************************************************************************/
     void updateProjection() {
       float aspect = (height != 0) ? width / static_cast<float>(height) : 1.0f;
       projection = glm::perspective(glm::radians(fov), aspect, zNear, zFar);
     }
 
-    //****************************************************************************/
-    // eulerRotation() - rotation matrix from pitch/yaw/roll (degrees)
-    //****************************************************************************/
     glm::mat4 eulerRotation(float _pitch, float _yaw, float _roll) const {
       glm::mat4 RX = glm::rotate(glm::mat4(1.0f), glm::radians(_pitch), glm::vec3(1, 0, 0));
       glm::mat4 RY = glm::rotate(glm::mat4(1.0f), glm::radians(_yaw),   glm::vec3(0, 1, 0));
       glm::mat4 RZ = glm::rotate(glm::mat4(1.0f), glm::radians(_roll),  glm::vec3(0, 0, 1));
       return RX * RY * RZ;
-    }
-
-  };
-
-  //****************************************************************************/
-  // glCameraFly - free-fly first-person camera
-  //****************************************************************************/
-  // Moves along its own axes (WASD / arrow keys) and looks around with the
-  // mouse. Holding the modifier key pans the camera on the screen plane instead
-  // of rotating it.
-  //****************************************************************************/
-  class glCameraFly : public glCamera {
-
-  public:
-
-    glCameraFly(GLsizei _width, GLsizei _height, GLfloat _fov = 45.0f, const glm::vec3 & _position = glm::vec3(0.0f))
-      : glCamera(FLY, _width, _height, _fov, _position, glm::vec3(0.0f)) { }
-
-    glm::mat4 getView() const override {
-      return glm::lookAt(position, position + front, up);
-    }
-
-    void processKeyboard(MOVEMENT direction, GLfloat deltaTime) override {
-      GLfloat velocity = speed * deltaTime;
-      if(direction == FORWARD)  position += front * velocity;
-      if(direction == BACKWARD) position -= front * velocity;
-      if(direction == LEFT)     position -= right * velocity;
-      if(direction == RIGHT)    position += right * velocity;
-    }
-
-    void processMouseMovement(GLfloat xOffset, GLfloat yOffset, bool mods, GLboolean constrainPitch = true) override {
-
-      if(!mods) {
-
-        yaw   += xOffset * sensitivity;
-        pitch += yOffset * sensitivity;
-
-        // Keep the camera from flipping over at the poles.
-        if(constrainPitch) {
-          if(pitch >  89.0f) pitch =  89.0f;
-          if(pitch < -89.0f) pitch = -89.0f;
-        }
-
-        updateBasis();
-
-      } else {
-        // Modifier held: pan on the screen plane instead of rotating.
-        updatePosition(xOffset, yOffset, 0.0f);
-      }
-
-    }
-
-  };
-
-  //****************************************************************************/
-  // glCameraOrbit - always looks at a fixed target point
-  //****************************************************************************/
-  // The view direction is determined entirely by position and target, so this
-  // camera ignores mouse/keyboard input (move it through setPosition/setTarget).
-  //****************************************************************************/
-  class glCameraOrbit : public glCamera {
-
-  public:
-
-    glCameraOrbit(GLsizei _width, GLsizei _height, GLfloat _fov = 45.0f, const glm::vec3 & _position = glm::vec3(0.0f), const glm::vec3 & _target = glm::vec3(0.0f))
-      : glCamera(ORBIT, _width, _height, _fov, _position, _target) { }
-
-    glm::mat4 getView() const override {
-      return glm::lookAt(position, target, up);
-    }
-
-  };
-
-  //****************************************************************************/
-  // glCameraPan - screen-plane pan + wheel zoom
-  //****************************************************************************/
-  // The view orbits a target: the mouse rotates it (or pans with the modifier),
-  // the arrow keys pan it on the XY plane and the scroll wheel dollies along Z.
-  //****************************************************************************/
-  class glCameraPan : public glCamera {
-
-  public:
-
-    glCameraPan(GLsizei _width, GLsizei _height, GLfloat _fov = 45.0f, const glm::vec3 & _position = glm::vec3(0.0f), const glm::vec3 & _target = glm::vec3(0.0f))
-      : glCamera(PAN, _width, _height, _fov, _position, _target) { }
-
-    glm::mat4 getView() const override {
-      glm::mat4 t1(1.0f); t1[3] = glm::vec4(target - position, 1.0f);
-      glm::mat4 t2(1.0f); t2[3] = glm::vec4(-target, 1.0f);
-      glm::mat4 r = eulerRotation(pitch, yaw, 0.0f);
-      return t1 * r * t2;
-    }
-
-    void processKeyboard(MOVEMENT direction, GLfloat deltaTime) override {
-      GLfloat velocity = speed * deltaTime;
-      if(direction == FORWARD)  position.y += velocity;
-      if(direction == BACKWARD) position.y -= velocity;
-      if(direction == LEFT)     position.x -= velocity;
-      if(direction == RIGHT)    position.x += velocity;
-    }
-
-    void processMouseMovement(GLfloat xOffset, GLfloat yOffset, bool mods, GLboolean constrainPitch = true) override {
-
-      if(!mods) {
-
-        yaw   += xOffset * sensitivity;
-        pitch += yOffset * sensitivity;
-
-        if(constrainPitch) {
-          if(pitch >  89.0f) pitch =  89.0f;
-          if(pitch < -89.0f) pitch = -89.0f;
-        }
-
-        updateBasis();
-
-      } else {
-        updatePosition(xOffset, yOffset, 0.0f);
-      }
-
-    }
-
-    void processMouseScroll(GLfloat yOffset) override {
-      updatePosition(0.0f, 0.0f, yOffset);
     }
 
   };

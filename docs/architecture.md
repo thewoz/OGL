@@ -92,7 +92,7 @@ Uniforms are set through the templated `glShader::setUniform(name, value)`.
 ```cpp
 while(!window.shouldClose()) {
   window.renderBegin();      // clear buffers, update camera/input
-    object.render(window.getCurrentCamera());
+    object.render(window.getCamera());
   window.renderEnd();        // swap buffers, poll events
 }
 ```
@@ -103,22 +103,19 @@ projection and view matrices through `getProjection()` / `getView()`.
 
 ## Cameras
 
-[`glCamera`](../include/ogl/core/glCamera.hpp) is an abstract base that holds all
-the mode-independent state (perspective projection, position/orientation,
-viewport) and every getter/setter. The behavior that actually differs between
-modes — how the view matrix is built and how mouse/keyboard input is
-interpreted — is virtual and lives in three concrete subclasses:
+[`glCamera`](../include/ogl/core/glCamera.hpp) is a single concrete class that
+holds all the camera state (perspective projection, position/orientation,
+viewport) and switches behaviour according to its current `MODE`:
 
-| mode    | subclass         | behaviour                                   |
-|:--------|:-----------------|:--------------------------------------------|
-| `FLY`   | `glCameraFly`    | free-fly first person (WASD/arrows + mouse) |
-| `ORBIT` | `glCameraOrbit`  | always looks at a fixed target point        |
-| `PAN`   | `glCameraPan`    | pan on the screen plane + wheel zoom        |
+| mode    | behaviour                                               |
+|:--------|:--------------------------------------------------------|
+| `FLY`   | free-fly first-person (arrow keys + mouse look/pan)     |
+| `ORBIT` | always looks at a fixed target; ignores input           |
+| `PAN`   | orbits a target with mouse, pans with keys, dollies with wheel |
 
-`glWindow` owns the cameras (`std::vector<std::unique_ptr<glCamera>>`) and
-creates them by mode; you normally don't construct a camera yourself — get the
-active one with `glWindow::getCurrentCamera()`, add more with
-`glWindow::addCamera(...)`, and change the active camera's mode with
-`glWindow::updateCurrentCamera(...)` (which swaps in the matching subclass).
+`glWindow` owns exactly one camera. The mode is set at creation time via the
+optional last argument of `create()` / `createOffscreen()` (default: `FLY`),
+and can be changed at any time with `glWindow::setCamera(mode, fov, pos, target)`
+or directly on the camera object via `glWindow::getCamera().setMode(mode)`.
 Every setter is always active: the current mode only decides how the stored
 state is interpreted, it never makes a setter silently do nothing.
