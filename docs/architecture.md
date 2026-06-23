@@ -109,9 +109,9 @@ viewport) and switches behaviour according to its current `MODE`:
 
 | mode    | behaviour                                               |
 |:--------|:--------------------------------------------------------|
-| `FLY`   | free-fly first-person (arrow keys + mouse look/pan)     |
-| `ORBIT` | always looks at a fixed target; ignores input           |
-| `PAN`   | orbits a target with mouse, pans with keys, dollies with wheel |
+| `FLY`   | free-fly first-person (arrow keys + mouse look, Ctrl+drag to strafe) |
+| `FIXED` | always looks at a fixed target; ignores all input       |
+| `ORBIT` | orbits a target with the mouse, pans with Shift+arrows, dollies with the wheel |
 
 `glWindow` owns exactly one camera. The mode is set at creation time via the
 optional last argument of `create()` / `createOffscreen()` (default: `FLY`),

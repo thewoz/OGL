@@ -239,7 +239,7 @@ namespace ogl {
       if(colorMap == colors.end()) {
 
         if(!create) {
-          fprintf(stderr, "error: color \"%s\" not found ogl::glColor\n", str.c_str());
+          fprintf(stderr, "ERROR [glColors]: color \"%s\" not found\n", str.c_str());
           abort();
         }
 

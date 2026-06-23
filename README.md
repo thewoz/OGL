@@ -4,7 +4,7 @@
 
 OGL provides a simple API for:
 - Creating windows
-- Managing a camera with switchable modes (FLY, ORBIT, PAN)
+- Managing a camera with switchable modes (FLY, FIXED, ORBIT)
 - Drawing 2D/3D basic shapes
 - Handling basic input
 - Integrating (optionally) ImGui
@@ -211,8 +211,9 @@ while(!window.shouldClose()) {
 }
 ```
 
-A complete, runnable ImGui example is in [`src/main_imgui.cpp`](src/main_imgui.cpp).
-Build and run it with:
+The same [`src/main.cpp`](src/main.cpp) doubles as the ImGui example: built
+without `OGL_WITHOUT_IMGUI` (via `make example_imgui`) the `#ifndef`-guarded
+blocks add an ImGui control panel. Build and run it with:
 
 ```bash
 make example_imgui

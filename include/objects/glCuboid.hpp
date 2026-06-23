@@ -70,6 +70,9 @@ namespace ogl {
     //****************************************************************************/
     ~glCuboid() { cleanInGpu(); }
 
+    glCuboid(glCuboid &&) noexcept = default;
+    glCuboid & operator = (glCuboid &&) noexcept = default;
+
     //****************************************************************************/
     // init()
     //****************************************************************************/
@@ -95,12 +98,12 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void render(const glCamera * camera) {
+    void render(const glCamera & camera) {
 
       DEBUG_LOG("glCuboid::render(" + name + ")");
 
       if(!isInited) {
-        fprintf(stderr, "glCuboid must be inited before render\n");
+        fprintf(stderr, "ERROR [glCuboid]: must be initialized before rendering\n");
         abort();
       }
 
@@ -108,19 +111,19 @@ namespace ogl {
 
       shader.use();
 
-      shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view", camera->getView());
+      shader.setUniform("projection", camera.getProjection());
+      shader.setUniform("view", camera.getView());
       shader.setUniform("model", modelMatrix);
       shader.setUniform("color", color);
       if(style == glShader::STYLE::SOLID) {
-        light.setInShader(shader, camera->getView());
+        light.setInShader(shader, camera.getView());
       }
 
       glBindVertexArray(vao);
 
       if(style == glShader::STYLE::WIREFRAME) {
         shader.setUniform("lineWidth", lineWidth);
-        shader.setUniform("viewport", camera->getViewport());
+        shader.setUniform("viewport", camera.getViewport());
         glDisable(GL_CULL_FACE);
       } else {
         glEnable(GL_CULL_FACE);

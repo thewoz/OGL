@@ -48,13 +48,13 @@ inline void snapshot(int width, int height, const char * outputfile, bool compre
   
     image = (GLubyte*)realloc(image, requiredSize);
     if(image == nullptr) {
-      fprintf(stderr, "snapshot error: realloc failed\n");
+      fprintf(stderr, "ERROR [snapshot]: realloc failed\n");
       abort();
     }
 
     TIFF * file = TIFFOpen(outputfile, "w");
     if(!file) {
-      fprintf(stderr, "snapshot error: could not open '%s'\n", outputfile);
+      fprintf(stderr, "ERROR [snapshot]: could not open '%s'\n", outputfile);
       abort();
     }
 
@@ -86,7 +86,7 @@ inline void snapshot(int width, int height, const char * outputfile, bool compre
     for(int i=0; i<height; ++i) {
       GLubyte * p = image + (width * 3 * (height - 1 - i));
       if(TIFFWriteScanline(file, p, i, 0) < 0) {
-        fprintf(stderr, "snapshot error: TIFFWriteScanline failed\n");
+        fprintf(stderr, "ERROR [snapshot]: TIFFWriteScanline failed\n");
         abort();
       }
     }
@@ -119,7 +119,7 @@ inline void snapshotPBO(int width, int height, const char* outputfile, bool comp
     // 5. Mappiamo il buffer
     GLubyte * ptr = (GLubyte*)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
     if(!ptr) {
-      fprintf(stderr, "snapshotPBO() error: glMapBuffer failed\n");
+      fprintf(stderr, "ERROR [snapshotPBO]: glMapBuffer failed\n");
       glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
       glDeleteBuffers(1, &pbo);
       abort();
@@ -128,7 +128,7 @@ inline void snapshotPBO(int width, int height, const char* outputfile, bool comp
     // 6. Creiamo il file TIFF
     TIFF * file = TIFFOpen(outputfile, "w");
     if(!file) {
-      fprintf(stderr, "snapshotPBO() error: cannot open '%s'\n", outputfile);
+      fprintf(stderr, "ERROR [snapshotPBO]: cannot open '%s'\n", outputfile);
       glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
       glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
       glDeleteBuffers(1, &pbo);
@@ -153,7 +153,7 @@ inline void snapshotPBO(int width, int height, const char* outputfile, bool comp
     for(int i=0; i<height; ++i) {
       const GLubyte* p = ptr + (width * 3 * (height - 1 - i)); // 3 bytes per pixel (RGB)
       if(TIFFWriteScanline(file, (void*)p, i, 0) < 0) {
-        fprintf(stderr, "snapshotPBO() error: TIFFWriteScanline failed at row %d\n", i);
+        fprintf(stderr, "ERROR [snapshotPBO]: TIFFWriteScanline failed at row %d\n", i);
         abort();
       }
     }

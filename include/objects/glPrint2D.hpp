@@ -83,6 +83,9 @@ namespace ogl {
     // ~glPrint2D()
     //****************************************************************************/
     ~glPrint2D() { cleanInGpu(); }
+
+    glPrint2D(glPrint2D &&) noexcept = default;
+    glPrint2D & operator = (glPrint2D &&) noexcept = default;
     
     //****************************************************************************/
     // init()
@@ -116,7 +119,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, const std::string & _text, float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) {
+    void render(const glCamera & camera, const std::string & _text, float _x, float _y, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) {
       
       DEBUG_LOG("glPrint2D::render(" + name + ")");
 
@@ -136,7 +139,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, const std::string & _text) {
+    void render(const glCamera & camera, const std::string & _text) {
       
       DEBUG_LOG("glPrint2D::render(" + name + ")");
 
@@ -149,7 +152,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera) {
+    void render(const glCamera & camera) {
             
       DEBUG_LOG("glPrint2D::render(" + name + ")");
       
@@ -163,7 +166,7 @@ namespace ogl {
     //****************************************************************************/
     // _render()
     //****************************************************************************/
-    void _render(const glCamera * camera) {
+    void _render(const glCamera & camera) {
       
       DEBUG_LOG("glPrint2D::_render(" + name + ")");
       
@@ -177,7 +180,7 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getOrthoProjection());
+      shader.setUniform("projection", camera.getOrthoProjection());
       shader.setUniform("color",      color);
                   
       glEnable(GL_CULL_FACE);

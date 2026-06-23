@@ -142,7 +142,7 @@ namespace ogl {
     void setInShader(const ogl::glShader & shader) {
 
       if(!isInitedInGpu) {
-        fprintf(stderr, "Error glMaterial: must be initialized in the GPU before set in the shader\n");
+        fprintf(stderr, "ERROR [glMaterial]: must be initialized in GPU before setting in shader\n");
         abort();
       }
 
@@ -179,7 +179,7 @@ namespace ogl {
     void setInGpu() {
 
       if(!isInited) {
-        fprintf(stderr, "Error glMaterial: material must be inizialized before set in Gpu\n");
+        fprintf(stderr, "ERROR [glMaterial]: must be initialized before uploading to GPU\n");
         abort();
       }
 

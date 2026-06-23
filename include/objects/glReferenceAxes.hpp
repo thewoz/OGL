@@ -39,7 +39,7 @@ namespace ogl {
   // Renders a small orientation gizmo (XYZ axes) in the bottom-right corner of
   // the viewport. The gizmo always tracks the camera orientation: it uses only
   // the rotation part of the view matrix so the axes stay centred as the camera
-  // moves. Works correctly with all three camera modes (FLY, ORBIT, PAN).
+  // moves. Works correctly with all three camera modes (FLY, FIXED, ORBIT).
   //
   // Axis colors: X = red, Y = green, Z = blue.
   // Axis labels (X, Y, Z) are rendered as 2D text overlaid on the main
@@ -55,8 +55,9 @@ namespace ogl {
     GLuint vao = 0;
     GLuint vbo = 0;
 
-    // Axis colors: X=red, Y=green, Z=blue.
-    const glm::vec3 colors[3] = {
+    // Axis colors: X=red, Y=green, Z=blue. Shared constant, not per-object state
+    // (a const member would otherwise make the class non-move-assignable).
+    static inline const glm::vec3 colors[3] = {
       glm::vec3(1.0f, 0.0f, 0.0f),
       glm::vec3(0.0f, 1.0f, 0.0f),
       glm::vec3(0.0f, 0.0f, 1.0f)
@@ -82,6 +83,9 @@ namespace ogl {
     // ~glReferenceAxes()
     //****************************************************************************/
     ~glReferenceAxes() { cleanInGpu(); }
+
+    glReferenceAxes(glReferenceAxes &&) noexcept = default;
+    glReferenceAxes & operator = (glReferenceAxes &&) noexcept = default;
 
     //****************************************************************************/
     // init()
@@ -111,12 +115,12 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera) {
+    void render(const glCamera & camera) {
 
       DEBUG_LOG("glReferenceAxes::render(" + name + ")");
 
       if(!isInited) {
-        fprintf(stderr, "glReferenceAxes must be inited before render\n");
+        fprintf(stderr, "ERROR [glReferenceAxes]: must be initialized before rendering\n");
         abort();
       }
 
@@ -145,10 +149,10 @@ namespace ogl {
 
       // Extract only the rotation from the view matrix by keeping the upper-left
       // 3×3 block and setting the 4th column to identity. This is correct for
-      // all camera modes: FLY/ORBIT use lookAt (rotation is the 3×3 block),
-      // PAN composes T1*R*T2 (the 3×3 block is still just R after the
+      // all camera modes: FLY/FIXED use lookAt (rotation is the 3×3 block),
+      // ORBIT composes T1*R*T2 (the 3×3 block is still just R after the
       // radians fix in glCamera::eulerRotation()).
-      glm::mat4 viewRotOnly = glm::mat4(glm::mat3(camera->getView()));
+      glm::mat4 viewRotOnly = glm::mat4(glm::mat3(camera.getView()));
 
       shader.setUniform("projection", projection);
       shader.setUniform("view",       viewRotOnly);

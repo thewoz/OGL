@@ -62,6 +62,9 @@ namespace ogl {
     // ~glQuad2D
     //****************************************************************************/
     ~glQuad2D() { cleanInGpu(); }
+
+    glQuad2D(glQuad2D &&) noexcept = default;
+    glQuad2D & operator = (glQuad2D &&) noexcept = default;
     
     //****************************************************************************/
     // init
@@ -101,12 +104,12 @@ namespace ogl {
     //****************************************************************************/
     // render
     //****************************************************************************/
-    void render(const glCamera * camera) {
+    void render(const glCamera & camera) {
       
       DEBUG_LOG("glQuad2D::render(" + name + ")");
       
       if(!isInited){
-        fprintf(stderr, "glQuad2D must be inited before render\n");
+        fprintf(stderr, "ERROR [glQuad2D]: must be initialized before rendering\n");
         abort();
       }
       
@@ -115,7 +118,7 @@ namespace ogl {
       shader.use();
       
       shader.setUniform("color", color);
-      shader.setUniform("viewport", camera->getViewport());
+      shader.setUniform("viewport", camera.getViewport());
       
       glDisable(GL_CULL_FACE);
 

@@ -115,6 +115,47 @@ namespace ogl {
 
     glObject(const glObject &) = delete;
     glObject & operator = (const glObject &) = delete;
+
+    //***************************************************************************
+    // Move is allowed and transfers ownership of the GPU resources. The base
+    // move resets the moved-from object's bookkeeping flags so that its
+    // destructor (and any later cleanInGpu()) becomes a no-op: this is what
+    // makes a default-generated move in the subclasses safe, since the freed
+    // source will never delete the handles now owned by the destination.
+    //***************************************************************************
+    glObject(glObject && o) noexcept
+      : name(std::move(o.name)), windowID(o.windowID), shader(std::move(o.shader)),
+        isInited(o.isInited), isInitedInGpu(o.isInitedInGpu), isToUpdateInGpu(o.isToUpdateInGpu),
+        _position(o._position), _rotation(o._rotation), _scale(o._scale),
+        modelMatrix(o.modelMatrix), style(o.style), lineWidth(o.lineWidth), color(o.color) {
+      o.isInited        = false;
+      o.isInitedInGpu   = false;
+      o.isToUpdateInGpu = false;
+      o.windowID        = 0;
+    }
+
+    glObject & operator = (glObject && o) noexcept {
+      if(this != &o) {
+        name            = std::move(o.name);
+        windowID        = o.windowID;
+        shader          = std::move(o.shader);
+        isInited        = o.isInited;
+        isInitedInGpu   = o.isInitedInGpu;
+        isToUpdateInGpu = o.isToUpdateInGpu;
+        _position       = o._position;
+        _rotation       = o._rotation;
+        _scale          = o._scale;
+        modelMatrix     = o.modelMatrix;
+        style           = o.style;
+        lineWidth       = o.lineWidth;
+        color           = o.color;
+        o.isInited        = false;
+        o.isInitedInGpu   = false;
+        o.isToUpdateInGpu = false;
+        o.windowID        = 0;
+      }
+      return *this;
+    }
     
     //****************************************************************************
     // initInGpu() -
@@ -126,7 +167,7 @@ namespace ogl {
       DEBUG_LOG("glObject::initInGpu(" + name + ")");
       
       if(!isInited){
-        fprintf(stderr, "glObject must be inited before set in GPU\n");
+        fprintf(stderr, "ERROR [glObject]: must be initialized before uploading to GPU\n");
         abort();
       }
       
@@ -190,17 +231,19 @@ namespace ogl {
   protected:
     
     //****************************************************************************
-    // updateModelMatrix - rebuild M = T * S * Rx * Ry * Rz.
-    // Called every time position/rotation/scale changes.
+    // updateModelMatrix - rebuild M = T * Rx * Ry * Rz * S.
+    // Called every time position/rotation/scale changes. Scale is applied first
+    // (in object space) and rotation after it, so a non-uniform scale on a
+    // rotated object stretches along the object's own axes instead of shearing.
     //****************************************************************************
     inline void updateModelMatrix() {
 
       modelMatrix = glm::mat4(1.0f);
       modelMatrix = glm::translate(modelMatrix, _position);
-      modelMatrix = glm::scale    (modelMatrix, _scale);
       modelMatrix = glm::rotate   (modelMatrix, _rotation.x, glm::vec3(1, 0, 0));
       modelMatrix = glm::rotate   (modelMatrix, _rotation.y, glm::vec3(0, 1, 0));
       modelMatrix = glm::rotate   (modelMatrix, _rotation.z, glm::vec3(0, 0, 1));
+      modelMatrix = glm::scale    (modelMatrix, _scale);
 
     }
     

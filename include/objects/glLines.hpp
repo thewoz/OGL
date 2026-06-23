@@ -69,6 +69,9 @@ namespace ogl {
     // ~glLines()
     //****************************************************************************/
     ~glLines() { cleanInGpu(); }
+
+    glLines(glLines &&) noexcept = default;
+    glLines & operator = (glLines &&) noexcept = default;
     
     //****************************************************************************/
     // init()
@@ -116,12 +119,12 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, int from = 0, int to = -1, int strip = -1, int stripOffset = -1, int index = -1) {
+    void render(const glCamera & camera, int from = 0, int to = -1, int strip = -1, int stripOffset = -1, int index = -1) {
       
       DEBUG_LOG("glLines::render(" + name + ")");
           
       if(!isInited){
-        fprintf(stderr, "glLines must be inited before render\n");
+        fprintf(stderr, "ERROR [glLines]: must be initialized before rendering\n");
         abort();
       }
       
@@ -129,11 +132,11 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection",   camera->getProjection());
-      shader.setUniform("view",         camera->getView());
+      shader.setUniform("projection",   camera.getProjection());
+      shader.setUniform("view",         camera.getView());
       shader.setUniform("model",        modelMatrix);
       shader.setUniform("lineWidth",    lineWidth);
-      shader.setUniform("viewport",     camera->getViewport());
+      shader.setUniform("viewport",     camera.getViewport());
       shader.setUniform("uniformColor", glm::vec4(1.0f));
                         
       glBindVertexArray(vao);

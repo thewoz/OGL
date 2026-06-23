@@ -39,11 +39,14 @@ int main(int argc, char * const argv[]) {
 
   ogl::glWindow window;
   window.create(1024, 768);
+  // Start in free-look mode: the cursor is captured and drives the camera.
+  // Press P to reveal the ImGui panel (see the loop below).
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
 
   window.getCamera().setPosition(3, 1.5f, 0);
   window.getCamera().setYaw(180);
   window.getCamera().setPitch(-20);
+  //window.getCamera().setMode(ogl::glCamera::ORBIT);
 
   // --- Scene objects ---
 
@@ -70,6 +73,14 @@ int main(int argc, char * const argv[]) {
   bool      showGrid       = true;
   bool      showAxes       = true;
   bool      showModel      = true;
+
+  // The parameters panel is hidden at start; press P to toggle it. While it is
+  // open the cursor is freed and the camera is frozen, so the mouse can drive
+  // the widgets. Closing it re-captures the cursor for free-look navigation.
+  bool showPanel = false;
+  bool pWasDown  = false;
+
+  ogl::glPrint2D hintText(10, 45, ogl::glColors::white, 0.5f);
 #endif
 
   while(!window.shouldClose()) {
@@ -77,33 +88,53 @@ int main(int argc, char * const argv[]) {
     window.renderBegin();
 
 #ifndef OGL_WITHOUT_IMGUI
+    // --- Toggle the panel with P (edge-triggered) ---
+
+    bool pIsDown = (glfwGetKey(window.window, GLFW_KEY_P) == GLFW_PRESS);
+    if(pIsDown && !pWasDown) {
+      showPanel = !showPanel;
+      if(showPanel) {
+        window.setCursorInputMode(GLFW_CURSOR_NORMAL);
+        window.disableMouseOnCamera();
+      } else {
+        window.setCursorInputMode(GLFW_CURSOR_DISABLED);
+        window.enableMouseOnCamera();
+        window.resetMouse();  // avoid a camera jump when re-capturing the cursor
+      }
+    }
+    pWasDown = pIsDown;
+
     // --- ImGui panel ---
 
-    ImGui::SetNextWindowPos(ImVec2(10, 40), ImGuiCond_Once);
-    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Once);
+    if(showPanel) {
 
-    ImGui::Begin("Scene Controls");
+      ImGui::SetNextWindowPos(ImVec2(10, 40), ImGuiCond_Once);
+      ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Once);
 
-    ImGui::Text("FPS: %d", window.getFPS());
-    ImGui::Separator();
+      ImGui::Begin("Scene Controls");
 
-    ImGui::Text("Cuboid");
-    ImGui::DragFloat3("Position##cuboid", &cuboidPos.x, 0.01f, -5.0f, 5.0f);
+      ImGui::Text("FPS: %d", window.getFPS());
+      ImGui::Separator();
 
-    ImGui::Separator();
+      ImGui::Text("Cuboid");
+      ImGui::DragFloat3("Position##cuboid", &cuboidPos.x, 0.01f, -5.0f, 5.0f);
 
-    ImGui::Text("Light");
-    ImGui::DragFloat3("Direction##light",  &lightDir.x,     0.01f, -1.0f, 1.0f);
-    ImGui::SliderFloat("Intensity##light", &lightIntensity, 0.0f,  2.0f);
+      ImGui::Separator();
 
-    ImGui::Separator();
+      ImGui::Text("Light");
+      ImGui::DragFloat3("Direction##light",  &lightDir.x,     0.01f, -1.0f, 1.0f);
+      ImGui::SliderFloat("Intensity##light", &lightIntensity, 0.0f,  2.0f);
 
-    ImGui::Text("Visibility");
-    ImGui::Checkbox("Grid",  &showGrid);
-    ImGui::Checkbox("Axes",  &showAxes);
-    ImGui::Checkbox("TRex",  &showModel);
+      ImGui::Separator();
 
-    ImGui::End();
+      ImGui::Text("Visibility");
+      ImGui::Checkbox("Grid",  &showGrid);
+      ImGui::Checkbox("Axes",  &showAxes);
+      ImGui::Checkbox("TRex",  &showModel);
+
+      ImGui::End();
+
+    }
 
     // --- Apply ImGui parameters ---
 
@@ -115,18 +146,23 @@ int main(int argc, char * const argv[]) {
     // --- Render scene ---
 
 #ifndef OGL_WITHOUT_IMGUI
-    if(showAxes)  axes.render(&window.getCamera());
-    if(showGrid)  grid.render(&window.getCamera());
-    if(showModel) model.render(&window.getCamera());
+    if(showAxes)  axes.render(window.getCamera());
+    if(showGrid)  grid.render(window.getCamera());
+    if(showModel) model.render(window.getCamera());
 #else
-    axes.render(&window.getCamera());
-    grid.render(&window.getCamera());
-    model.render(&window.getCamera());
+    axes.render(window.getCamera());
+    grid.render(window.getCamera());
+    model.render(window.getCamera());
 #endif
 
-    cuboid.render(&window.getCamera());
-    fpsText.render(&window.getCamera(), "FPS: " + std::to_string(window.getFPS()));
-    referenceAxes.render(&window.getCamera());
+    cuboid.render(window.getCamera());
+    fpsText.render(window.getCamera(), "FPS: " + std::to_string(window.getFPS()));
+    referenceAxes.render(window.getCamera());
+
+#ifndef OGL_WITHOUT_IMGUI
+    hintText.render(window.getCamera(), showPanel ? "Press P to hide parameters"
+                                                  : "Press P to show parameters");
+#endif
 
     window.renderEnd();
 

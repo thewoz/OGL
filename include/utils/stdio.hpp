@@ -53,7 +53,7 @@ namespace ogl::io {
         strcpy(dst, path);
       } else if(path[0]=='.') {
         if(getcwd(dst, PATH_MAX)==NULL) {
-          fprintf(stderr, "error getcwd(): (%d) %s\n", errno, strerror(errno));
+          fprintf(stderr, "ERROR [getcwd]: (%d) %s\n", errno, strerror(errno));
           abort();
         }
         strcat(dst, "/");
@@ -61,7 +61,7 @@ namespace ogl::io {
       } else if(path[0]=='~') {
         struct passwd * passwdEnt = getpwuid(getuid());
         if(passwdEnt == NULL) {
-          fprintf(stderr, "error getpwuid(): cannot resolve home directory\n");
+          fprintf(stderr, "ERROR [getpwuid]: cannot resolve home directory\n");
           abort();
         }
         strcpy(dst, passwdEnt->pw_dir);
@@ -69,7 +69,7 @@ namespace ogl::io {
       } else {
         // bare relative path: resolve it against the current working directory
         if(getcwd(dst, PATH_MAX)==NULL) {
-          fprintf(stderr, "error getcwd(): (%d) %s\n", errno, strerror(errno));
+          fprintf(stderr, "ERROR [getcwd]: (%d) %s\n", errno, strerror(errno));
           abort();
         }
         strcat(dst, "/");

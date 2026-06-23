@@ -32,6 +32,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <unordered_map>
 
 //****************************************************************************/
 // namespace ogl
@@ -61,8 +62,14 @@ namespace ogl {
     
     bool isInited;
     bool isInitedInGpu;
-    
+
     std::string name = "";
+
+    // Cache of uniform name -> location for the current program. Avoids a
+    // glGetUniformLocation (string hash + driver lookup) on every setUniform call.
+    // Inactive uniforms are cached as -1 too, so they are skipped cheaply.
+    // Invalidated whenever the program is (re)created.
+    mutable std::unordered_map<std::string, GLint> uniformLocationCache;
 
   public:
     
@@ -88,6 +95,33 @@ namespace ogl {
     //****************************************************************************/
     glShader(const glShader &) = delete;
     glShader & operator = (const glShader &) = delete;
+
+    glShader(glShader && o) noexcept
+      : windowID(o.windowID), program(o.program),
+        vertexCode(std::move(o.vertexCode)), fragmentCode(std::move(o.fragmentCode)),
+        geometryCode(std::move(o.geometryCode)),
+        isInited(o.isInited), isInitedInGpu(o.isInitedInGpu),
+        name(std::move(o.name)),
+        uniformLocationCache(std::move(o.uniformLocationCache)), style(o.style) {
+      o.program = 0;
+    }
+
+    glShader & operator = (glShader && o) noexcept {
+      if(this != &o) {
+        if(program != 0) glDeleteProgram(program);
+        windowID     = o.windowID;
+        program      = o.program;      o.program = 0;
+        vertexCode   = std::move(o.vertexCode);
+        fragmentCode = std::move(o.fragmentCode);
+        geometryCode = std::move(o.geometryCode);
+        isInited     = o.isInited;
+        isInitedInGpu = o.isInitedInGpu;
+        name         = std::move(o.name);
+        uniformLocationCache = std::move(o.uniformLocationCache);
+        style        = o.style;
+      }
+      return *this;
+    }
     
     //****************************************************************************/
     // initModel
@@ -154,6 +188,7 @@ namespace ogl {
         glDeleteProgram(program);
         program = 0;
       }
+      uniformLocationCache.clear();
       isInitedInGpu = false;
 
       // 1. Retrieve the vertex/fragment source code from filePath
@@ -204,7 +239,7 @@ namespace ogl {
         }
         
       } catch (std::system_error & e) {
-        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << strerror(errno) << std::endl;
+        fprintf(stderr, "ERROR [glShader]: file not successfully read: %s\n", strerror(errno));
         abort();
       }
       
@@ -232,25 +267,21 @@ namespace ogl {
     
     //****************************************************************************/
     // setUniform - upload a typed value to a named uniform.
-    // Inactive uniforms (location == -1 with no GL error) are silently skipped;
-    // this avoids spurious aborts when the optimizer removes unused uniforms.
+    // The location is looked up once and cached (see getUniformLocation).
+    // Inactive uniforms (location == -1, e.g. optimized-out by the GLSL compiler)
+    // are silently skipped; this avoids spurious aborts on unused uniforms.
     //****************************************************************************/
     template <typename T>
     inline void setUniform(const std::string & name, const T & value) const {
 
       if(!isInitedInGpu) {
-        fprintf(stderr, "shader must be inited in gpu before use in render\n");
+        fprintf(stderr, "ERROR [glShader]: must be initialized in GPU before use\n");
         abort();
       }
 
-      GLint location = glGetUniformLocation(program, name.c_str());
+      GLint location = getUniformLocation(name);
 
-      // Abort only if the lookup itself triggered a GL error (e.g. invalid program).
-      // A location of -1 without a GL error means the uniform is inactive/optimized-out.
-      if(location == -1 && glGetError() != 0) {
-        fprintf(stderr, "error in get uniform location \"%s\" in program %d\n", name.c_str(), program);
-        abort();
-      }
+      if(location == -1) return; // inactive / optimized-out uniform
 
       setUniform(location, value);
 
@@ -266,13 +297,14 @@ namespace ogl {
       DEBUG_LOG("glShader::initInGpu(" + name + ") on windowID " + std::to_string(windowID));
 
       if(!isInited){
-        fprintf(stderr, "shader must be inited before set in GPU\n");
+        fprintf(stderr, "ERROR [glShader]: must be initialized before uploading to GPU\n");
         abort();
       }
 
       // Recompiling (e.g. after a context change): drop the previous program so
-      // its handle is not leaked.
+      // its handle is not leaked, and invalidate the stale uniform locations.
       if(program != 0) { glDeleteProgram(program); program = 0; }
+      uniformLocationCache.clear();
 
       const GLchar * vShaderCode = vertexCode.c_str();
       const GLchar * fShaderCode = fragmentCode.c_str();
@@ -292,7 +324,7 @@ namespace ogl {
       
       if(!success) {
         glGetShaderInfoLog( vertex, 512, NULL, infoLog );
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+        fprintf(stderr, "ERROR [glShader]: vertex shader compilation failed\n%s\n", infoLog);
         abort();
       }
             
@@ -306,7 +338,7 @@ namespace ogl {
       
       if(!success){
         glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+        fprintf(stderr, "ERROR [glShader]: fragment shader compilation failed\n%s\n", infoLog);
         abort();
       }
             
@@ -323,7 +355,7 @@ namespace ogl {
          
         if(!success) {
           glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-          std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+          fprintf(stderr, "ERROR [glShader]: geometry shader compilation failed\n%s\n", infoLog);
           abort();
         }
                   
@@ -344,7 +376,7 @@ namespace ogl {
        
       if(!success) {
         glGetProgramInfoLog(program, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+        fprintf(stderr, "ERROR [glShader]: program linking failed\n%s\n", infoLog);
         abort();
       }
        
@@ -364,7 +396,23 @@ namespace ogl {
     inline void setName(std::string _name) { name = _name; }
     
   private:
-    
+
+    //****************************************************************************/
+    // getUniformLocation - cached glGetUniformLocation. Misses (including
+    // inactive uniforms, location == -1) are cached too, so a name is queried
+    // from the driver at most once per compiled program.
+    //****************************************************************************/
+    inline GLint getUniformLocation(const std::string & uniformName) const {
+
+      auto it = uniformLocationCache.find(uniformName);
+      if(it != uniformLocationCache.end()) return it->second;
+
+      GLint location = glGetUniformLocation(program, uniformName.c_str());
+      uniformLocationCache[uniformName] = location;
+      return location;
+
+    }
+
     //****************************************************************************/
     // isToInitInGpu
     //****************************************************************************/

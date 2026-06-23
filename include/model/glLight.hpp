@@ -57,6 +57,13 @@ namespace ogl {
     glm::vec3 position;   // world-space position  (used by point lights)
     glm::vec3 direction;  // world-space direction (used by directional lights)
 
+    // Whether a real position / direction was explicitly set. If neither was,
+    // the shaders use a head light coming from the camera. Without these flags
+    // the default world position (0,0,0) would map to a *non-zero* view-space
+    // position and be wrongly treated as a point light at the world origin.
+    bool hasPosition  = false;
+    bool hasDirection = false;
+
     glm::vec3 ambient;    // ambient  contribution
     glm::vec3 diffuse;    // diffuse  contribution
     glm::vec3 specular;   // specular contribution
@@ -73,8 +80,8 @@ namespace ogl {
     //****************************************************************************//
     // setters
     //****************************************************************************//
-    void setPosition(const glm::vec3& _position)   { position  = _position; }
-    void setDirection(const glm::vec3& _direction) { direction = _direction; }
+    void setPosition(const glm::vec3& _position)   { position  = _position;  hasPosition  = true; }
+    void setDirection(const glm::vec3& _direction) { direction = _direction; hasDirection = true; }
     void setAmbient(const glm::vec3& _ambient)     { ambient   = _ambient; }
     void setDiffuse(const glm::vec3& _diffuse)     { diffuse   = _diffuse; }
     void setSpecular(const glm::vec3& _specular)   { specular  = _specular; }
@@ -86,13 +93,17 @@ namespace ogl {
 
       // The shaders work in view space (the camera is at the origin there), so
       // the light position/direction are transformed by the view matrix to match
-      // fragPos and fragNormal.
-      glm::vec3 viewPos = glm::vec3(view * glm::vec4(position, 1.0f));
-      glm::vec3 viewDir = glm::mat3(view) * direction;
+      // fragPos and fragNormal. Send a real position/direction only if one was
+      // explicitly set; otherwise send zeros so the shaders fall back to a head
+      // light coming from the camera (a light that follows the viewpoint).
+      glm::vec3 viewPos(0.0f);
+      if(hasPosition) viewPos = glm::vec3(view * glm::vec4(position, 1.0f));
 
-      // Keep a null direction as zero: it tells the shader to use the point
-      // light position (or the head-light fallback) instead of a directional one.
-      if(glm::length(viewDir) > 0.0f) viewDir = glm::normalize(viewDir);
+      glm::vec3 viewDir(0.0f);
+      if(hasDirection) {
+        viewDir = glm::mat3(view) * direction;
+        if(glm::length(viewDir) > 0.0f) viewDir = glm::normalize(viewDir);
+      }
 
       shader.setUniform("light.position",  viewPos);
       shader.setUniform("light.direction", viewDir);

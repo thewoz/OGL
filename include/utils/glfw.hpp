@@ -38,7 +38,7 @@ namespace glfw {
   //****************************************************************************//
   inline void glfwErrorCallback(int error, const char * description) {
 
-    fprintf(stderr, "GLFW error (%d): %s\n", error, description);
+    fprintf(stderr, "ERROR [GLFW] (%d): %s\n", error, description);
 
   }
 
@@ -58,8 +58,8 @@ namespace glfw {
       
       // Init GLFW
       if(!glfwInit()) {
-        fprintf(stderr, "GLFW init error\n");
-        exit(EXIT_FAILURE);
+        fprintf(stderr, "ERROR [GLFW]: initialization failed\n");
+        abort();
       }
       
       // Set all the required options for GLFW

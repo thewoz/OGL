@@ -71,6 +71,11 @@ namespace ogl {
       // ~glQuad()
       //****************************************************************************/
       ~glQuad() { cleanInGpu(); }
+
+      // The base glObject move neuters the moved-from object's destructor, so a
+      // defaulted move safely transfers ownership of the GPU handles.
+      glQuad(glQuad &&) noexcept = default;
+      glQuad & operator = (glQuad &&) noexcept = default;
     
       //****************************************************************************/
       // init()
@@ -102,7 +107,7 @@ namespace ogl {
         DEBUG_LOG("glQuad::init(" + name + ")");
 
         if(_vertices.size() != 6) {
-          fprintf(stderr, "glQuad init error vertices must be six\n");
+          fprintf(stderr, "ERROR [glQuad]: vertices must be six\n");
           abort();
         }
         
@@ -126,12 +131,12 @@ namespace ogl {
       //****************************************************************************/
       // render()
       //****************************************************************************/
-      void render(const glCamera * camera) {
+      void render(const glCamera & camera) {
           
         DEBUG_LOG("glQuad::render(" + name + ")");
 
         if(!isInited) {
-          fprintf(stderr, "glQuad must be inited before render\n");
+          fprintf(stderr, "ERROR [glQuad]: must be initialized before rendering\n");
           abort();
         }
 
@@ -139,19 +144,19 @@ namespace ogl {
 
         shader.use();
 
-        shader.setUniform("projection", camera->getProjection());
-        shader.setUniform("view", camera->getView());
+        shader.setUniform("projection", camera.getProjection());
+        shader.setUniform("view", camera.getView());
         shader.setUniform("model", modelMatrix);
         shader.setUniform("color", color);
         if(style == glShader::STYLE::SOLID) {
-          light.setInShader(shader, camera->getView());
+          light.setInShader(shader, camera.getView());
         }
 
         glBindVertexArray(vao);
 
         if(style == glShader::STYLE::WIREFRAME) {
           shader.setUniform("lineWidth", lineWidth);
-          shader.setUniform("viewport",  camera->getViewport());
+          shader.setUniform("viewport",  camera.getViewport());
           glDisable(GL_CULL_FACE);
         } else if(cullFaceEnabled) {
           glEnable(GL_CULL_FACE);

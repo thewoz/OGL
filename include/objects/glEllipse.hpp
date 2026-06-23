@@ -75,6 +75,9 @@ namespace ogl {
     // ~glEllipse()
     //****************************************************************************/
     ~glEllipse() { cleanInGpu(); }
+
+    glEllipse(glEllipse &&) noexcept = default;
+    glEllipse & operator = (glEllipse &&) noexcept = default;
     
     //****************************************************************************/
     // init()
@@ -109,12 +112,12 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera) {
+    void render(const glCamera & camera) {
             
       DEBUG_LOG("glEllipse::render(" + name + ")");
       
       if(!isInited){
-        fprintf(stderr, "glEllipse must be inited before render\n");
+        fprintf(stderr, "ERROR [glEllipse]: must be initialized before rendering\n");
         abort();
       }
       
@@ -122,19 +125,19 @@ namespace ogl {
       
       shader.use();
 
-      shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getView());
+      shader.setUniform("projection", camera.getProjection());
+      shader.setUniform("view",       camera.getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("color",      color);
       if(style == glShader::STYLE::SOLID) {
-        light.setInShader(shader, camera->getView());
+        light.setInShader(shader, camera.getView());
       }
 
       glBindVertexArray(vao);
 
       if(style == glShader::STYLE::WIREFRAME) {
         shader.setUniform("lineWidth", lineWidth);
-        shader.setUniform("viewport",  camera->getViewport());
+        shader.setUniform("viewport",  camera.getViewport());
         glDisable(GL_CULL_FACE);
       }
       

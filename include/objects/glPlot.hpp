@@ -115,6 +115,9 @@ namespace ogl {
     //****************************************************************************/
     ~glPlot() { cleanInGpu(); }
 
+    glPlot(glPlot &&) noexcept = default;
+    glPlot & operator = (glPlot &&) noexcept = default;
+
     //****************************************************************************/
     // init()
     //****************************************************************************/
@@ -269,12 +272,12 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera) {
+    void render(const glCamera & camera) {
 
       DEBUG_LOG("glPlot::render(" + name + ")");
 
       if(!isInited) {
-        fprintf(stderr, "glPlot must be inited before render\n");
+        fprintf(stderr, "ERROR [glPlot]: must be initialized before rendering\n");
         abort();
       }
 
@@ -282,12 +285,12 @@ namespace ogl {
 
       shader.use();
 
-      shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getView());
+      shader.setUniform("projection", camera.getProjection());
+      shader.setUniform("view",       camera.getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("uniformColor", glm::vec4(1.0f));
       shader.setUniform("lineWidth",  lineWidth);
-      shader.setUniform("viewport",   camera->getViewport());
+      shader.setUniform("viewport",   camera.getViewport());
 
       glBindVertexArray(vao);
 
@@ -423,7 +426,7 @@ namespace ogl {
     //****************************************************************************/
     // renderLabels()
     //****************************************************************************/
-    void renderLabels(const glCamera * camera) {
+    void renderLabels(const glCamera & camera) {
 
       AxisRange xDrawRange = getDrawRange(xRange, axisOrigin.x, xLog);
       AxisRange yDrawRange = getDrawRange(yRange, axisOrigin.y, yLog);
@@ -459,7 +462,7 @@ namespace ogl {
     //****************************************************************************/
     // renderAxisLinearTickLabels()
     //****************************************************************************/
-    void renderAxisLinearTickLabels(const glCamera * camera, int axis, const AxisRange & range, float step) {
+    void renderAxisLinearTickLabels(const glCamera & camera, int axis, const AxisRange & range, float step) {
 
       if(step <= 0.0f) return;
 
@@ -480,7 +483,7 @@ namespace ogl {
     //****************************************************************************/
     // renderAxisLogTickLabels()
     //****************************************************************************/
-    void renderAxisLogTickLabels(const glCamera * camera, int axis, const AxisRange & range) {
+    void renderAxisLogTickLabels(const glCamera & camera, int axis, const AxisRange & range) {
 
       if(range.min <= 0.0f || range.max <= 0.0f) return;
 
@@ -565,15 +568,19 @@ namespace ogl {
     //****************************************************************************/
     void cleanInGpu() {
 
-      if(vbo != 0) glDeleteBuffers(1, &vbo);
-      if(ibo != 0) glDeleteBuffers(1, &ibo);
-      if(vao != 0) glDeleteVertexArrays(1, &vao);
+      if(isInitedInGpu) {
 
-      vao = 0;
-      vbo = 0;
-      ibo = 0;
-      
-      isInitedInGpu = false;
+        if(vbo != 0) glDeleteBuffers(1, &vbo);
+        if(ibo != 0) glDeleteBuffers(1, &ibo);
+        if(vao != 0) glDeleteVertexArrays(1, &vao);
+
+        vao = 0;
+        vbo = 0;
+        ibo = 0;
+
+        isInitedInGpu = false;
+
+      }
 
     }
 

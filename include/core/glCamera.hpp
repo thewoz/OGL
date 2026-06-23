@@ -38,29 +38,64 @@ namespace ogl {
   //****************************************************************************/
   // glCamera
   //****************************************************************************/
-  // A single camera class that changes behaviour according to its current mode:
-  //
-  //   FLY    free-fly first-person (arrow keys + mouse look / pan with modifier)
-  //   ORBIT  always looks at a fixed target; ignores keyboard and mouse input
-  //   PAN    orbits a target with mouse, pans with arrow keys, dollies with wheel
-  //
+  // A single camera class that changes behaviour according to its current mode.
   // The mode is set at construction time and can be changed at any time via
   // setMode(). All setters are always active: the mode only decides how the
   // stored state is interpreted when building the view matrix or processing input.
+  //
+  // ── FLY ─────────────────────────────────────────────────────────────────────
+  //   First-person free-fly. The camera moves through the world independently,
+  //   like a drone. 'position' is the eye; 'front/right/up' are derived from
+  //   yaw/pitch and change as you look around.
+  //
+  //   Mouse drag            → look around (yaw / pitch)
+  //   Ctrl + mouse drag     → strafe (translate position)
+  //   Arrow keys            → move forward / back / left / right
+  //   Scroll wheel          → (no effect in FLY)
+  //
+  //   Best for: free exploration of a 3-D scene, first-person navigation.
+  //
+  // ── FIXED ────────────────────────────────────────────────────────────────────
+  //   Locked look-at. The camera always points at 'target' using glm::lookAt;
+  //   yaw/pitch/keyboard/mouse are all ignored. The view is entirely controlled
+  //   by setting 'position' and 'target' explicitly in code.
+  //
+  //   All input devices       → ignored
+  //
+  //   Best for: cinematic shots, fixed inspection angles, offscreen rendering
+  //             where the view must be set programmatically and must never drift.
+  //
+  // ── ORBIT ────────────────────────────────────────────────────────────────────
+  //   Turntable orbit. The camera revolves around 'target' at a fixed radius
+  //   (= |position − target|). Think of it as spinning a turntable under an
+  //   object while the camera watches from above/beside.
+  //
+  //   Mouse drag            → orbit around target (yaw / pitch)
+  //   Ctrl + mouse drag     → translate both camera and target (pan the scene)
+  //   Shift + Arrow keys    → pan the scene (translate camera + target together)
+  //   Scroll wheel          → dolly in/out (move camera along its radius)
+  //
+  //   IMPORTANT: position must differ from target, otherwise the orbit radius
+  //   is zero and the scene appears frozen. A typical setup:
+  //     camera.setTarget(0, 0, 0);
+  //     camera.setPosition(0, 0, 5);  // radius = 5
+  //
+  //   Best for: inspecting a 3-D object from all sides (like a model viewer).
   //****************************************************************************/
   class glCamera {
 
   public:
 
-    enum MODE     { FLY, ORBIT, PAN };
+    enum MODE     { FLY, FIXED, ORBIT };
     enum MOVEMENT { FORWARD, BACKWARD, LEFT, RIGHT };
 
   private:
 
     MODE mode;
 
-    GLfloat speed       = 3.0f;
-    GLfloat sensitivity = 0.3f;
+    GLfloat speed          = 3.0f;  // keyboard translation speed (world units/s)
+    GLfloat sensitivity    = 0.3f;  // mouse-look rotation (degrees per pixel)
+    GLfloat panSensitivity = 1.0f;  // mouse pan translation (world units per pixel)
 
     glm::vec3 position = glm::vec3(0.0f);
     glm::vec3 front    = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -119,9 +154,9 @@ namespace ogl {
 
     glm::mat4 getView() const {
       switch(mode) {
-        case ORBIT:
+        case FIXED:
           return glm::lookAt(position, target, up);
-        case PAN: {
+        case ORBIT: {
           glm::mat4 t1(1.0f); t1[3] = glm::vec4(target - position, 1.0f);
           glm::mat4 t2(1.0f); t2[3] = glm::vec4(-target, 1.0f);
           return t1 * eulerRotation(pitch, yaw, 0.0f) * t2;
@@ -133,7 +168,7 @@ namespace ogl {
     }
 
     //==========================================================================
-    // Input handlers — ORBIT ignores all input
+    // Input handlers — FIXED ignores all input
     //==========================================================================
 
     void processKeyboard(MOVEMENT direction, GLfloat deltaTime) {
@@ -145,7 +180,7 @@ namespace ogl {
           if(direction == LEFT)     position -= right * velocity;
           if(direction == RIGHT)    position += right * velocity;
           break;
-        case PAN:
+        case ORBIT:
           if(direction == FORWARD)  position.y += velocity;
           if(direction == BACKWARD) position.y -= velocity;
           if(direction == LEFT)     position.x -= velocity;
@@ -156,7 +191,7 @@ namespace ogl {
     }
 
     void processMouseMovement(GLfloat xOffset, GLfloat yOffset, bool mods, GLboolean constrainPitch = true) {
-      if(mode == ORBIT) return;
+      if(mode == FIXED) return;
       if(!mods) {
         yaw   += xOffset * sensitivity;
         pitch += yOffset * sensitivity;
@@ -166,12 +201,12 @@ namespace ogl {
         }
         updateBasis();
       } else {
-        updatePosition(xOffset, yOffset, 0.0f);
+        updatePosition(xOffset * panSensitivity, yOffset * panSensitivity, 0.0f);
       }
     }
 
     void processMouseScroll(GLfloat yOffset) {
-      if(mode == PAN) updatePosition(0.0f, 0.0f, yOffset);
+      if(mode == ORBIT) updatePosition(0.0f, 0.0f, yOffset);
     }
 
     //==========================================================================
@@ -260,6 +295,19 @@ namespace ogl {
     inline void setTarget(const glm::vec3 & _target) { target = _target; }
     inline void setTarget(float x, float y, float z)  { target = glm::vec3(x, y, z); }
 
+    // Point the camera at _target from the current position, updating yaw/pitch.
+    // In FLY mode this is the only way to aim the camera at a specific point,
+    // because getView() uses position+front (not target). Calling setTarget()
+    // alone has no effect on the view direction in FLY mode.
+    void lookAt(const glm::vec3 & _target) {
+      target = _target;
+      glm::vec3 dir = glm::normalize(_target - position);
+      pitch = glm::degrees(glm::asin(glm::clamp(dir.y, -1.0f, 1.0f)));
+      yaw   = glm::degrees(glm::atan(dir.z, dir.x));
+      updateBasis();
+    }
+    void lookAt(float x, float y, float z) { lookAt(glm::vec3(x, y, z)); }
+
     inline glm::vec3 getTarget() const { return target; }
 
     inline void setFront(const glm::vec3 & _front) {
@@ -282,6 +330,7 @@ namespace ogl {
 
     inline void setKeybordSpeed(GLfloat _speed)           { speed = _speed; }
     inline void setMouseSensitivity(GLfloat _sensitivity) { sensitivity = _sensitivity; }
+    inline void setPanSensitivity(GLfloat _sensitivity)   { panSensitivity = _sensitivity; }
 
     inline glm::mat4 getLookAt(const glm::vec3 & _target) const { return glm::lookAt(position, _target, up); }
 

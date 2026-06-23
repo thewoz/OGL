@@ -105,14 +105,14 @@ namespace ogl {
 
       // All functions return a value different than 0 whenever an error occurred
       if(FT_Init_FreeType(&ft)) {
-        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+        fprintf(stderr, "ERROR [glFont]: could not init FreeType library\n");
         abort();
       }
 
       // load font as face
       FT_Face face;
       if(FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
-        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+        fprintf(stderr, "ERROR [glFont]: failed to load font\n");
         abort();
       }
 
@@ -127,7 +127,7 @@ namespace ogl {
 
         // Load character glyph
         if(FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-          std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+          fprintf(stderr, "WARNING [glFont]: failed to load glyph for char %d\n", (int)c);
           continue;
         }
 

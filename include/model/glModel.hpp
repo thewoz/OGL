@@ -71,6 +71,9 @@ namespace ogl {
     // ~glModel() -
     //****************************************************************************/
     ~glModel() { cleanInGpu(); }
+
+    glModel(glModel &&) noexcept = default;
+    glModel & operator = (glModel &&) noexcept = default;
     
     //****************************************************************************/
     // init
@@ -99,7 +102,7 @@ namespace ogl {
 
       // Check for errors - if is Not Zero
       if(!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode) {
-        fprintf(stderr, "ERROR::ASSIMP:: %s\n", importer.GetErrorString());
+        fprintf(stderr, "ERROR [glModel]: Assimp error: %s\n", importer.GetErrorString());
         abort();
       }
       
@@ -129,7 +132,7 @@ namespace ogl {
     //****************************************************************************/
     // render() - Render the model, and thus all its meshes
     //****************************************************************************/
-    void render(const glCamera * camera) {
+    void render(const glCamera & camera) {
             
       renderBegin(camera);
       
@@ -144,12 +147,12 @@ namespace ogl {
     //****************************************************************************/
     // renderBegin()
     //****************************************************************************/
-    void renderBegin(const glCamera * camera){
+    void renderBegin(const glCamera & camera){
               
       DEBUG_LOG("glModel::render(" + name + ")");
       
       if(!isInited){
-        fprintf(stderr, "glModel must be inited before render\n");
+        fprintf(stderr, "ERROR [glModel]: must be initialized before rendering\n");
         abort();
       }
       
@@ -157,11 +160,11 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getView());
+      shader.setUniform("projection", camera.getProjection());
+      shader.setUniform("view",       camera.getView());
       shader.setUniform("model",      modelMatrix);
 
-      light.setInShader(shader, camera->getView());
+      light.setInShader(shader, camera.getView());
 
       glEnable(GL_CULL_FACE);
       glCullFace(GL_BACK);
@@ -185,7 +188,7 @@ namespace ogl {
     void getBounds(glm::vec3 & center, glm::vec3 & size, float & radius) const {
           
       if(!isInited) {
-        fprintf(stderr, "glModel must be initialized before calling getBounds\n");
+        fprintf(stderr, "ERROR [glModel]: must be initialized before calling getBounds\n");
         abort();
       }
 

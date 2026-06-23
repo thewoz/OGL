@@ -185,7 +185,7 @@ namespace ogl {
     void render(const glShader & shader) {
                  
       if(!isInited){
-        fprintf(stderr, "model must be inited before render\n");
+        fprintf(stderr, "ERROR [glMesh]: must be initialized before rendering\n");
         abort();
       }
       
@@ -255,7 +255,7 @@ namespace ogl {
     void setInGpu() {
       
       if(!isInited){
-        fprintf(stderr, "model must be inited before set in gpu\n");
+        fprintf(stderr, "ERROR [glMesh]: must be initialized before uploading to GPU\n");
         abort();
       }
       

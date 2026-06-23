@@ -84,6 +84,9 @@ namespace ogl {
     // ~glPrint3D()
     //****************************************************************************/
     ~glPrint3D() { cleanInGpu(); }
+
+    glPrint3D(glPrint3D &&) noexcept = default;
+    glPrint3D & operator = (glPrint3D &&) noexcept = default;
     
     //****************************************************************************/
     // init()
@@ -113,7 +116,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, const std::string & _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) {
+    void render(const glCamera & camera, const std::string & _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1) {
       
       DEBUG_LOG("glPrint3D::render(" + name + ")");
       
@@ -132,7 +135,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, const std::string & _text) {
+    void render(const glCamera & camera, const std::string & _text) {
       
       DEBUG_LOG("glPrint3D::render(" + name + ")");
       
@@ -145,7 +148,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera) {
+    void render(const glCamera & camera) {
       
       DEBUG_LOG("glPrint3D::render(" + name + ")");
       
@@ -159,13 +162,13 @@ namespace ogl {
     //****************************************************************************/
     // _render()
     //****************************************************************************/
-    void _render(const glCamera * camera) {
+    void _render(const glCamera & camera) {
       
       DEBUG_LOG("glPrint3D::_render(" + name + ")");
       
       glm::vec2 screen;
       
-      if(!camera->screenPosition(coord, getModelMatrix(), screen)) return;
+      if(!camera.screenPosition(coord, getModelMatrix(), screen)) return;
 
       if(!isInited){
         shader.setName(name);
@@ -177,7 +180,7 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getOrthoProjection());
+      shader.setUniform("projection", camera.getOrthoProjection());
       shader.setUniform("color",      color);
             
       glEnable(GL_CULL_FACE);
@@ -201,7 +204,7 @@ namespace ogl {
       float _scale = scale;
       
       if(isDynamicScale) {
-        float distance = glm::distance(camera->getPosition(), coord);
+        float distance = glm::distance(camera.getPosition(), coord);
         _scale = scale / distance;
       }
       

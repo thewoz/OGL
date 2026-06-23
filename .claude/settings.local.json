@@ -13,7 +13,15 @@
       "Bash(grep -E '\\\\.\\(hpp|cpp|h\\)$')",
       "Read(//usr/local/Cellar/freetype/2.14.3/include/freetype2/**)",
       "Read(//usr/local/lib/**)",
-      "Bash(ls -la /Users/thewoz/Dropbox 2>&1 | head -3; echo \"---\"; ls -la /Users/thewoz/Dropbox/Research/OGL/include/ogl.hpp 2>&1; echo \"--- same file test ---\"; test /Users/thewoz/Dropbox/Research/OGL/include/ogl.hpp -ef \"/Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/ogl.hpp\" && echo \"SAME FILE\" || echo \"DIFFERENT\")"
+      "Bash(ls -la /Users/thewoz/Dropbox 2>&1 | head -3; echo \"---\"; ls -la /Users/thewoz/Dropbox/Research/OGL/include/ogl.hpp 2>&1; echo \"--- same file test ---\"; test /Users/thewoz/Dropbox/Research/OGL/include/ogl.hpp -ef \"/Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/ogl.hpp\" && echo \"SAME FILE\" || echo \"DIFFERENT\")",
+      "Bash(sed -i '' 's/fprintf\\(stderr, \"glAxes must be inited before render\\\\\\\\n\"\\);/fprintf\\(stderr, \"ERROR [glAxes]: must be initialized before rendering\\\\\\\\n\"\\);/g' /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/objects/glAxes.hpp)",
+      "Bash(sed -i '' 's/fprintf\\(stderr, \"glBox must be inited before render\\\\\\\\n\"\\);/fprintf\\(stderr, \"ERROR [glBox]: must be initialized before rendering\\\\\\\\n\"\\);/g' /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/objects/glBox.hpp)",
+      "Bash(sed -i '' 's/fprintf\\(stderr, \"glCuboid must be inited before render\\\\\\\\n\"\\);/fprintf\\(stderr, \"ERROR [glCuboid]: must be initialized before rendering\\\\\\\\n\"\\);/g' /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/objects/glCuboid.hpp)",
+      "Bash(sed -i '' 's/fprintf\\(stderr, \"glEllipse must be inited before render\\\\\\\\n\"\\);/fprintf\\(stderr, \"ERROR [glEllipse]: must be initialized before rendering\\\\\\\\n\"\\);/g' /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/objects/glEllipse.hpp)",
+      "Bash(sed -i '' 's/fprintf\\(stderr, \"glGrid must be inited before render\\\\\\\\n\"\\);/fprintf\\(stderr, \"ERROR [glGrid]: must be initialized before rendering\\\\\\\\n\"\\);/g' /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/objects/glGrid.hpp)",
+      "Bash(find /Users/thewoz/Library/CloudStorage/Dropbox/Research -name \"icaro*\" 2>/dev/null | head -20)",
+      "Bash(git -C /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL diff HEAD~1 -- include/core/glCamera.hpp)",
+      "Bash(git -C /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL show HEAD~1:include/core/glCamera.hpp)"
     ]
   }
 }

@@ -115,7 +115,7 @@ namespace ogl {
       unsigned char * tmpImage = SOIL_load_image(path.c_str(), &width, &height, NULL, SOIL_LOAD_RGB);
     
       if(tmpImage == NULL){
-        fprintf(stderr, "Error glTexture: error in load the texture\n");
+        fprintf(stderr, "ERROR [glTexture]: failed to load texture\n");
         abort();
       }
             
@@ -137,7 +137,7 @@ namespace ogl {
     void setInGpu() {
       
       if(!isInited){
-         fprintf(stderr, "Error glTexture: the texture must be initialized before being set into the GPU\n");
+         fprintf(stderr, "ERROR [glTexture]: must be initialized before uploading to GPU\n");
          abort();
        }
       
@@ -170,7 +170,7 @@ namespace ogl {
     inline void setInShader(const ogl::glShader & shader, GLenum unit) {
 
       if(!isInitedInGpu) {
-        fprintf(stderr, "Error glTexture: the texture must be initialized in the GPU before being used\n");
+        fprintf(stderr, "ERROR [glTexture]: must be initialized in GPU before use\n");
         abort();
       }
 

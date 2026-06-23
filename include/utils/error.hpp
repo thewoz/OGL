@@ -54,7 +54,7 @@ inline GLenum glCheckError_(const char *file, int line) {
       case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; getError = true; break;
     }
 
-    std::cout << error << " | " << file << " (" << line << ")" << std::endl;
+    fprintf(stderr, "ERROR [GL]: %s | %s (%d)\n", error.c_str(), file, line);
     
   }
   
@@ -73,10 +73,10 @@ inline GLenum glCheckError_(const char *file, int line) {
 }
 
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
-
+ 
 #ifndef __APPLE__
 inline void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
-    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""), type, severity, message);
+    fprintf(stderr, "ERROR [GL callback]: type=0x%x severity=0x%x message=%s\n", type, severity, message);
 }
 #endif
 

@@ -55,14 +55,24 @@ namespace ogl {
     std::vector<glm::vec4> colors;
 
     float radius;
-    
+
+    // how the impostors are shaded (see points.fs); PHONG keeps the old look
+    int shadingMode = PHONG;
+
   public:
+
+    // Shading modes for the sphere impostors:
+    //   FLAT    - uniform matte colour, no lighting, view independent
+    //   DIFFUSE - matte sphere (ambient + diffuse, no specular)
+    //   PHONG   - full Phong with specular highlight (default, shiny)
+    enum SHADING { FLAT = 0, DIFFUSE = 1, PHONG = 2 };
+
     
     //****************************************************************************/
     // glPoints()
     //****************************************************************************/
     glPoints(const std::string & _name = "") { name = _name; }
-    glPoints(const std::vector<glm::vec3> & _points, const glm::vec4 & _color = glm::vec4(0.0), float _radius = 1, const std::string & _name = "") {
+    glPoints(const std::vector<glm::vec3> & _points, const glm::vec4 & _color = glm::vec4(1.0), float _radius = 1, const std::string & _name = "") {
       name = _name;
       init(_points, _color, _radius);
     }
@@ -75,11 +85,14 @@ namespace ogl {
     // ~glPoints()
     //****************************************************************************/
     ~glPoints() { cleanInGpu(); }
+
+    glPoints(glPoints &&) noexcept = default;
+    glPoints & operator = (glPoints &&) noexcept = default;
  
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const std::vector<glm::vec3> & _points, const glm::vec4 & _color = glm::vec4(0.0), float _radius = 1) {
+    void init(const std::vector<glm::vec3> & _points, const glm::vec4 & _color = glm::vec4(1.0), float _radius = 1) {
       
       DEBUG_LOG("glPoints::init(" + name + ")");
          
@@ -120,16 +133,22 @@ namespace ogl {
     // setRadius()
     //****************************************************************************/
     void setRadius(float _radius) { radius = _radius; }
+
+    //****************************************************************************/
+    // setShadingMode() - FLAT / DIFFUSE / PHONG (see SHADING)
+    //****************************************************************************/
+    void setShadingMode(int _mode) { shadingMode = _mode; }
+    int  getShadingMode() const { return shadingMode; }
     
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera * camera, int from = 0, int to = -1, int index = -1) {
+    void render(const glCamera & camera, int from = 0, int to = -1, int index = -1) {
             
       DEBUG_LOG("glPoints::render(" + name + ")");
 
       if(!isInited){
-        fprintf(stderr, "glPoints must be inited before render\n");
+        fprintf(stderr, "ERROR [glPoints]: must be initialized before rendering\n");
         abort();
       }
       
@@ -137,20 +156,37 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("projection", camera->getProjection());
-      shader.setUniform("view",       camera->getView());
+      shader.setUniform("projection", camera.getProjection());
+      shader.setUniform("view",       camera.getView());
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("pointSize",  radius);
+      shader.setUniform("shadingMode", shadingMode);
+      shader.setUniform("viewport",   camera.getViewport());
 
       // Shade the impostors with the scene light (head-light fallback by default).
-      light.setInShader(shader, camera->getView());
+      light.setInShader(shader, camera.getView());
             
-      if(to == -1) to = (int) points.size();
+      int n = (int) points.size();
+
+      if(to == -1) to = n;
+
+      // Clamp the requested [from, to) range to the valid window so a bad
+      // argument can't make glDrawArrays read past the buffer.
+      if(from < 0) from = 0;
+      if(to   > n) to   = n;
 
       // 'to' is an end index (exclusive); the draw call needs a vertex count
       int count = to - from;
 
-      if(index != -1) { from += index; count = 1; }
+      if(index != -1) {
+        // draw a single point at absolute position (from + index)
+        int at = from + index;
+        if(at < 0 || at >= n) return;
+        from  = at;
+        count = 1;
+      }
+
+      if(count <= 0) return;
 
       glEnable(GL_PROGRAM_POINT_SIZE);
 

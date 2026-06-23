@@ -50,7 +50,7 @@ namespace ogl::draw {
       float length = (float)norm(dir);
 
       if(length <= 1e-6f) {
-        fprintf(stderr, "shrinkLine() warning: line too short\n");
+        fprintf(stderr, "WARNING [shrinkLine]: line too short\n");
         return;
       }
 
@@ -60,7 +60,7 @@ namespace ogl::draw {
       float totalCut = cutFromA + cutFromB;
 
       if(totalCut >= length) {
-        fprintf(stderr, "shrinkLine() warning: cut too big\n");
+        fprintf(stderr, "WARNING [shrinkLine]: cut too big\n");
         return;
       }
 

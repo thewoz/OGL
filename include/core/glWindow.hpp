@@ -45,11 +45,11 @@ namespace ogl {
 
     inline void processKeyboardInput() {
 
-      if(!keybord) return;
+      if(!keybord || !keyboardUserEnabled) return;
 
       bool canMoveWithKeyboard = (camera.getMode() == glCamera::MODE::FLY);
 
-      if(camera.getMode() == glCamera::MODE::PAN) {
+      if(camera.getMode() == glCamera::MODE::ORBIT) {
         canMoveWithKeyboard = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS);
       }
 
@@ -81,9 +81,21 @@ namespace ogl {
 
     bool isFullscreen;
 
+    // Windowed size saved when entering fullscreen, restored on exit. Per-instance
+    // (not static) so that toggling fullscreen on one window does not clobber the
+    // saved size of another.
+    int windowedWidth  = 0;
+    int windowedHeight = 0;
+
     bool keybord = false;
 
     bool imguiFrameActive = false;
+
+    // User-controlled keyboard toggle (disableKeybord/enableKeybord). Kept
+    // separate from 'keybord', which is the internal "rendering has started"
+    // gate raised by renderBegin(): without this split, renderBegin() would
+    // re-enable input every frame and a user disableKeybord() would never stick.
+    bool keyboardUserEnabled = true;
 
     // ImGui keeps a single global context, so it is created exactly once (by the
     // first on-screen window) and torn down by that same window. Offscreen
@@ -144,14 +156,19 @@ namespace ogl {
 
       glfw::init();
 
-      // Others Glfw options
+      // GLFW window hints are global and sticky, so set every per-window hint
+      // explicitly: otherwise a GLFW_VISIBLE=FALSE left over from a previous
+      // createOffscreen() would leak in and this window would stay hidden.
+      // (The GL context hints set in glfw::init() must persist, so we do not
+      // call glfwDefaultWindowHints() here.)
+      glfwWindowHint(GLFW_VISIBLE,   GLFW_TRUE);
       glfwWindowHint(GLFW_RESIZABLE, resizable);
 
       // Create a GLFWwindow object that we can use for GLFW's functions
       window = glfwCreateWindow(width, height, title, NULL, NULL);
 
       if(window == NULL) {
-        fprintf(stderr, "Failed to create GLFW window\n");
+        fprintf(stderr, "ERROR [glWindow]: failed to create GLFW window\n");
         glfwTerminate();
         abort();
       }
@@ -159,7 +176,7 @@ namespace ogl {
       glfwMakeContextCurrent(window);
 
       if(!gladLoadGL((GLADloadfunc) glfwGetProcAddress)) {
-        fprintf(stderr, "Failed to initialize GLAD\n");
+        fprintf(stderr, "ERROR [glWindow]: failed to initialize GLAD\n");
         abort();
       }
 
@@ -234,7 +251,7 @@ namespace ogl {
       window = glfwCreateWindow(width, height, "notitle", NULL, NULL);
 
       if(window == NULL) {
-        fprintf(stderr, "Failed to create GLFW window\n");
+        fprintf(stderr, "ERROR [glWindow]: failed to create GLFW window\n");
         glfwTerminate();
         abort();
       }
@@ -242,7 +259,7 @@ namespace ogl {
       glfwMakeContextCurrent(window);
 
       if(!gladLoadGL((GLADloadfunc) glfwGetProcAddress)) {
-        fprintf(stderr, "Failed to initialize GLAD\n");
+        fprintf(stderr, "ERROR [glWindow]: failed to initialize GLAD\n");
         abort();
       }
 
@@ -330,15 +347,24 @@ namespace ogl {
     //****************************************************************************//
     // setCamera() - reconfigure the camera (mode, fov, position, target)
     //****************************************************************************//
-    void setCamera(glCamera::MODE mode, float fov = 45.0f,
-                   glm::vec3 position = glm::vec3(0.0f),
-                   glm::vec3 target   = glm::vec3(0.0f)) {
+    void setCamera(glCamera::MODE mode, float fov = 45.0f, glm::vec3 position = glm::vec3(0.0f), glm::vec3 target = glm::vec3(0.0f)) {
       GLsizei w = camera.getWidth();
       GLsizei h = camera.getHeight();
       camera = glCamera(mode, w, h, fov, position, target);
     }
 
   private:
+
+    //****************************************************************************//
+    // imguiWantsMouse() - true when the cursor is over an ImGui widget/window,
+    // so camera and scroll input must be suppressed while the user drives the UI.
+    //****************************************************************************//
+    inline bool imguiWantsMouse() const {
+      #ifndef OGL_WITHOUT_IMGUI
+        if(imguiInitialized) return ImGui::GetIO().WantCaptureMouse;
+      #endif
+      return false;
+    }
 
     //****************************************************************************//
     // CallBack GLFW Wrapper
@@ -392,13 +418,14 @@ namespace ogl {
     }
 
     inline void scrollCallback(double xoffset, double yoffset) {
+      if(imguiWantsMouse()) return;
       camera.processMouseScroll(yoffset);
       scroll(xoffset, yoffset);
     }
 
     inline void keyCallback(int key, int scancode, int action, int mods) {
 
-      if(!keybord) return;
+      if(!keybord || !keyboardUserEnabled) return;
 
       if(GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
         setShouldClose(GL_TRUE);
@@ -438,7 +465,8 @@ namespace ogl {
         if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
           controllKey = GLFW_PRESS;
 
-        if(isProcessMouseMovement) camera.processMouseMovement(xOffset, yOffset, controllKey);
+        if(isProcessMouseMovement && !imguiWantsMouse())
+          camera.processMouseMovement(xOffset, yOffset, controllKey);
 
         cursorPos(lastX, lastY, xOffset, yOffset);
 
@@ -446,7 +474,10 @@ namespace ogl {
 
     }
 
-    inline void mouseButtonCallback(int button, int action, int mods) { mouseButton(button, action, mods); }
+    inline void mouseButtonCallback(int button, int action, int mods) {
+      if(imguiWantsMouse()) return;
+      mouseButton(button, action, mods);
+    }
 
   public:
 
@@ -489,14 +520,21 @@ namespace ogl {
     //*****************************************************************************/
     // disable/enable Keybord
     //*****************************************************************************/
-    void disableKeybord() { keybord = false; }
-    void enableKeybord()  { keybord = true;  }
+    void disableKeybord() { keyboardUserEnabled = false; }
+    void enableKeybord()  { keyboardUserEnabled = true;  }
 
     //*****************************************************************************/
     // disable/enable mouseOnCamera()
     //*****************************************************************************/
     void disableMouseOnCamera() { isProcessMouseMovement = false; }
     void enableMouseOnCamera()  { isProcessMouseMovement = true;  }
+
+    //*****************************************************************************/
+    // resetMouse() - forget the last cursor position so the next motion produces
+    // no offset. Call this after re-capturing the cursor (e.g. closing a UI panel)
+    // to avoid a sudden camera jump.
+    //*****************************************************************************/
+    void resetMouse() { firstMouse = true; }
 
     inline void hide() { glfwHideWindow(window); }
     inline void show() { glfwShowWindow(window); }
@@ -566,11 +604,13 @@ namespace ogl {
       glfwGetWindowContentScale(window, &xScale, &yScale);
 
       if(xScale != yScale) {
-        fprintf(stderr, "error in isOnRetinaDisplay()\n");
+        fprintf(stderr, "ERROR [glWindow]: inconsistent content scale in isOnRetinaDisplay()\n");
         abort();
       }
 
-      return (xScale == 2);
+      // Any HiDPI/Retina backing (scale > 1) counts; avoids an exact == 2 test
+      // that would miss fractional scale factors (1.5x, 2.5x, ...).
+      return (xScale > 1.0f);
 
     }
 
@@ -580,7 +620,7 @@ namespace ogl {
     void renderBegin() {
 
       if(window == NULL) {
-        fprintf(stderr, "glWindow error: the window is not initialized\n");
+        fprintf(stderr, "ERROR [glWindow]: window is not initialized\n");
         abort();
       }
 
@@ -656,8 +696,8 @@ namespace ogl {
     //****************************************************************************
     void toggleFullscreen() {
 
-      static int oldWidth;
-      static int oldHeight;
+      int & oldWidth  = windowedWidth;
+      int & oldHeight = windowedHeight;
 
       GLFWmonitor * monitor = glfwGetPrimaryMonitor();
 
