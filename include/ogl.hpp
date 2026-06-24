@@ -72,6 +72,11 @@
 
 // Model
 #include <ogl/model/glLight.hpp>
+
+// Scene & shadows (need glLight, glShader, glCamera; used by glModel and objects)
+#include <ogl/core/glShadow.hpp>
+#include <ogl/core/glScene.hpp>
+
 #include <ogl/model/glMaterial.hpp>
 #include <ogl/model/glMesh.hpp>
 #include <ogl/model/glModel.hpp>

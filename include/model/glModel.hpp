@@ -52,9 +52,6 @@ namespace ogl {
     // The meshes that make up the model.
     std::vector<glMesh> meshes;
 
-    // The light used to shade every mesh of this model.
-    ogl::glLight light;
-
   public:
     
     //****************************************************************************/
@@ -120,63 +117,71 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // setLight() - Set the light
-    //****************************************************************************/
-    void setLight(const glm::vec3 & _position, const glm::vec3 & _direction) {
-      
-      light.setPosition(_position);
-      light.setDirection(_direction);
-
-    }
-    
-    //****************************************************************************/
     // render() - Render the model, and thus all its meshes
     //****************************************************************************/
-    void render(const glCamera & camera) {
-            
-      renderBegin(camera);
-      
+    void render(const glCamera & camera, const glScene * scene = nullptr) {
+
+      renderBegin(camera, scene);
+
       for(std::size_t i=0; i<meshes.size(); ++i) meshes[i].render(shader);
-      
+
       renderEnd();
-      
+
       glCheckError();
-      
+
+    }
+
+    //****************************************************************************/
+    // renderDepth() - draw every mesh into the scene shadow map (depth only)
+    //****************************************************************************/
+    void renderDepth(const glShader & depthShader) override {
+
+      if(!isInited) return;
+
+      if(isToInitInGpu()) initInGpu();
+
+      depthShader.setUniform("model", modelMatrix);
+
+      for(std::size_t i=0; i<meshes.size(); ++i) meshes[i].renderDepth();
+
     }
 
     //****************************************************************************/
     // renderBegin()
     //****************************************************************************/
-    void renderBegin(const glCamera & camera){
-              
+    void renderBegin(const glCamera & camera, const glScene * scene = nullptr){
+
       DEBUG_LOG("glModel::render(" + name + ")");
-      
+
       if(!isInited){
         fprintf(stderr, "ERROR [glModel]: must be initialized before rendering\n");
         abort();
       }
-      
+
       if(isToInitInGpu()) initInGpu();
-      
+
       shader.use();
-      
+
       shader.setUniform("projection", camera.getProjection());
       shader.setUniform("view",       camera.getView());
       shader.setUniform("model",      modelMatrix);
 
-      light.setInShader(shader, camera.getView());
+      // Lighting (and shadows) come from the scene; without one, fall back to a
+      // camera head light and disable shadow sampling.
+      if(scene) scene->setInShader(shader, camera.getView());
+      else { glLight().setInShader(shader, camera.getView()); shader.setUniform("useShadow", false); }
 
       glEnable(GL_CULL_FACE);
       glCullFace(GL_BACK);
-      
+
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-      
+
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LEQUAL);
-      
+
     }
-    
-    
+
+
     //****************************************************************************/
     // renderEnd()
     //****************************************************************************/

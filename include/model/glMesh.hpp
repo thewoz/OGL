@@ -194,15 +194,33 @@ namespace ogl {
       setInShader(shader);
               
       glBindVertexArray(vao);
-      
+
       glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, 0);
-      
+
       glBindVertexArray(0);
-      
+
       glCheckError();
-            
+
     }
-    
+
+    //****************************************************************************//
+    // renderDepth - draw the geometry only (no material), for the shadow map.
+    // The depth shader and its 'model' uniform are set by the caller (glModel).
+    //****************************************************************************//
+    void renderDepth() {
+
+      if(!isInited) return;
+
+      if(!isInitedInGpu) setInGpu();
+
+      glBindVertexArray(vao);
+      glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, 0);
+      glBindVertexArray(0);
+
+      glCheckError();
+
+    }
+
     //****************************************************************************//
     // bounds
     //****************************************************************************//

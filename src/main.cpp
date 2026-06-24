@@ -48,16 +48,26 @@ int main(int argc, char * const argv[]) {
   window.getCamera().setPitch(-20);
   //window.getCamera().setMode(ogl::glCamera::ORBIT);
 
+  // --- Scene (light + shadows shared by every object) ---
+
+  ogl::glScene scene;
+  scene.setDirectionalLight(glm::vec3(-1.0f, -1.0f, -1.0f));
+  scene.enableShadows(true);
+  scene.setBounds(glm::vec3(0.0f, 0.5f, 0.0f), 3.0f);
+
   // --- Scene objects ---
 
   ogl::glAxes axes;
   ogl::glGrid grid(10, 10, 0.5f, ogl::glColors::cyan);
 
+  // Solid floor that receives the shadows (a quad laid flat on the XZ plane).
+  ogl::glQuad floor(glm::vec2(10.0f), glm::vec3(0.55f), ogl::glShader::STYLE::SOLID);
+  floor.rotate(glm::vec3(-1.57079633f, 0.0f, 0.0f)); // -90° about X: normal points up
+  floor.translate(glm::vec3(0.0f, -0.01f, 0.0f));
+
   ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::white);
-  cuboid.setLight(glm::vec3(1.0f), glm::vec3(-1.0f));
 
   ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
-  model.setLight(glm::vec3(1.0f), glm::vec3(-1.0f));
 
   ogl::glPrint2D fpsText(10, 10, ogl::glColors::white, 0.5f);
 
@@ -67,12 +77,13 @@ int main(int argc, char * const argv[]) {
 #ifndef OGL_WITHOUT_IMGUI
   // --- ImGui-controlled parameters ---
 
-  glm::vec3 cuboidPos(0.0f, 0.0f, 0.0f);
+  glm::vec3 cuboidPos(1.2f, 0.25f, 0.0f);
   glm::vec3 lightDir(-1.0f, -1.0f, -1.0f);
   float     lightIntensity = 1.0f;
   bool      showGrid       = true;
   bool      showAxes       = true;
   bool      showModel      = true;
+  bool      showShadows    = true;
 
   // The parameters panel is hidden at start; press P to toggle it. While it is
   // open the cursor is freed and the camera is frozen, so the mouse can drive
@@ -128,34 +139,55 @@ int main(int argc, char * const argv[]) {
       ImGui::Separator();
 
       ImGui::Text("Visibility");
-      ImGui::Checkbox("Grid",  &showGrid);
-      ImGui::Checkbox("Axes",  &showAxes);
-      ImGui::Checkbox("TRex",  &showModel);
+      ImGui::Checkbox("Grid",    &showGrid);
+      ImGui::Checkbox("Axes",    &showAxes);
+      ImGui::Checkbox("TRex",    &showModel);
+      ImGui::Checkbox("Shadows", &showShadows);
 
       ImGui::End();
 
     }
 
-    // --- Apply ImGui parameters ---
+    // --- Apply ImGui parameters to the scene ---
 
     cuboid.translate(cuboidPos);
-    cuboid.setLight(glm::vec3(lightIntensity), lightDir);
-    if(showModel) model.setLight(glm::vec3(lightIntensity), lightDir);
+
+    scene.setDirectionalLight(lightDir);
+    scene.setAmbient (glm::vec3(0.2f));
+    scene.setDiffuse (glm::vec3(0.5f * lightIntensity));
+    scene.setSpecular(glm::vec3(1.0f * lightIntensity));
+    scene.enableShadows(showShadows);
 #endif
 
+    // --- Shadow pass: render the casters into the scene shadow map ---
+
+    if(scene.areShadowsEnabled()) {
+      scene.beginShadowPass();
+      floor.renderDepth(scene.getShadowShader());
+      cuboid.renderDepth(scene.getShadowShader());
+#ifndef OGL_WITHOUT_IMGUI
+      if(showModel) model.renderDepth(scene.getShadowShader());
+#else
+      model.renderDepth(scene.getShadowShader());
+#endif
+      scene.endShadowPass();
+    }
+
     // --- Render scene ---
+
+    floor.render(window.getCamera(), &scene);
 
 #ifndef OGL_WITHOUT_IMGUI
     if(showAxes)  axes.render(window.getCamera());
     if(showGrid)  grid.render(window.getCamera());
-    if(showModel) model.render(window.getCamera());
+    if(showModel) model.render(window.getCamera(), &scene);
 #else
     axes.render(window.getCamera());
     grid.render(window.getCamera());
-    model.render(window.getCamera());
+    model.render(window.getCamera(), &scene);
 #endif
 
-    cuboid.render(window.getCamera());
+    cuboid.render(window.getCamera(), &scene);
     fpsText.render(window.getCamera(), "FPS: " + std::to_string(window.getFPS()));
     referenceAxes.render(window.getCamera());
 

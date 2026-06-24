@@ -51,6 +51,9 @@ struct Light {
 uniform Material material;
 uniform Light    light;
 
+uniform bool      useShadow;   // sample the shadow map only when enabled
+uniform sampler2D shadowMap;
+
 /*****************************************************************************/
 // Inputs (from the vertex shader, all in view space)
 /*****************************************************************************/
@@ -58,6 +61,7 @@ in vec2 fragTexCoord;
 in vec3 fragNormal;
 in vec3 fragPos;
 in mat3 TBN;        // tangent-space → view-space, built in model.vs
+in vec4 fragPosLightSpace; // fragment position in light clip space
 
 /*****************************************************************************/
 // Output
@@ -68,6 +72,30 @@ out vec4 outColor;
 // Constants
 /*****************************************************************************/
 const float gamma = 2.2;
+
+/*****************************************************************************/
+// shadowCalc - fraction of this fragment in shadow (0 = lit, 1 = shadow).
+// 3x3 PCF with a slope-scaled depth bias to avoid shadow acne.
+/*****************************************************************************/
+float shadowCalc(vec3 norm, vec3 lightDir) {
+
+    vec3 proj = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    proj = proj * 0.5 + 0.5;
+
+    if(proj.z > 1.0) return 0.0;
+
+    float bias = max(0.0025 * (1.0 - dot(norm, lightDir)), 0.0008);
+
+    float shadow = 0.0;
+    vec2 texel = 1.0 / vec2(textureSize(shadowMap, 0));
+    for(int x = -1; x <= 1; ++x) {
+        for(int y = -1; y <= 1; ++y) {
+            float closest = texture(shadowMap, proj.xy + vec2(x, y) * texel).r;
+            shadow += (proj.z - bias > closest) ? 1.0 : 0.0;
+        }
+    }
+    return shadow / 9.0;
+}
 
 /*****************************************************************************/
 // Main
@@ -109,7 +137,10 @@ void main() {
     vec3 diffuse  = light.diffuse  * diff * diffuseColor;
     vec3 specular = light.specular * spec * specularColor;
 
-    vec3 lighting = emissiveColor + ambient + diffuse + specular;
+    // Shadow only attenuates the direct (diffuse + specular) terms.
+    float shadow = useShadow ? shadowCalc(norm, lightDir) : 0.0;
+
+    vec3 lighting = emissiveColor + ambient + (1.0 - shadow) * (diffuse + specular);
 
     // Opacity (from the opacity map when available).
     float opacity = material.haveOpacityTexture ? texture(material.opacityTexture, fragTexCoord).r : material.opacity;

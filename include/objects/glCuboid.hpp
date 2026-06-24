@@ -39,7 +39,7 @@ namespace ogl {
   // Axis-aligned solid box. Because a cube's 8 corners are shared by faces with
   // different normals, the geometry is expanded to 36 vertices (6 faces × 6
   // verts) so each face can carry its own flat outward normal. Supports SOLID
-  // and WIREFRAME styles. In SOLID mode Phong shading uses the glLight member.
+  // and WIREFRAME styles. In SOLID mode Phong shading uses the scene light.
   //****************************************************************************/
   class glCuboid : public glShape {
 
@@ -96,9 +96,9 @@ namespace ogl {
     }
 
     //****************************************************************************/
-    // init()
+    // render()
     //****************************************************************************/
-    void render(const glCamera & camera) {
+    void render(const glCamera & camera, const glScene * scene = nullptr) {
 
       DEBUG_LOG("glCuboid::render(" + name + ")");
 
@@ -116,7 +116,8 @@ namespace ogl {
       shader.setUniform("model", modelMatrix);
       shader.setUniform("color", color);
       if(style == glShader::STYLE::SOLID) {
-        light.setInShader(shader, camera.getView());
+        if(scene) scene->setInShader(shader, camera.getView());
+        else { glLight().setInShader(shader, camera.getView()); shader.setUniform("useShadow", false); }
       }
 
       glBindVertexArray(vao);
@@ -132,6 +133,25 @@ namespace ogl {
 
       glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
 
+      glBindVertexArray(0);
+
+      glCheckError();
+
+    }
+
+    //****************************************************************************/
+    // renderDepth() - cast a shadow into the scene shadow map (SOLID only)
+    //****************************************************************************/
+    void renderDepth(const glShader & depthShader) override {
+
+      if(!isInited || style != glShader::STYLE::SOLID) return;
+
+      if(isToInitInGpu()) initInGpu();
+
+      depthShader.setUniform("model", modelMatrix);
+
+      glBindVertexArray(vao);
+      glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
       glBindVertexArray(0);
 
       glCheckError();

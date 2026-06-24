@@ -178,6 +178,14 @@ namespace ogl {
     }
     
     //****************************************************************************
+    // renderDepth() - draw this object's geometry into the scene shadow map,
+    // using the scene's depth-only shader. Default is a no-op: only the solid
+    // shadow casters (model, cuboid, quad, sphere, ellipse) override it. Lines,
+    // points, text and axes do not cast meaningful shadows.
+    //****************************************************************************
+    virtual void renderDepth(const glShader & /*depthShader*/) { }
+
+    //****************************************************************************
     // Position fuction
     //****************************************************************************
     virtual void translate(const glm::vec3 & value) { _position = value; updateModelMatrix(); }

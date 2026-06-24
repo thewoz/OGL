@@ -131,8 +131,8 @@ namespace ogl {
       //****************************************************************************/
       // render()
       //****************************************************************************/
-      void render(const glCamera & camera) {
-          
+      void render(const glCamera & camera, const glScene * scene = nullptr) {
+
         DEBUG_LOG("glQuad::render(" + name + ")");
 
         if(!isInited) {
@@ -149,7 +149,8 @@ namespace ogl {
         shader.setUniform("model", modelMatrix);
         shader.setUniform("color", color);
         if(style == glShader::STYLE::SOLID) {
-          light.setInShader(shader, camera.getView());
+          if(scene) scene->setInShader(shader, camera.getView());
+          else { glLight().setInShader(shader, camera.getView()); shader.setUniform("useShadow", false); }
         }
 
         glBindVertexArray(vao);
@@ -167,6 +168,25 @@ namespace ogl {
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
+        glBindVertexArray(0);
+
+        glCheckError();
+
+      }
+
+      //****************************************************************************/
+      // renderDepth() - cast a shadow into the scene shadow map (SOLID only)
+      //****************************************************************************/
+      void renderDepth(const glShader & depthShader) override {
+
+        if(!isInited || style != glShader::STYLE::SOLID) return;
+
+        if(isToInitInGpu()) initInGpu();
+
+        depthShader.setUniform("model", modelMatrix);
+
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
         glCheckError();

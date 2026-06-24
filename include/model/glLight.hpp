@@ -87,6 +87,14 @@ namespace ogl {
     void setSpecular(const glm::vec3& _specular)   { specular  = _specular; }
 
     //****************************************************************************//
+    // getters - used by glScene to build the light-space matrix for shadows
+    //****************************************************************************//
+    const glm::vec3 & getPosition()  const { return position;  }
+    const glm::vec3 & getDirection() const { return direction; }
+    bool hasPositionSet()  const { return hasPosition;  }
+    bool hasDirectionSet() const { return hasDirection; }
+
+    //****************************************************************************//
     // setInShader - upload the light to the given shader
     //****************************************************************************//
     void setInShader(const ogl::glShader & shader, const glm::mat4 & view) const {

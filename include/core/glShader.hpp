@@ -73,7 +73,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { SOLID, WIREFRAME, LINE, POINTS, TEXT, MODEL, PLAIN2D };
+    enum STYLE { SOLID, WIREFRAME, LINE, POINTS, TEXT, MODEL, PLAIN2D, SHADOW };
 
     int style;
     
@@ -137,6 +137,14 @@ namespace ogl {
     void initSolid() {
       init("/usr/local/include/ogl/shader/solid.vs", "/usr/local/include/ogl/shader/solid.fs");
       style = STYLE::SOLID;
+    }
+
+    //****************************************************************************/
+    // initShadow - depth-only program used to render the scene shadow map
+    //****************************************************************************/
+    void initShadow() {
+      init("/usr/local/include/ogl/shader/shadow.vs", "/usr/local/include/ogl/shader/shadow.fs");
+      style = STYLE::SHADOW;
     }
 
     //****************************************************************************/

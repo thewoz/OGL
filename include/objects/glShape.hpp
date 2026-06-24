@@ -37,27 +37,16 @@ namespace ogl {
   //****************************************************************************/
   // Intermediate base for the lit objects (glSphere, glEllipse, glCuboid,
   // glQuad and the glPoints impostors). On top of glObject (transform, shader,
-  // style, lineWidth, color) it adds the per-object light used for Phong
-  // shading, so the light handling is written once instead of being copied into
-  // every object. Still abstract: subclasses implement setInGpu()/cleanInGpu().
+  // style, lineWidth, color) it is the common type for Phong-shaded shapes.
+  // Lighting is no longer owned per object: the scene light is supplied through
+  // glScene at render time (render(camera, &scene)). Still abstract: subclasses
+  // implement setInGpu()/cleanInGpu().
   //****************************************************************************/
   class glShape : public glObject {
-
-  protected:
-
-    ogl::glLight light;
 
   public:
 
     glShape(const std::string & _name = "") : glObject(_name) { }
-
-    //****************************************************************************/
-    // setLight() - Set the light position and direction
-    //****************************************************************************/
-    void setLight(const glm::vec3 & _position, const glm::vec3 & _direction) {
-      light.setPosition(_position);
-      light.setDirection(_direction);
-    }
 
   }; /* class glShape */
 

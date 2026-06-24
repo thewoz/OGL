@@ -40,9 +40,9 @@ namespace ogl {
   // Class glPoints
   //****************************************************************************/
   // Renders a point cloud as sphere impostors (one GL_POINTS vertex per point,
-  // shaded as a little 3D sphere in points.fs). It derives from glShape to reuse
-  // the per-object light, so the points react to setLight() just like the solid
-  // primitives; with no explicit light they fall back to a camera head light.
+  // shaded as a little 3D sphere in points.fs). It derives from glShape and is
+  // shaded by the scene light passed to render(); with no scene it falls back to
+  // a camera head light. The impostors are not shadow casters/receivers.
   //****************************************************************************/
   class glPoints : public glShape {
     
@@ -143,7 +143,7 @@ namespace ogl {
     //****************************************************************************/
     // render()
     //****************************************************************************/
-    void render(const glCamera & camera, int from = 0, int to = -1, int index = -1) {
+    void render(const glCamera & camera, int from = 0, int to = -1, int index = -1, const glScene * scene = nullptr) {
             
       DEBUG_LOG("glPoints::render(" + name + ")");
 
@@ -164,7 +164,9 @@ namespace ogl {
       shader.setUniform("viewport",   camera.getViewport());
 
       // Shade the impostors with the scene light (head-light fallback by default).
-      light.setInShader(shader, camera.getView());
+      // The point impostors receive light but do not sample the shadow map.
+      if(scene) scene->setInShader(shader, camera.getView());
+      else      glLight().setInShader(shader, camera.getView());
             
       int n = (int) points.size();
 
