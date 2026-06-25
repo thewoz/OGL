@@ -217,7 +217,7 @@ namespace ogl {
     //****************************************************************************/
     // setInGpu()
     //****************************************************************************/
-    void setInGpu() {
+    void setInGpu() override {
 
       DEBUG_LOG("glReferenceAxes::setInGpu(" + name + ")");
 
@@ -242,7 +242,7 @@ namespace ogl {
     //****************************************************************************/
     // cleanInGpu()
     //****************************************************************************/
-    void cleanInGpu() {
+    void cleanInGpu() override {
 
       if(isInitedInGpu) {
         glDeleteBuffers(1, &vbo);

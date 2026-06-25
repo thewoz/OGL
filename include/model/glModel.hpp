@@ -246,7 +246,7 @@ namespace ogl {
     //****************************************************************************/
     // setInGpu() - Copy the model into the GPU
     //****************************************************************************/
-    void setInGpu() {
+    void setInGpu() override {
       
       DEBUG_LOG("glModel::setInGpu(" + name + ")");
       
@@ -313,7 +313,7 @@ namespace ogl {
     //****************************************************************************/
     // cleanInGpu() -
     //****************************************************************************/
-    void cleanInGpu() {
+    void cleanInGpu() override {
       
       if(isInitedInGpu) {
 
