@@ -46,6 +46,9 @@ int main(int argc, char * const argv[]) {
   window.getCamera().setPosition(3, 1.5f, 0);
   window.getCamera().setYaw(180);
   window.getCamera().setPitch(-20);
+  // Push the far plane out: the default (10) clips objects as soon as you
+  // move a few units away from the scene.
+  window.getCamera().setzNearFar(0.1f, 100.0f);
   //window.getCamera().setMode(ogl::glCamera::ORBIT);
 
   // --- Scene (light + shadows shared by every object) ---
