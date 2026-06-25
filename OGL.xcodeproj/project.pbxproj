@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3A91D24E2423CB6A00A86587 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A3B498D241F9BA700084872 /* main.cpp */; };
+		3AEC07E32FED1A2400974148 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AEC07E12FED1A1700974148 /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		3ABAC82E241F9B8400C40957 /* CopyFiles */ = {
+		3AEC07D82FED194A00974148 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -24,7 +24,6 @@
 
 /* Begin PBXFileReference section */
 		3A07EE142F6809E200D5D460 /* glPlot.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glPlot.hpp; sourceTree = "<group>"; };
-		3A3B498D241F9BA700084872 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
 		3A3D08BC2F33B882008EAF80 /* line.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = line.fs; sourceTree = "<group>"; };
 		3A3D08BD2F33B882008EAF80 /* line.gs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = line.gs; sourceTree = "<group>"; };
 		3A3D08BE2F33B882008EAF80 /* line.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = line.vs; sourceTree = "<group>"; };
@@ -44,7 +43,6 @@
 		3A83B8882DBE9E9B00E0397A /* glQuad2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad2D.hpp; sourceTree = "<group>"; };
 		3AAB1A9F2FE74F9C00157213 /* glDraw.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glDraw.hpp; sourceTree = "<group>"; };
 		3AB7EB3C2DBE770C00A73EF1 /* glQuad.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad.hpp; sourceTree = "<group>"; };
-		3ABAC830241F9B8400C40957 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AC10E802DBE35F7000C540C /* glCamera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glCamera.hpp; sourceTree = "<group>"; };
 		3AC10E812DBE35F7000C540C /* glColors.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glColors.hpp; sourceTree = "<group>"; };
 		3AC10E822DBE35F7000C540C /* glObject.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glObject.hpp; sourceTree = "<group>"; };
@@ -74,10 +72,12 @@
 		3AC10EBA2DBE35F7000C540C /* snapshot.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = snapshot.hpp; sourceTree = "<group>"; };
 		3AC10EBB2DBE35F7000C540C /* stdio.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stdio.hpp; sourceTree = "<group>"; };
 		3AC10EBD2DBE35F7000C540C /* ogl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ogl.hpp; sourceTree = "<group>"; };
+		3AEC07DA2FED194A00974148 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AEC07E12FED1A1700974148 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		3ABAC82D241F9B8400C40957 /* Frameworks */ = {
+		3AEC07D72FED194A00974148 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -91,7 +91,6 @@
 			isa = PBXGroup;
 			children = (
 				3AC10EBE2DBE35F7000C540C /* include */,
-				3A3B498D241F9BA700084872 /* main.cpp */,
 				3ABAC831241F9B8400C40957 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -99,7 +98,7 @@
 		3ABAC831241F9B8400C40957 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				3ABAC830241F9B8400C40957 /* OGL */,
+				3AEC07DA2FED194A00974148 /* OGL */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -196,28 +195,39 @@
 				3AC10EB32DBE35F7000C540C /* shader */,
 				3AC10EBC2DBE35F7000C540C /* utils */,
 				3AC10EBD2DBE35F7000C540C /* ogl.hpp */,
+				3AEC07E22FED1A1700974148 /* src */,
 			);
 			path = include;
+			sourceTree = "<group>";
+		};
+		3AEC07E22FED1A1700974148 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				3AEC07E12FED1A1700974148 /* main.cpp */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3ABAC82F241F9B8400C40957 /* OGL */ = {
+		3AEC07D92FED194A00974148 /* OGL */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 3ABAC837241F9B8400C40957 /* Build configuration list for PBXNativeTarget "OGL" */;
+			buildConfigurationList = 3AEC07DE2FED194A00974148 /* Build configuration list for PBXNativeTarget "OGL" */;
 			buildPhases = (
-				3ABAC82C241F9B8400C40957 /* Sources */,
-				3ABAC82D241F9B8400C40957 /* Frameworks */,
-				3ABAC82E241F9B8400C40957 /* CopyFiles */,
+				3AEC07D62FED194A00974148 /* Sources */,
+				3AEC07D72FED194A00974148 /* Frameworks */,
+				3AEC07D82FED194A00974148 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = OGL;
+			packageProductDependencies = (
+			);
 			productName = OGL;
-			productReference = 3ABAC830241F9B8400C40957 /* OGL */;
+			productReference = 3AEC07DA2FED194A00974148 /* OGL */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -230,8 +240,8 @@
 				LastUpgradeCheck = 2630;
 				ORGANIZATIONNAME = "Leonardo Parisi";
 				TargetAttributes = {
-					3ABAC82F241F9B8400C40957 = {
-						CreatedOnToolsVersion = 11.3.1;
+					3AEC07D92FED194A00974148 = {
+						CreatedOnToolsVersion = 26.3;
 					};
 				};
 			};
@@ -248,17 +258,17 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				3ABAC82F241F9B8400C40957 /* OGL */,
+				3AEC07D92FED194A00974148 /* OGL */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		3ABAC82C241F9B8400C40957 /* Sources */ = {
+		3AEC07D62FED194A00974148 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3A91D24E2423CB6A00A86587 /* main.cpp in Sources */,
+				3AEC07E32FED1A2400974148 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,6 +356,7 @@
 					"-lassimp",
 					"-lSOIL2",
 					"-ltiff",
+					"-limgui",
 				);
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -427,79 +438,35 @@
 					"-lassimp",
 					"-lSOIL2",
 					"-ltiff",
+					"-limgui",
 				);
 				SDKROOT = macosx;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 			};
 			name = Release;
 		};
-		3ABAC838241F9B8400C40957 /* Debug */ = {
+		3AEC07DF2FED194A00974148 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				DEAD_CODE_STRIPPING = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					IMGUI_IMPL_OPENGL_LOADER_GLAD,
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				HEADER_SEARCH_PATHS = (
-					/usr/local/include/,
-					/usr/local/include/freetype2/,
-				);
-				OTHER_LDFLAGS = (
-					"-limgui",
-					"-lfreetype",
-					"-lassimp",
-					"-ltiff",
-					"-lSOIL2",
-					"-lglad",
-					"-lglfw3",
-					"-framework",
-					Cocoa,
-					"-framework",
-					IOKit,
-					"-framework",
-					CoreFoundation,
-					"-framework",
-					CoreVideo,
-					"-framework",
-					OpenGL,
-				);
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		3ABAC839241F9B8400C40957 /* Release */ = {
+		3AEC07E02FED194A00974148 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "-";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
-				DEAD_CODE_STRIPPING = YES;
-				HEADER_SEARCH_PATHS = (
-					/usr/local/include/,
-					/usr/local/include/freetype2/,
-				);
-				OTHER_LDFLAGS = (
-					"-limgui",
-					"-lfreetype",
-					"-lassimp",
-					"-ltiff",
-					"-lSOIL2",
-					"-lglad",
-					"-lglfw3",
-					"-framework",
-					Cocoa,
-					"-framework",
-					IOKit,
-					"-framework",
-					CoreFoundation,
-					"-framework",
-					CoreVideo,
-					"-framework",
-					OpenGL,
-				);
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -516,11 +483,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		3ABAC837241F9B8400C40957 /* Build configuration list for PBXNativeTarget "OGL" */ = {
+		3AEC07DE2FED194A00974148 /* Build configuration list for PBXNativeTarget "OGL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				3ABAC838241F9B8400C40957 /* Debug */,
-				3ABAC839241F9B8400C40957 /* Release */,
+				3AEC07DF2FED194A00974148 /* Debug */,
+				3AEC07E02FED194A00974148 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
