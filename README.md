@@ -144,22 +144,37 @@ int main(int argc, char * const argv[]) {
 
   ogl::glWindow window;
 
-  window.create(800, 600);
+  window.create(1024, 768);
 
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
 
   // The default camera is a FLY (free-fly) camera.
-  window.getCamera().setPosition(3, 1.5, 0);
+  window.getCamera().setPosition(3, 1.5f, 0);
   window.getCamera().setYaw(180);
   window.getCamera().setPitch(-20);
+  // Push the far plane out so distant objects are not clipped.
+  window.getCamera().setzNearFar(0.1f, 100.0f);
 
-  ogl::glAxes  axes;
-  ogl::glGrid  grid(10, 10, 0.5, ogl::glColors::cyan);
+  // The scene owns the light and the shadow map shared by every lit object.
+  ogl::glScene scene;
+  scene.setDirectionalLight(glm::vec3(-1.0f, -1.0f, -1.0f));
+  scene.enableShadows(true);
+  scene.setBounds(glm::vec3(0.0f, 0.5f, 0.0f), 3.0f);
+
+  ogl::glAxes axes;
+  ogl::glGrid grid(10, 10, 0.5f, ogl::glColors::cyan);
+
+  // Solid floor that receives the shadows (a quad laid flat on the XZ plane).
+  ogl::glQuad floor(glm::vec2(10.0f), glm::vec3(0.55f), ogl::glShader::STYLE::SOLID);
+  floor.rotate(glm::vec3(-1.57079633f, 0.0f, 0.0f)); // -90° about X: normal up
+  floor.translate(glm::vec3(0.0f, -0.01f, 0.0f));
+
+  ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::white);
+  cuboid.translate(glm::vec3(1.2f, 0.25f, 0.0f));
 
   ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
-  model.setLight(glm::vec3(1.0), glm::vec3(-1.0));
 
-  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5);
+  ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5f);
 
   ogl::glReferenceAxes referenceAxes;
   referenceAxes.setLineWidth(2);
@@ -168,9 +183,21 @@ int main(int argc, char * const argv[]) {
 
     window.renderBegin();
 
+      // Shadow pass: render the casters into the scene shadow map.
+      if(scene.areShadowsEnabled()) {
+        scene.beginShadowPass();
+        floor.renderDepth(scene.getShadowShader());
+        cuboid.renderDepth(scene.getShadowShader());
+        model.renderDepth(scene.getShadowShader());
+        scene.endShadowPass();
+      }
+
+      // Render pass: pass &scene so lit objects use its light and shadows.
+      floor.render(window.getCamera(), &scene);
       axes.render(window.getCamera());
       grid.render(window.getCamera());
-      model.render(window.getCamera());
+      cuboid.render(window.getCamera(), &scene);
+      model.render(window.getCamera(), &scene);
       text.render(window.getCamera(), "FPS: " + std::to_string(window.getFPS()));
       referenceAxes.render(window.getCamera());
 
@@ -237,7 +264,6 @@ The Makefile automatically detects whether you are on **Linux** or **macOS**.
 
 ## TODO
 
-- Add shadow mapping (currently lights shade surfaces directly, with no shadows)
 - Add support for multiple lights per object/model
 - Add render-to-texture support
 - Improve key input management
