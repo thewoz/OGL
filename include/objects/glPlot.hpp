@@ -80,6 +80,10 @@ namespace ogl {
     bool drawAxisLabels = true;
     bool drawTickLabels = true;
 
+    // se true i tick vengono disegnati solo verso l'interno (direzione positiva
+    // rispetto all'origine degli assi) invece che simmetrici sui due lati.
+    bool tickInward = false;
+
     float majorTickStep = 1.0f;
     float minorTickStep = 0.5f;
 
@@ -87,6 +91,12 @@ namespace ogl {
     float minorTickSize = 0.015f;
     float axisLabelScale = 0.6f;
     float tickLabelScale = 0.45f;
+
+    // distanza (in unita' mondo) delle scritte dall'asse. 0 => default automatico
+    // proporzionale all'ampiezza degli assi. Disaccoppiato da majorTickSize, cosi'
+    // i tick possono essere piccoli senza spostare/affollare le scritte.
+    float axisLabelOffset = 0.0f;
+    float tickLabelOffset = 0.0f;
 
     std::string xAxisLabel = "X";
     std::string yAxisLabel = "Y";
@@ -203,6 +213,14 @@ namespace ogl {
     }
 
     //****************************************************************************/
+    // setTickInward() - true => tick solo verso l'interno, false => simmetrici
+    //****************************************************************************/
+    void setTickInward(bool _tickInward) {
+      tickInward = _tickInward;
+      isToUpdateInGpu = true;
+    }
+
+    //****************************************************************************/
     // setLabelVisibility()
     //****************************************************************************/
     void setLabelVisibility(bool _drawAxisLabels, bool _drawTickLabels) {
@@ -230,6 +248,14 @@ namespace ogl {
     void setLabelScale(float _axisLabelScale, float _tickLabelScale = -1.0f) {
       axisLabelScale = (_axisLabelScale > 0.0f) ? _axisLabelScale : axisLabelScale;
       if(_tickLabelScale > 0.0f) tickLabelScale = _tickLabelScale;
+    }
+
+    //****************************************************************************/
+    // setLabelOffsets() - distanza delle scritte dall'asse (0 => default auto)
+    //****************************************************************************/
+    void setLabelOffsets(float _axisLabelOffset, float _tickLabelOffset = -1.0f) {
+      if(_axisLabelOffset >= 0.0f) axisLabelOffset = _axisLabelOffset;
+      if(_tickLabelOffset >= 0.0f) tickLabelOffset = _tickLabelOffset;
     }
 
     //****************************************************************************/
@@ -341,9 +367,13 @@ namespace ogl {
 
         float axisValue = mapAxisValue(range, v, axisOriginByAxis(axis), false);
 
-        if(axis == 0) addSegment(glm::vec3(axisValue, axisOrigin.y - tickSize, axisOrigin.z), glm::vec3(axisValue, axisOrigin.y + tickSize, axisOrigin.z), color);
-        if(axis == 1) addSegment(glm::vec3(axisOrigin.x - tickSize, axisValue, axisOrigin.z), glm::vec3(axisOrigin.x + tickSize, axisValue, axisOrigin.z), color);
-        if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y - tickSize, axisValue), glm::vec3(axisOrigin.x, axisOrigin.y + tickSize, axisValue), color);
+        // tick solo verso l'interno (t0=0) oppure simmetrico (t0=-tickSize)
+        float t0 = tickInward ? 0.0f : -tickSize;
+        float t1 = tickSize;
+
+        if(axis == 0) addSegment(glm::vec3(axisValue, axisOrigin.y + t0, axisOrigin.z), glm::vec3(axisValue, axisOrigin.y + t1, axisOrigin.z), color);
+        if(axis == 1) addSegment(glm::vec3(axisOrigin.x + t0, axisValue, axisOrigin.z), glm::vec3(axisOrigin.x + t1, axisValue, axisOrigin.z), color);
+        if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + t0, axisValue), glm::vec3(axisOrigin.x, axisOrigin.y + t1, axisValue), color);
       }
       
     }
@@ -362,21 +392,27 @@ namespace ogl {
 
         float major = std::pow(10.0f, (float)e);
 
+        float t0 = tickInward ? 0.0f : -tickSize;
+        float t1 = tickSize;
+
         if(major >= range.min && major <= range.max) {
-          if(axis == 0) addSegment(glm::vec3(major, axisOrigin.y - tickSize, axisOrigin.z), glm::vec3(major, axisOrigin.y + tickSize, axisOrigin.z), color);
-          if(axis == 1) addSegment(glm::vec3(axisOrigin.x - tickSize, major, axisOrigin.z), glm::vec3(axisOrigin.x + tickSize, major, axisOrigin.z), color);
-          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y - tickSize, major), glm::vec3(axisOrigin.x, axisOrigin.y + tickSize, major), color);
+          if(axis == 0) addSegment(glm::vec3(major, axisOrigin.y + t0, axisOrigin.z), glm::vec3(major, axisOrigin.y + t1, axisOrigin.z), color);
+          if(axis == 1) addSegment(glm::vec3(axisOrigin.x + t0, major, axisOrigin.z), glm::vec3(axisOrigin.x + t1, major, axisOrigin.z), color);
+          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + t0, major), glm::vec3(axisOrigin.x, axisOrigin.y + t1, major), color);
         }
 
         if(!addMinor) continue;
+
+        float m0 = tickInward ? 0.0f : -minorTickSize;
+        float m1 = minorTickSize;
 
         for(int i = 2; i < 10; ++i) {
           float minor = major * (float)i;
           if(minor >= range.max) break;
           if(minor < range.min) continue;
-          if(axis == 0) addSegment(glm::vec3(minor, axisOrigin.y - minorTickSize, axisOrigin.z), glm::vec3(minor, axisOrigin.y + minorTickSize, axisOrigin.z), minorTickColor);
-          if(axis == 1) addSegment(glm::vec3(axisOrigin.x - minorTickSize, minor, axisOrigin.z), glm::vec3(axisOrigin.x + minorTickSize, minor, axisOrigin.z), minorTickColor);
-          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y - minorTickSize, minor), glm::vec3(axisOrigin.x, axisOrigin.y + minorTickSize, minor), minorTickColor);
+          if(axis == 0) addSegment(glm::vec3(minor, axisOrigin.y + m0, axisOrigin.z), glm::vec3(minor, axisOrigin.y + m1, axisOrigin.z), minorTickColor);
+          if(axis == 1) addSegment(glm::vec3(axisOrigin.x + m0, minor, axisOrigin.z), glm::vec3(axisOrigin.x + m1, minor, axisOrigin.z), minorTickColor);
+          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + m0, minor), glm::vec3(axisOrigin.x, axisOrigin.y + m1, minor), minorTickColor);
         }
       }
       
@@ -424,6 +460,26 @@ namespace ogl {
     }
 
     //****************************************************************************/
+    // maxAxisExtent() - massima ampiezza tra gli assi (per offset/scale di default)
+    //****************************************************************************/
+    float maxAxisExtent() const {
+      float ex = std::fabs(xRange.max - xRange.min);
+      float ey = std::fabs(yRange.max - yRange.min);
+      float ez = std::fabs(zRange.max - zRange.min);
+      return std::max(ex, std::max(ey, ez));
+    }
+
+    //****************************************************************************/
+    // resolved offset delle scritte: usa quello impostato o un default automatico
+    //****************************************************************************/
+    float resolvedAxisLabelOffset() const {
+      return (axisLabelOffset > 0.0f) ? axisLabelOffset : maxAxisExtent() * 0.03f;
+    }
+    float resolvedTickLabelOffset() const {
+      return (tickLabelOffset > 0.0f) ? tickLabelOffset : maxAxisExtent() * 0.025f;
+    }
+
+    //****************************************************************************/
     // renderLabels()
     //****************************************************************************/
     void renderLabels(const glCamera & camera) {
@@ -433,14 +489,19 @@ namespace ogl {
       AxisRange zDrawRange = getDrawRange(zRange, axisOrigin.z, zLog);
 
       if(drawAxisLabels) {
-        
-        float xOff = majorTickSize * 2.2f;
-        float yOff = majorTickSize * 2.2f;
-        float zOff = majorTickSize * 2.2f;
 
-        axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(mapAxisValue(xRange, xDrawRange.max, axisOrigin.x, xLog), axisOrigin.y + xOff, axisOrigin.z), axisColor, axisLabelScale);
-        axisLabelPrinter.render(camera, yAxisLabel, glm::vec3(axisOrigin.x + yOff, mapAxisValue(yRange, yDrawRange.max, axisOrigin.y, yLog), axisOrigin.z), axisColor, axisLabelScale);
-        axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(axisOrigin.x, axisOrigin.y + zOff, mapAxisValue(zRange, zDrawRange.max, axisOrigin.z, zLog)), axisColor, axisLabelScale);
+        float xOff = resolvedAxisLabelOffset();
+        float yOff = resolvedAxisLabelOffset();
+        float zOff = resolvedAxisLabelOffset();
+
+        // il nome dell'asse va al CENTRO dell'asse (punto medio del range), non in cima
+        float xMid = 0.5f * (xDrawRange.min + xDrawRange.max);
+        float yMid = 0.5f * (yDrawRange.min + yDrawRange.max);
+        float zMid = 0.5f * (zDrawRange.min + zDrawRange.max);
+
+        axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(mapAxisValue(xRange, xMid, axisOrigin.x, xLog), axisOrigin.y - xOff, axisOrigin.z), axisColor, axisLabelScale);
+        axisLabelPrinter.render(camera, yAxisLabel, glm::vec3(axisOrigin.x - yOff, mapAxisValue(yRange, yMid, axisOrigin.y, yLog), axisOrigin.z), axisColor, axisLabelScale);
+        axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(axisOrigin.x, axisOrigin.y - zOff, mapAxisValue(zRange, zMid, axisOrigin.z, zLog)), axisColor, axisLabelScale);
         
       }
 
@@ -468,7 +529,7 @@ namespace ogl {
 
       const float eps = 1e-6f;
       float start = std::ceil(range.min / step) * step;
-      float off = majorTickSize * 2.0f;
+      float off = resolvedTickLabelOffset();
 
       for(float v = start; v <= range.max + eps; v += step) {
         std::string label = formatTickValue(v);
@@ -489,7 +550,7 @@ namespace ogl {
 
       int expMin = (int)std::floor(std::log10(range.min));
       int expMax = (int)std::ceil(std::log10(range.max));
-      float off = majorTickSize * 2.0f;
+      float off = resolvedTickLabelOffset();
 
       for(int e = expMin; e <= expMax; ++e) {
         float major = std::pow(10.0f, (float)e);
