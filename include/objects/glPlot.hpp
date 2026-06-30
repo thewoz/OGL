@@ -499,9 +499,12 @@ namespace ogl {
         float yMid = 0.5f * (yDrawRange.min + yDrawRange.max);
         float zMid = 0.5f * (zDrawRange.min + zDrawRange.max);
 
-        axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(mapAxisValue(xRange, xMid, axisOrigin.x, xLog), axisOrigin.y - xOff, axisOrigin.z), axisColor, axisLabelScale);
+        // X: offset in -Z → rimane sul piano XY (y=axisOrigin.y)
+        axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(mapAxisValue(xRange, xMid, axisOrigin.x, xLog), axisOrigin.y, axisOrigin.z - xOff), axisColor, axisLabelScale);
+        // Y: offset in -X → rimane sul piano XY (z=axisOrigin.z)
         axisLabelPrinter.render(camera, yAxisLabel, glm::vec3(axisOrigin.x - yOff, mapAxisValue(yRange, yMid, axisOrigin.y, yLog), axisOrigin.z), axisColor, axisLabelScale);
-        axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(axisOrigin.x, axisOrigin.y - zOff, mapAxisValue(zRange, zMid, axisOrigin.z, zLog)), axisColor, axisLabelScale);
+        // Z: offset in -X → rimane sul piano XZ (y=axisOrigin.y)
+        axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(axisOrigin.x - zOff, axisOrigin.y, mapAxisValue(zRange, zMid, axisOrigin.z, zLog)), axisColor, axisLabelScale);
         
       }
 
