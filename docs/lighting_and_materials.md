@@ -41,24 +41,26 @@ else                                     lightDir = viewDir; // head light
 ```
 
 Because of the head-light fallback an object is **always** visibly shaded, even
-if you never call `setLight()`.
+if you never configure a light.
 
-### Setting a light on an object
+### Setting the scene light
 
-The base objects and `glModel` expose a convenience setter that takes a
-position and a direction at once:
+Objects do not own a light. The light (and the shadow map) live in a
+[`glScene`](../include/core/glScene.hpp), which is passed to `render()`:
 
 ```cpp
-ogl::glCuboid cube(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::white);
-cube.setLight(/*position*/ glm::vec3(1.0f, 0.0f, 0.0f),
-              /*direction*/ glm::vec3(-1.0f));   // directional light
+ogl::glScene scene;
+scene.setDirectionalLight(glm::vec3(-1.0f));  // or scene.setPointLight(position)
+scene.setAmbient (glm::vec3(0.2f));
+scene.setDiffuse (glm::vec3(0.5f));
+scene.setSpecular(glm::vec3(1.0f));
 
-ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
-model.setLight(glm::vec3(1.0f), glm::vec3(-1.0f));
+cube.render(camera, &scene);
+model.render(camera, &scene);
 ```
 
-Pass a zero direction (`glm::vec3(0.0f)`) if you want a pure point light from
-the given position.
+Calling `render(camera)` without a scene makes the object fall back to a
+default head light (and disables shadow sampling).
 
 ## Materials (`glMaterial`)
 
@@ -100,15 +102,41 @@ color    = vec4( gammaCorrect(lighting), opacity )
 
 with a standard gamma of `2.2`.
 
+## Shadows
+
+The primary scene light casts shadows through a single 2D shadow map
+([`glShadow`](../include/core/glShadow.hpp), owned by `glScene`). Enable them
+and draw the casters in a depth-only pass before the color pass:
+
+```cpp
+scene.enableShadows(true);
+scene.setBounds(center, radius);   // bounding sphere used to frame the light
+
+if(scene.areShadowsEnabled()) {
+  scene.beginShadowPass();
+  floor.renderDepth(scene.getShadowShader());
+  model.renderDepth(scene.getShadowShader());
+  scene.endShadowPass();
+}
+
+floor.render(camera, &scene);      // the color pass samples the shadow map
+```
+
+A directional light uses an orthographic light box; a point light casts
+shadows only inside the cone that looks at the scene center (a full
+omnidirectional shadow would need a depth cubemap). The shadow test uses 3×3
+PCF with a slope-scaled depth bias (see `solid.fs` / `model.fs`).
+
 ## What was intentionally left out
 
 To keep the engine small and easy to reason about, the following are **not**
 implemented:
 
-- **Shadows.** There is no shadow mapping; lights only shade surfaces directly.
 - **Reflection / refraction**, environment maps, and transparency blending
   beyond a simple per-fragment opacity (`d`).
-- **Multiple lights.** Each object/model is lit by a single `glLight`.
+- **Multiple lights.** `glScene` stores a vector of lights so the API can grow,
+  but the shaders currently use only the primary light (`scene.light(0)`).
+- **Omnidirectional point-light shadows** (depth cubemaps); see above.
 
 These are natural future extensions; the current code keeps the material to the
 common Phong subset on purpose.

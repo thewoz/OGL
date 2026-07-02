@@ -67,7 +67,7 @@ namespace ogl {
     //****************************************************************************/
     // glPrint()
     //****************************************************************************/
-    glPrint3D(const std::string _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1.0, float _isDynamicScale = false, const std::string & _name = "") {
+    glPrint3D(const std::string _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1.0, bool _isDynamicScale = false, const std::string & _name = "") {
       name = _name;
       init(_text, _coord, _color, _scale, _isDynamicScale);
     }
@@ -91,7 +91,7 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(const std::string _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1.0, float _isDynamicScale = false) {
+    void init(const std::string _text, const glm::vec3 & _coord, const glm::vec3 & _color = glm::vec3(1,1,1), float _scale = 1.0, bool _isDynamicScale = false) {
       
       DEBUG_LOG("glPrint3D::init(" + name + ")");
       

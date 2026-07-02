@@ -118,13 +118,18 @@ namespace ogl {
       
       shader.setName(name);
       shader.initPoints();
-            
+
       points = _points;
-      
+
       colors = _color;
-      
+
+      // the color buffer must cover every point, otherwise the GPU reads past
+      // the end of the color VBO during rendering (same guard as glLines)
+      if(colors.size() < points.size())
+        colors.resize(points.size(), colors.empty() ? glm::vec4(1.0f) : colors.back());
+
       radius = _radius;
-      
+
       isInited = true;
       
     }
@@ -197,10 +202,15 @@ namespace ogl {
       //glEnable(GL_CULL_FACE);
       //glCullFace(GL_BACK);
 
-      glDisable(GL_BLEND);
+      // points.fs outputs a premultiplied color (rgb*alpha, alpha) to antialias
+      // the disc edge; without blending the rim pixels turn dark instead of
+      // fading out. Premultiplied blend keeps interior pixels (alpha=1) exact.
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
       glDrawArrays(GL_POINTS, from, count);
 
+      glDisable(GL_BLEND);
       glDisable(GL_PROGRAM_POINT_SIZE);
 
       glBindVertexArray(0);

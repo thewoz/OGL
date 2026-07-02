@@ -66,19 +66,21 @@ namespace ogl {
   //             where the view must be set programmatically and must never drift.
   //
   // ── ORBIT ────────────────────────────────────────────────────────────────────
-  //   Turntable orbit. The camera revolves around 'target' at a fixed radius
-  //   (= |position − target|). Think of it as spinning a turntable under an
-  //   object while the camera watches from above/beside.
+  //   Turntable orbit. The view is built as T(target−position) · R(yaw,pitch) ·
+  //   T(−target): the scene rotates around 'target' and the vector
+  //   (target − position) is applied AFTER the rotation, i.e. it acts as a
+  //   fixed view-space offset. Its z component is the viewing distance, its
+  //   x/y components pan the scene on screen — for any camera orientation.
   //
   //   Mouse drag            → orbit around target (yaw / pitch)
-  //   Ctrl + mouse drag     → translate both camera and target (pan the scene)
-  //   Shift + Arrow keys    → pan the scene (translate camera + target together)
-  //   Scroll wheel          → dolly in/out (move camera along its radius)
+  //   Ctrl + mouse drag     → pan the scene (moves position.x/y = screen offset)
+  //   Shift + Arrow keys    → pan the scene (same, via the keyboard)
+  //   Scroll wheel          → dolly in/out (moves position.z = view distance)
   //
-  //   IMPORTANT: position must differ from target, otherwise the orbit radius
+  //   IMPORTANT: position must differ from target, otherwise the view distance
   //   is zero and the scene appears frozen. A typical setup:
   //     camera.setTarget(0, 0, 0);
-  //     camera.setPosition(0, 0, 5);  // radius = 5
+  //     camera.setPosition(0, 0, 5);  // viewing distance = 5
   //
   //   Best for: inspecting a 3-D object from all sides (like a model viewer).
   //****************************************************************************/
@@ -328,7 +330,9 @@ namespace ogl {
     // Misc
     //==========================================================================
 
-    inline void setKeybordSpeed(GLfloat _speed)           { speed = _speed; }
+    inline void setKeyboardSpeed(GLfloat _speed)          { speed = _speed; }
+    // Deprecated misspelled alias, kept for source compatibility.
+    inline void setKeybordSpeed(GLfloat _speed)           { setKeyboardSpeed(_speed); }
     inline void setMouseSensitivity(GLfloat _sensitivity) { sensitivity = _sensitivity; }
     inline void setPanSensitivity(GLfloat _sensitivity)   { panSensitivity = _sensitivity; }
 

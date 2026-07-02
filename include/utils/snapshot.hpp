@@ -71,7 +71,6 @@ inline void snapshot(int width, int height, const char * outputfile, bool compre
     TIFFSetField(file, TIFFTAG_IMAGEWIDTH, width);
     TIFFSetField(file, TIFFTAG_IMAGELENGTH, height);
     TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
-    TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
     TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
     TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 3);
     TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);

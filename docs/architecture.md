@@ -16,9 +16,11 @@ include `<ogl/ogl.hpp>` instead.
 include/
   core/      glWindow, glCamera, glShader, glTexture, glColors, glObject (base class)
              glFont (shared glyph atlas used by the text objects)
+             glScene (scene light + shadow controls), glShadow (shadow map FBO)
+             glDraw (ImGui drawing helpers, only with ImGui enabled)
   model/     glLight, glMaterial, glMesh, glModel  (Assimp import + Phong shading)
   objects/   ready-to-use drawables:
-               glShape                             — base for the lit primitives (adds the light)
+               glShape                             — base for the lit primitives
                glEllipse, glSphere, glCuboid, glQuad — solid/wireframe 3D shapes
                glBox, glLine, glLines              — edge/line primitives
                glGrid, glAxes, glReferenceAxes     — scene helpers
@@ -33,14 +35,15 @@ include/
 ## Class relationships
 
 Every drawable derives from `glObject` (transform, shader, `style`, `lineWidth`,
-`color`). Drawables own GPU handles, so `glObject` is **non-copyable and
-non-movable** (a virtual destructor makes deletion through a `glObject*` safe);
-pass drawables by reference or pointer. The lit primitives derive from an
-intermediate `glShape : glObject`, which adds the `glLight` member and
-`setLight()`. `glSphere` is a thin subclass of `glEllipse` (a sphere is an
-ellipsoid with equal semi-axes). Text objects (`glPrint2D`/`glPrint3D`) share a
-single process-wide glyph atlas through `glFont` instead of each loading their
-own copy.
+`color`). Drawables own GPU handles, so `glObject` is **non-copyable but
+movable**: moving transfers ownership of the GPU resources and neuters the
+moved-from object (a virtual destructor makes deletion through a `glObject*`
+safe). The lit primitives derive from an intermediate `glShape : glObject`;
+they do not own a light — the scene light and the shadow map are supplied by a
+`glScene` passed to `render(camera, &scene)`. `glSphere` is a thin subclass of
+`glEllipse` (a sphere is an ellipsoid with equal semi-axes). Text objects
+(`glPrint2D`/`glPrint3D`) share a single process-wide glyph atlas through
+`glFont` instead of each loading their own copy.
 
 ## The drawable object model
 
@@ -84,6 +87,7 @@ offers a small set of presets:
 | `initModel`      | `model.vs/.fs`              | imported 3D models (glModel)         |
 | `initText`       | `text.vs/.fs`               | 2D/3D text                           |
 | `initPlain2D`    | `plain2D.vs/.fs`            | 2D overlays                          |
+| `initShadow`     | `shadow.vs/.fs`             | depth-only shadow pass (glShadow)    |
 
 Uniforms are set through the templated `glShader::setUniform(name, value)`.
 
@@ -92,14 +96,25 @@ Uniforms are set through the templated `glShader::setUniform(name, value)`.
 ```cpp
 while(!window.shouldClose()) {
   window.renderBegin();      // clear buffers, update camera/input
-    object.render(window.getCamera());
+
+    // Optional shadow pass: draw the casters into the scene shadow map.
+    if(scene.areShadowsEnabled()) {
+      scene.beginShadowPass();
+      object.renderDepth(scene.getShadowShader());
+      scene.endShadowPass();
+    }
+
+    object.render(window.getCamera(), &scene);  // lit objects take the scene
+
   window.renderEnd();        // swap buffers, poll events
 }
 ```
 
 `renderBegin()` / `renderEnd()` are provided by
 [`glWindow`](../include/ogl/core/glWindow.hpp); the camera supplies the
-projection and view matrices through `getProjection()` / `getView()`.
+projection and view matrices through `getProjection()` / `getView()`. Lighting
+and shadows are described in
+[Lighting and Materials](lighting_and_materials.md).
 
 ## Cameras
 

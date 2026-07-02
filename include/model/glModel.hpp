@@ -89,12 +89,18 @@ namespace ogl {
       // ASSIMP reader file
       Assimp::Importer importer;
       
-      // Load the model via ASSIMP
+      // Load the model via ASSIMP.
+      // aiProcess_PreTransformVertices bakes every node transformation into the
+      // vertices: processNode() below reads the meshes without walking the node
+      // matrices, so without this flag models with a transformed node hierarchy
+      // would be rendered with their parts in the wrong pose. (The flag drops
+      // animations, which OGL does not support anyway.)
       const aiScene *scene = importer.ReadFile(path, aiProcess_CalcTangentSpace
                                                | aiProcess_Triangulate
                                                | aiProcess_JoinIdenticalVertices
                                                | aiProcess_GenSmoothNormals
                                                | aiProcess_FlipUVs
+                                               | aiProcess_PreTransformVertices
                                                );
 
       // Check for errors - if is Not Zero
@@ -179,13 +185,19 @@ namespace ogl {
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LEQUAL);
 
+      // model.fs writes the material opacity in the alpha channel: blending must
+      // be on or semi-transparent materials render fully opaque. For opaque
+      // fragments (alpha = 1) this blend is a no-op.
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     }
 
 
     //****************************************************************************/
     // renderEnd()
     //****************************************************************************/
-    void renderEnd() { glDisable(GL_CULL_FACE); }
+    void renderEnd() { glDisable(GL_CULL_FACE); glDisable(GL_BLEND); }
     
     //****************************************************************************/
     // getBounds() - Compute the bounds of the model (center, size, radius)

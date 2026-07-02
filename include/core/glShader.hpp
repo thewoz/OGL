@@ -75,7 +75,7 @@ namespace ogl {
     
     enum STYLE { SOLID, WIREFRAME, LINE, POINTS, TEXT, MODEL, PLAIN2D, SHADOW };
 
-    int style;
+    int style = STYLE::SOLID;
     
     //****************************************************************************/
     // glShader
@@ -103,7 +103,11 @@ namespace ogl {
         isInited(o.isInited), isInitedInGpu(o.isInitedInGpu),
         name(std::move(o.name)),
         uniformLocationCache(std::move(o.uniformLocationCache)), style(o.style) {
-      o.program = 0;
+      // Neutralize the source: with program == 0 but isInitedInGpu still true, a
+      // reused moved-from shader would silently glUseProgram(0).
+      o.program       = 0;
+      o.isInitedInGpu = false;
+      o.windowID      = 0;
     }
 
     glShader & operator = (glShader && o) noexcept {
@@ -119,6 +123,8 @@ namespace ogl {
         name         = std::move(o.name);
         uniformLocationCache = std::move(o.uniformLocationCache);
         style        = o.style;
+        o.isInitedInGpu = false;
+        o.windowID      = 0;
       }
       return *this;
     }

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3AEC07E32FED1A2400974148 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3AEC07E12FED1A1700974148 /* main.cpp */; };
+		3A8B01212FF690AB007B8023 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3A8B011F2FF6909E007B8023 /* main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -41,6 +41,7 @@
 		3A3D08CA2F33B882008EAF80 /* wireframe.gs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.gs; sourceTree = "<group>"; };
 		3A3D08CB2F33B882008EAF80 /* wireframe.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.vs; sourceTree = "<group>"; };
 		3A83B8882DBE9E9B00E0397A /* glQuad2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad2D.hpp; sourceTree = "<group>"; };
+		3A8B011F2FF6909E007B8023 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		3AAB1A9F2FE74F9C00157213 /* glDraw.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glDraw.hpp; sourceTree = "<group>"; };
 		3AB7EB3C2DBE770C00A73EF1 /* glQuad.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad.hpp; sourceTree = "<group>"; };
 		3AC10E802DBE35F7000C540C /* glCamera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glCamera.hpp; sourceTree = "<group>"; };
@@ -72,8 +73,7 @@
 		3AC10EBA2DBE35F7000C540C /* snapshot.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = snapshot.hpp; sourceTree = "<group>"; };
 		3AC10EBB2DBE35F7000C540C /* stdio.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = stdio.hpp; sourceTree = "<group>"; };
 		3AC10EBD2DBE35F7000C540C /* ogl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ogl.hpp; sourceTree = "<group>"; };
-		3AEC07DA2FED194A00974148 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = OGL; sourceTree = BUILT_PRODUCTS_DIR; };
-		3AEC07E12FED1A1700974148 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		3AEC07DA2FED194A00974148 /* OGL */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = OGL; path = /Users/thewoz/Dropbox/Research/OGL/build/Debug/OGL; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,20 +87,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		3A8B01202FF6909E007B8023 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				3A8B011F2FF6909E007B8023 /* main.cpp */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
 		3ABAC827241F9B8400C40957 = {
 			isa = PBXGroup;
 			children = (
 				3AC10EBE2DBE35F7000C540C /* include */,
-				3ABAC831241F9B8400C40957 /* Products */,
+				3A8B01202FF6909E007B8023 /* src */,
 			);
-			sourceTree = "<group>";
-		};
-		3ABAC831241F9B8400C40957 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				3AEC07DA2FED194A00974148 /* OGL */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		3AC10E862DBE35F7000C540C /* core */ = {
@@ -195,17 +195,8 @@
 				3AC10EB32DBE35F7000C540C /* shader */,
 				3AC10EBC2DBE35F7000C540C /* utils */,
 				3AC10EBD2DBE35F7000C540C /* ogl.hpp */,
-				3AEC07E22FED1A1700974148 /* src */,
 			);
 			path = include;
-			sourceTree = "<group>";
-		};
-		3AEC07E22FED1A1700974148 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				3AEC07E12FED1A1700974148 /* main.cpp */,
-			);
-			path = src;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -254,7 +245,7 @@
 				Base,
 			);
 			mainGroup = 3ABAC827241F9B8400C40957;
-			productRefGroup = 3ABAC831241F9B8400C40957 /* Products */;
+			productRefGroup = 3ABAC827241F9B8400C40957;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -268,7 +259,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3AEC07E32FED1A2400974148 /* main.cpp in Sources */,
+				3A8B01212FF690AB007B8023 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

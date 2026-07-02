@@ -35,17 +35,23 @@
 // glCheckError() -
 //****************************************************************************/
 inline GLenum glCheckError_(const char *file, int line) {
-  
+
 #ifndef NDEBUG
-  
+
   GLenum errorCode = GL_NO_ERROR;
-  
+
+  // The loop drains the whole error queue; remember the first code so the
+  // caller does not always get GL_NO_ERROR back.
+  GLenum firstError = GL_NO_ERROR;
+
   bool getError = false;
-  
+
   while ((errorCode = glGetError()) != GL_NO_ERROR) {
-    
+
+    if(firstError == GL_NO_ERROR) firstError = errorCode;
+
     std::string error = "Unknown";
-    
+
     switch (errorCode) {
       case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; getError = true; break;
       case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; getError = true; break;
@@ -55,21 +61,21 @@ inline GLenum glCheckError_(const char *file, int line) {
     }
 
     fprintf(stderr, "ERROR [GL]: %s | %s (%d)\n", error.c_str(), file, line);
-    
-  }
-  
-  if(getError) { fflush(stdout); abort(); }
-  
-  return errorCode;
-  
-#else
-  
-  return GL_NO_ERROR;
-  
-#endif
-  
 
-  
+  }
+
+  if(getError) { fflush(stdout); abort(); }
+
+  return firstError;
+
+#else
+
+  return GL_NO_ERROR;
+
+#endif
+
+
+
 }
 
 #define glCheckError() glCheckError_(__FILE__, __LINE__)

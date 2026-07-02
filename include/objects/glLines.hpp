@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 
 //****************************************************************************/
 // namespace ogl
@@ -140,22 +141,34 @@ namespace ogl {
       shader.setUniform("uniformColor", glm::vec4(1.0f));
                         
       glBindVertexArray(vao);
-      
+
       glDisable(GL_CULL_FACE);
 
-      if(to == -1) to = (int) vertices.size();
-      
+      int n = (int) vertices.size();
+
       if(strip == -1) {
-        
-        glDrawArrays(GL_LINE_STRIP, from, to - from);
+
+        // Single strip: 'to' is an end index (exclusive); -1 means "up to the
+        // last vertex". Clamp so bad arguments cannot read past the buffer.
+        if(to == -1 || to > n) to = n;
+        if(from < 0) from = 0;
+
+        if(to - from > 1) glDrawArrays(GL_LINE_STRIP, from, to - from);
 
       } else {
-        
+
+        // Multiple strips: strip i starts at from + i*stripOffset and 'to' is
+        // the vertex count of each strip (-1 = up to the end of the buffer).
+        // 'index' (when != -1) draws only that strip. Each strip is clamped to
+        // the end of the buffer.
         for(int i=0; i<=strip; ++i) {
           if(index != -1 && i != index) continue;
-          glDrawArrays(GL_LINE_STRIP, (i*stripOffset)+from, to);
+          int first = (i * stripOffset) + from;
+          if(first < 0 || first >= n) continue;
+          int count = (to == -1) ? n - first : std::min(to, n - first);
+          if(count > 1) glDrawArrays(GL_LINE_STRIP, first, count);
         }
-        
+
       }
 
       glBindVertexArray(0);

@@ -396,9 +396,10 @@ namespace ogl {
         float t1 = tickSize;
 
         if(major >= range.min && major <= range.max) {
-          if(axis == 0) addSegment(glm::vec3(major, axisOrigin.y + t0, axisOrigin.z), glm::vec3(major, axisOrigin.y + t1, axisOrigin.z), color);
-          if(axis == 1) addSegment(glm::vec3(axisOrigin.x + t0, major, axisOrigin.z), glm::vec3(axisOrigin.x + t1, major, axisOrigin.z), color);
-          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + t0, major), glm::vec3(axisOrigin.x, axisOrigin.y + t1, major), color);
+          float pos = mapAxisValue(range, major, axisOriginByAxis(axis), true);
+          if(axis == 0) addSegment(glm::vec3(pos, axisOrigin.y + t0, axisOrigin.z), glm::vec3(pos, axisOrigin.y + t1, axisOrigin.z), color);
+          if(axis == 1) addSegment(glm::vec3(axisOrigin.x + t0, pos, axisOrigin.z), glm::vec3(axisOrigin.x + t1, pos, axisOrigin.z), color);
+          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + t0, pos), glm::vec3(axisOrigin.x, axisOrigin.y + t1, pos), color);
         }
 
         if(!addMinor) continue;
@@ -410,9 +411,10 @@ namespace ogl {
           float minor = major * (float)i;
           if(minor >= range.max) break;
           if(minor < range.min) continue;
-          if(axis == 0) addSegment(glm::vec3(minor, axisOrigin.y + m0, axisOrigin.z), glm::vec3(minor, axisOrigin.y + m1, axisOrigin.z), minorTickColor);
-          if(axis == 1) addSegment(glm::vec3(axisOrigin.x + m0, minor, axisOrigin.z), glm::vec3(axisOrigin.x + m1, minor, axisOrigin.z), minorTickColor);
-          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + m0, minor), glm::vec3(axisOrigin.x, axisOrigin.y + m1, minor), minorTickColor);
+          float pos = mapAxisValue(range, minor, axisOriginByAxis(axis), true);
+          if(axis == 0) addSegment(glm::vec3(pos, axisOrigin.y + m0, axisOrigin.z), glm::vec3(pos, axisOrigin.y + m1, axisOrigin.z), minorTickColor);
+          if(axis == 1) addSegment(glm::vec3(axisOrigin.x + m0, pos, axisOrigin.z), glm::vec3(axisOrigin.x + m1, pos, axisOrigin.z), minorTickColor);
+          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + m0, pos), glm::vec3(axisOrigin.x, axisOrigin.y + m1, pos), minorTickColor);
         }
       }
       
@@ -560,9 +562,10 @@ namespace ogl {
         if(major < range.min || major > range.max) continue;
 
         std::string label = formatTickValue(major);
-        if(axis == 0) tickLabelPrinter.render(camera, label, glm::vec3(major, axisOrigin.y - off, axisOrigin.z), majorTickColor, tickLabelScale);
-        if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x - off, major, axisOrigin.z), majorTickColor, tickLabelScale);
-        if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x, axisOrigin.y - off, major), majorTickColor, tickLabelScale);
+        float pos = mapAxisValue(range, major, axisOriginByAxis(axis), true);
+        if(axis == 0) tickLabelPrinter.render(camera, label, glm::vec3(pos, axisOrigin.y - off, axisOrigin.z), majorTickColor, tickLabelScale);
+        if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x - off, pos, axisOrigin.z), majorTickColor, tickLabelScale);
+        if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x, axisOrigin.y - off, pos), majorTickColor, tickLabelScale);
       }
       
     }
@@ -696,7 +699,12 @@ namespace ogl {
     // mapAxisValue()
     //****************************************************************************/
     float mapAxisValue(const AxisRange & range, float value, float axisOriginValue, bool isLogScale) const {
-      if(isLogScale) return value;
+      if(isLogScale) {
+        // True log axis: range.min maps to the axis origin and every decade has
+        // unit length, so the decades are compressed logarithmically.
+        if(range.min <= 0.0f || value <= 0.0f) return axisOriginValue;
+        return std::log10(value / range.min) + axisOriginValue;
+      }
       if(range.max <= range.min) return axisOriginValue;
       return value - range.min + axisOriginValue;
     }

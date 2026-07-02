@@ -30,6 +30,7 @@
 
 #include <deque>
 #include <string>
+#include <algorithm>
 
 //*****************************************************************************/
 // namespace ogl
@@ -105,8 +106,9 @@ namespace ogl {
     bool imguiOwner = false;
 
     // FPS tracking — per-window (not static) so multiple windows don't share state.
+    // One delta is sampled per frame in renderBegin(); getFPS() only reads the
+    // history, so it can be called any number of times per frame.
     std::deque<double> fpsDeltas;
-    double fpsLastTimestamp = 0.0;
 
   protected:
 
@@ -461,12 +463,11 @@ namespace ogl {
         lastX = xPos;
         lastY = yPos;
 
-        bool controllKey = GLFW_RELEASE;
-        if(glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS)
-          controllKey = GLFW_PRESS;
+        bool controlKey = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)  == GLFW_PRESS ||
+                           glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
 
         if(isProcessMouseMovement && !imguiWantsMouse())
-          camera.processMouseMovement(xOffset, yOffset, controllKey);
+          camera.processMouseMovement(xOffset, yOffset, controlKey);
 
         cursorPos(lastX, lastY, xOffset, yOffset);
 
@@ -518,10 +519,14 @@ namespace ogl {
     }
 
     //*****************************************************************************/
-    // disable/enable Keybord
+    // disable/enable Keyboard
     //*****************************************************************************/
-    void disableKeybord() { keyboardUserEnabled = false; }
-    void enableKeybord()  { keyboardUserEnabled = true;  }
+    void disableKeyboard() { keyboardUserEnabled = false; }
+    void enableKeyboard()  { keyboardUserEnabled = true;  }
+
+    // Deprecated misspelled aliases, kept for source compatibility.
+    void disableKeybord() { disableKeyboard(); }
+    void enableKeybord()  { enableKeyboard();  }
 
     //*****************************************************************************/
     // disable/enable mouseOnCamera()
@@ -543,27 +548,16 @@ namespace ogl {
     //*****************************************************************************/
     // FPS
     //*****************************************************************************/
-    inline int getFPS() {
+    inline int getFPS() const {
 
-      double now = glfwGetTime();
-
-      if(fpsLastTimestamp == 0.0) { fpsLastTimestamp = now; return 0; }
-
-      double delta = now - fpsLastTimestamp;
-      fpsLastTimestamp = now;
-
-      if(fpsDeltas.size() < 60) fpsDeltas.push_back(delta);
-      else {
-        fpsDeltas.pop_front();
-        fpsDeltas.push_back(delta);
-      }
+      if(fpsDeltas.empty()) return 0;
 
       double sum = 0;
       for(std::size_t i = 0; i < fpsDeltas.size(); ++i) sum += fpsDeltas[i];
 
       if(sum <= 0.0) return 0;
 
-      return static_cast<int>(1.0 / (sum / static_cast<double>(fpsDeltas.size())));
+      return static_cast<int>(static_cast<double>(fpsDeltas.size()) / sum);
 
     }
 
@@ -603,14 +597,10 @@ namespace ogl {
 
       glfwGetWindowContentScale(window, &xScale, &yScale);
 
-      if(xScale != yScale) {
-        fprintf(stderr, "ERROR [glWindow]: inconsistent content scale in isOnRetinaDisplay()\n");
-        abort();
-      }
-
       // Any HiDPI/Retina backing (scale > 1) counts; avoids an exact == 2 test
-      // that would miss fractional scale factors (1.5x, 2.5x, ...).
-      return (xScale > 1.0f);
+      // that would miss fractional scale factors (1.5x, 2.5x, ...). The two
+      // axes practically always match; use the larger one instead of aborting.
+      return (std::max(xScale, yScale) > 1.0f);
 
     }
 
@@ -632,6 +622,10 @@ namespace ogl {
 
       deltaTime = currentTime - lastTime;
       lastTime  = currentTime;
+
+      // Sample the FPS history exactly once per frame; getFPS() is a pure getter.
+      if(fpsDeltas.size() >= 60) fpsDeltas.pop_front();
+      fpsDeltas.push_back(deltaTime);
 
       processKeyboardInput();
 
@@ -705,11 +699,10 @@ namespace ogl {
 
       if(!isFullscreen) {
 
-        camera.getViewport(oldWidth, oldHeight);
-
-#ifdef __APPLE__
-        oldWidth *= 0.5; oldHeight *= 0.5;
-#endif
+        // Save the windowed size in screen coordinates. Asking GLFW directly is
+        // correct on every display; deriving it from the framebuffer size would
+        // require assuming a fixed content scale (e.g. exactly 2x on Retina).
+        glfwGetWindowSize(window, &oldWidth, &oldHeight);
 
         glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 
@@ -725,9 +718,11 @@ namespace ogl {
 
         glfwSetWindowMonitor(window, NULL, 0, 0, oldWidth, oldHeight, 0);
 
-        glfwGetFramebufferSize(window, &oldWidth, &oldHeight);
+        int width, height;
 
-        camera.setViewport(oldWidth, oldHeight);
+        glfwGetFramebufferSize(window, &width, &height);
+
+        camera.setViewport(width, height);
 
       }
 

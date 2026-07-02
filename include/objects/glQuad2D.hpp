@@ -44,11 +44,13 @@ namespace ogl {
     GLuint vbo = 0;
 
     glm::vec2 position;
-    
+
     glm::vec2 size;
-    
-    glm::vec4 color;
-    
+
+    // RGBA fill color. Named differently from glObject::color (vec3) so it does
+    // not shadow it: the inherited setColor(vec3)/getColor() stay meaningful.
+    glm::vec4 fillColor;
+
     std::vector<glm::vec2> vertices;
     
   public:
@@ -56,7 +58,7 @@ namespace ogl {
     //****************************************************************************/
     // glQuad2D - Constructor
     //****************************************************************************/
-    glQuad2D(const std::string & _name = "", glm::vec4 _color = glm::vec4(1.0)) { name = _name; color = _color; }
+    glQuad2D(const std::string & _name = "", glm::vec4 _color = glm::vec4(1.0)) { name = _name; fillColor = _color; }
     
     //****************************************************************************/
     // ~glQuad2D
@@ -70,8 +72,8 @@ namespace ogl {
     // init
     //****************************************************************************/
     void init(glm::vec2 _pos, glm::vec2 _size, const glm::vec4 & _color = glm::vec4(1.0)) {
-            
-      color = _color;
+
+      fillColor = _color;
       
       position = _pos;
       
@@ -117,7 +119,7 @@ namespace ogl {
       
       shader.use();
       
-      shader.setUniform("color", color);
+      shader.setUniform("color", fillColor);
       shader.setUniform("viewport", camera.getViewport());
       
       glDisable(GL_CULL_FACE);
@@ -135,11 +137,17 @@ namespace ogl {
       glBindVertexArray(0);
             
       glCheckError();
-            
+
     }
-    
+
+    //****************************************************************************/
+    // setColor() - RGBA fill color (the vec3 overload keeps the current alpha)
+    //****************************************************************************/
+    inline void setColor(const glm::vec4 & _color) { fillColor = _color; }
+    inline void setColor(const glm::vec3 & _color) { fillColor = glm::vec4(_color, fillColor.a); }
+
   private:
-        
+
     //****************************************************************************/
     // setInGpu()
     //****************************************************************************/

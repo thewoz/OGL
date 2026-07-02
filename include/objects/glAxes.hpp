@@ -100,10 +100,13 @@ namespace ogl {
         colors[0] = glm::vec3(1.0f,0.0f,0.0f);
         colors[1] = glm::vec3(0.0f,1.0f,0.0f);
         colors[2] = glm::vec3(0.0f,0.0f,1.0f);
-    
-        xAxeLabel.init("x", glm::vec3(1.01f,0.01f,0.01f), glm::vec3(1.0f), 0.5);
-        yAxeLabel.init("y", glm::vec3(0.01f,1.01f,0.01f), glm::vec3(1.0f), 0.5);
-        zAxeLabel.init("z", glm::vec3(0.01f,0.01f,1.01f), glm::vec3(1.0f), 0.5);
+
+        // The axis lines are scaled through the model matrix, but the labels are
+        // independent objects: scale their anchor points too, so they stay at
+        // the tips of the axes for any _scale.
+        xAxeLabel.init("x", glm::vec3(1.01f,0.01f,0.01f) * _scale, glm::vec3(1.0f), 0.5);
+        yAxeLabel.init("y", glm::vec3(0.01f,1.01f,0.01f) * _scale, glm::vec3(1.0f), 0.5);
+        zAxeLabel.init("z", glm::vec3(0.01f,0.01f,1.01f) * _scale, glm::vec3(1.0f), 0.5);
 
         isInited = true;
         

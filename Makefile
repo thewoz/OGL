@@ -24,7 +24,7 @@ endif
 
 ifeq ($(PLATFORM), Darwin)
     INCLUDE = -I./include -I/usr/local/include -I/usr/local/include/freetype2
-    LIBS = -lfreetype -lglad -lsoil2 -lglfw3 -framework Cocoa -framework IOKit -framework CoreFoundation -framework OpenGL -lassimp -lSOIL2 -ltiff -limgui -rpath /usr/local/lib/
+    LIBS = -lfreetype -lglad -lsoil2 -lglfw3 -framework Cocoa -framework IOKit -framework CoreFoundation -framework OpenGL -lassimp -ltiff -limgui -rpath /usr/local/lib/
 endif
 
 # ==========================
