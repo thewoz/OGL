@@ -152,7 +152,7 @@ namespace ogl {
     //*****************************************************************************/
     // create() - Crea una nuova finestra
     //*****************************************************************************/
-    void create(GLint width, GLint height, bool resizable = false, const char * title = "OpenGL window", glCamera::MODE cameraMode = glCamera::FLY) {
+    void create(GLint width, GLint height, const std::string & title = "OpenGL window", glCamera::MODE cameraMode = glCamera::FLY, bool resizable = false) {
 
       DEBUG_LOG("glWindow::create() windowID " + std::to_string(windowsCounter));
 
@@ -167,7 +167,7 @@ namespace ogl {
       glfwWindowHint(GLFW_RESIZABLE, resizable);
 
       // Create a GLFWwindow object that we can use for GLFW's functions
-      window = glfwCreateWindow(width, height, title, NULL, NULL);
+      window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
 
       if(window == NULL) {
         fprintf(stderr, "ERROR [glWindow]: failed to create GLFW window\n");
