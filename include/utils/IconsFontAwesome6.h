@@ -3,8 +3,13 @@
 // for use with https://github.com/FortAwesome/Font-Awesome/blob/6.x/webfonts/fa-regular-400.ttf, https://github.com/FortAwesome/Font-Awesome/blob/6.x/webfonts/fa-solid-900.ttf
 #pragma once
 
-#define FONT_ICON_FILE_NAME_FAR "/usr/local/include/ogl/data/fa-regular-400.ttf"
-#define FONT_ICON_FILE_NAME_FAS "/usr/local/include/ogl/data/fa-solid-900.ttf"
+// Resolved against the OGL resource root (see ogl.hpp); the fallback keeps
+// this header usable when included standalone.
+#ifndef OGL_RESOURCE_DIR
+  #define OGL_RESOURCE_DIR "/usr/local/include/ogl"
+#endif
+#define FONT_ICON_FILE_NAME_FAR OGL_RESOURCE_DIR "/data/fa-regular-400.ttf"
+#define FONT_ICON_FILE_NAME_FAS OGL_RESOURCE_DIR "/data/fa-solid-900.ttf"
 
 #define ICON_MIN_FA 0xe005
 #define ICON_MAX_16_FA 0xf8ff

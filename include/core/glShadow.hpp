@@ -195,7 +195,7 @@ namespace ogl {
     // isToInitInGpu - (re)create the FBO on first use or after a context change
     //****************************************************************************//
     inline bool isToInitInGpu() {
-      if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) {
+      if(windowID != currentWindowID() || !isInitedInGpu) {
         isInitedInGpu = false;
         return true;
       }
@@ -207,7 +207,7 @@ namespace ogl {
     //****************************************************************************//
     void setInGpu() {
 
-      windowID = ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id;
+      windowID = currentWindowID();
 
       glGenTextures(1, &depthTex);
       glBindTexture(GL_TEXTURE_2D, depthTex);

@@ -21,7 +21,8 @@
       "Bash(sed -i '' 's/fprintf\\(stderr, \"glGrid must be inited before render\\\\\\\\n\"\\);/fprintf\\(stderr, \"ERROR [glGrid]: must be initialized before rendering\\\\\\\\n\"\\);/g' /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL/include/objects/glGrid.hpp)",
       "Bash(find /Users/thewoz/Library/CloudStorage/Dropbox/Research -name \"icaro*\" 2>/dev/null | head -20)",
       "Bash(git -C /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL diff HEAD~1 -- include/core/glCamera.hpp)",
-      "Bash(git -C /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL show HEAD~1:include/core/glCamera.hpp)"
+      "Bash(git -C /Users/thewoz/Library/CloudStorage/Dropbox/Research/OGL show HEAD~1:include/core/glCamera.hpp)",
+      "Bash(g++ --version)"
     ]
   }
 }

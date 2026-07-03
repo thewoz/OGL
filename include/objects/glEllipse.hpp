@@ -219,7 +219,7 @@ namespace ogl {
         }
                 
         // Now generate the index buffer
-        std::vector<GLuint> indicies;
+        std::vector<GLuint> indices;
         
         int noPerSlice = slices + 1;
         
@@ -229,13 +229,13 @@ namespace ogl {
             
             int start_i = (i * noPerSlice) + j;
             
-            indicies.push_back( start_i );
-            indicies.push_back( start_i + noPerSlice + 1 );
-            indicies.push_back( start_i + noPerSlice );
+            indices.push_back( start_i );
+            indices.push_back( start_i + noPerSlice + 1 );
+            indices.push_back( start_i + noPerSlice );
             
-            indicies.push_back( start_i + noPerSlice + 1 );
-            indicies.push_back( start_i );
-            indicies.push_back( start_i + 1 );
+            indices.push_back( start_i + noPerSlice + 1 );
+            indices.push_back( start_i );
+            indices.push_back( start_i + 1 );
             
           }
           
@@ -268,7 +268,7 @@ namespace ogl {
         glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(glm::vec2), textureCoords.data(), GL_STATIC_DRAW);
         
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicies.size() * sizeof(GLuint), indicies.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
         
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);

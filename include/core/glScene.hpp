@@ -72,8 +72,9 @@ namespace ogl {
     //****************************************************************************//
     // light - access a scene light (index 0 is the primary light)
     //****************************************************************************//
-    glLight & light(std::size_t i = 0) { return lights[i]; }
-    const glLight & light(std::size_t i = 0) const { return lights[i]; }
+    // .at() turns an out-of-range index into a clear exception instead of UB.
+    glLight & light(std::size_t i = 0) { return lights.at(i); }
+    const glLight & light(std::size_t i = 0) const { return lights.at(i); }
 
     std::size_t numLights() const { return lights.size(); }
 

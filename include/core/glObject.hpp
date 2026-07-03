@@ -107,9 +107,10 @@ namespace ogl {
     //***************************************************************************
     // glObject owns GPU resources through its subclasses (vao/vbo/program), so
     // copying would duplicate the handles and double-free them on destruction.
-    // Drawables are therefore non-copyable and non-movable; pass them by
-    // reference or pointer. The virtual destructor makes deletion through a
-    // glObject* well defined.
+    // Drawables are therefore non-copyable but movable: moving transfers
+    // ownership of the GPU resources and neuters the moved-from object (see
+    // below). The virtual destructor makes deletion through a glObject* well
+    // defined.
     //***************************************************************************
     virtual ~glObject() { }
 
@@ -161,8 +162,8 @@ namespace ogl {
     // initInGpu() -
     //****************************************************************************
     void initInGpu() {
-      
-      windowID = ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id;
+
+      windowID = currentWindowID();
       
       DEBUG_LOG("glObject::initInGpu(" + name + ")");
       
@@ -269,9 +270,9 @@ namespace ogl {
     // _setInGpu
     //****************************************************************************
     void _setInGpu() {
-      
-      windowID = ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id;
-      
+
+      windowID = currentWindowID();
+
     }
     
     //****************************************************************************
@@ -283,7 +284,7 @@ namespace ogl {
 
       DEBUG_LOG("glObject::isToInitInGpu(" + name + ")");
 
-      if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) {
+      if(windowID != currentWindowID() || !isInitedInGpu) {
         isInitedInGpu = false;
         return true;
       }

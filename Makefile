@@ -13,8 +13,11 @@ LIBRARY_NAME = ogl
 # Detect platform
 PLATFORM := $(shell uname)
 
-# Compiler
-COMPILER = g++
+# Compiler (overridable: make COMPILER=clang++ example)
+COMPILER ?= g++
+
+# Warning flags: the library is expected to build warning-free with these
+WARNINGS = -Wall -Wextra
 
 # Compiler and linker flags
 ifeq ($(PLATFORM), Linux)
@@ -49,11 +52,11 @@ uninstall:
 # Compile example program (no ImGui)
 example:
 	@mkdir -p ~/bin
-	$(COMPILER) -march=native -Os -std=c++17 -DOGL_WITHOUT_IMGUI -o ~/bin/ogl $(INCLUDE) ./src/main.cpp $(LIBS)
+	$(COMPILER) $(WARNINGS) -march=native -Os -std=c++17 -DOGL_WITHOUT_IMGUI -o ~/bin/ogl $(INCLUDE) ./src/main.cpp $(LIBS)
 	@echo "Example built at ~/bin/ogl"
 
 # Compile ImGui integration example
 example_imgui:
 	@mkdir -p ~/bin
-	$(COMPILER) -march=native -Os -std=c++17 -o ~/bin/ogl_imgui $(INCLUDE) ./src/main.cpp $(LIBS)
+	$(COMPILER) $(WARNINGS) -march=native -Os -std=c++17 -o ~/bin/ogl_imgui $(INCLUDE) ./src/main.cpp $(LIBS)
 	@echo "ImGui example built at ~/bin/ogl_imgui"

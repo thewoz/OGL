@@ -53,18 +53,22 @@ inline GLenum glCheckError_(const char *file, int line) {
     std::string error = "Unknown";
 
     switch (errorCode) {
-      case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; getError = true; break;
-      case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; getError = true; break;
-      case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; getError = true; break;
-      case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; getError = true; break;
-      case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; getError = true; break;
+      case GL_INVALID_ENUM:                  error = "INVALID_ENUM"; break;
+      case GL_INVALID_VALUE:                 error = "INVALID_VALUE"; break;
+      case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
+      case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
+      case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
     }
+
+    // Any non-GL_NO_ERROR code is fatal, including codes not in the switch
+    // above: an "Unknown" error must not be silently ignored.
+    getError = true;
 
     fprintf(stderr, "ERROR [GL]: %s | %s (%d)\n", error.c_str(), file, line);
 
   }
 
-  if(getError) { fflush(stdout); abort(); }
+  if(getError) { fflush(stderr); abort(); }
 
   return firstError;
 

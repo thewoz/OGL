@@ -151,7 +151,14 @@ namespace ogl {
         
       }
       
-      material = ogl::glMaterial(scene->mMaterials[mesh->mMaterialIndex], path);
+      // Guard against malformed files: an out-of-range material index would be
+      // undefined behaviour. Fall back to the default material and warn.
+      if(mesh->mMaterialIndex < scene->mNumMaterials) {
+        material = ogl::glMaterial(scene->mMaterials[mesh->mMaterialIndex], path);
+      } else {
+        fprintf(stderr, "WARNING [glMesh]: material index %u out of range (%u materials), using default material\n",
+                mesh->mMaterialIndex, scene->mNumMaterials);
+      }
       
       isInited = true;
       

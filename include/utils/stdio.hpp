@@ -45,37 +45,40 @@ namespace ogl::io {
   namespace util {
 
     //*****************************************************************************
-    // appendCwd
+    // appendCwd - dst must hold at least PATH_MAX+1 bytes. Every write is
+    // bounds-checked: a result longer than PATH_MAX is a hard error, not a
+    // silent stack overflow.
     //*****************************************************************************
     inline void appendCwd(const char * path, char * dst) {
-      
+
+      const size_t room = PATH_MAX + 1;
+      bool tooLong = false;
+
       if(path[0]=='/') {
-        strcpy(dst, path);
-      } else if(path[0]=='.') {
-        if(getcwd(dst, PATH_MAX)==NULL) {
-          fprintf(stderr, "ERROR [getcwd]: (%d) %s\n", errno, strerror(errno));
-          abort();
-        }
-        strcat(dst, "/");
-        strcat(dst, path);
+        tooLong = (snprintf(dst, room, "%s", path) >= (int)room);
       } else if(path[0]=='~') {
         struct passwd * passwdEnt = getpwuid(getuid());
         if(passwdEnt == NULL) {
           fprintf(stderr, "ERROR [getpwuid]: cannot resolve home directory\n");
           abort();
         }
-        strcpy(dst, passwdEnt->pw_dir);
-        strcat(dst, &path[1]);
+        tooLong = (snprintf(dst, room, "%s%s", passwdEnt->pw_dir, &path[1]) >= (int)room);
       } else {
-        // bare relative path: resolve it against the current working directory
+        // relative path (with or without a leading '.'): resolve it against
+        // the current working directory
         if(getcwd(dst, PATH_MAX)==NULL) {
           fprintf(stderr, "ERROR [getcwd]: (%d) %s\n", errno, strerror(errno));
           abort();
         }
-        strcat(dst, "/");
-        strcat(dst, path);
+        size_t len = strlen(dst);
+        tooLong = (snprintf(dst + len, room - len, "/%s", path) >= (int)(room - len));
       }
-      
+
+      if(tooLong) {
+        fprintf(stderr, "ERROR [expandPath]: path too long: '%s'\n", path);
+        abort();
+      }
+
     }
 
     //*****************************************************************************
@@ -123,8 +126,10 @@ namespace ogl::io {
     char buff[PATH_MAX+1];
     
     wordexp_t p;
-    
-    if(wordexp(srcPath, &p, 0)==0){
+
+    // WRDE_NOCMD: never run the shell command substitution ($(...) / `...`)
+    // that wordexp performs by default — a path must not execute commands.
+    if(wordexp(srcPath, &p, WRDE_NOCMD)==0){
       if(p.we_wordc > 0) util::appendCwd(p.we_wordv[0], buff);
       else               util::appendCwd(srcPath, buff);
       wordfree(&p);

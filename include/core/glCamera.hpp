@@ -105,8 +105,10 @@ namespace ogl {
     glm::vec3 up       = glm::vec3(0.0f, 1.0f,  0.0f);
     glm::vec3 worldUp  = glm::vec3(0.0f, 1.0f,  0.0f);
 
-    // Euler angles, in degrees.
-    GLfloat yaw   = 0.0f;
+    // Euler angles, in degrees. yaw = -90 makes updateBasis() produce
+    // front = (0,0,-1), the standard OpenGL "looking down -Z" default;
+    // with yaw = 0 the camera would look along +X.
+    GLfloat yaw   = -90.0f;
     GLfloat pitch = 0.0f;
 
     glm::vec3 target = glm::vec3(0.0f);
@@ -314,13 +316,18 @@ namespace ogl {
 
     inline void setFront(const glm::vec3 & _front) {
       front = glm::normalize(_front);
-      right = glm::normalize(glm::cross(front, worldUp));
+      // If front is (anti)parallel to worldUp the cross product vanishes and
+      // normalizing it would fill the basis with NaN: fall back to a safe right.
+      glm::vec3 r = glm::cross(front, worldUp);
+      right = (glm::length(r) > 1e-6f) ? glm::normalize(r) : glm::vec3(1.0f, 0.0f, 0.0f);
       up    = glm::normalize(glm::cross(right, front));
     }
 
     inline glm::vec3 getFront() const { return front; }
 
-    inline void setPitch(float _pitch) { pitch = _pitch; updateBasis(); }
+    // Pitch is clamped like in processMouseMovement(): at exactly ±90° front
+    // becomes parallel to worldUp and the basis degenerates (NaN view matrix).
+    inline void setPitch(float _pitch) { pitch = glm::clamp(_pitch, -89.9f, 89.9f); updateBasis(); }
     inline void setYaw(float _yaw)     { yaw   = _yaw;   updateBasis(); }
 
     inline float getPitch() const { return pitch; }
@@ -384,7 +391,9 @@ namespace ogl {
       f.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
       front = glm::normalize(f);
-      right = glm::normalize(glm::cross(front, worldUp));
+      // Guard against front (anti)parallel to worldUp (see setFront).
+      glm::vec3 r = glm::cross(front, worldUp);
+      right = (glm::length(r) > 1e-6f) ? glm::normalize(r) : glm::vec3(1.0f, 0.0f, 0.0f);
       up    = glm::normalize(glm::cross(right, front));
 
     }

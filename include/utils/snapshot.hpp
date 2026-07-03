@@ -30,6 +30,8 @@
 #include <cerrno>
 #include <cstring>
 
+#include <vector>
+
 #include <tiffio.h>
 
 //****************************************************************************//
@@ -42,15 +44,11 @@ namespace ogl {
 //****************************************************************************//
 inline void snapshot(int width, int height, const char * outputfile, bool compress = false) {
 
-    static GLubyte * image = nullptr;
-
-    size_t requiredSize = (size_t)width * (size_t)height * 3;
-  
-    image = (GLubyte*)realloc(image, requiredSize);
-    if(image == nullptr) {
-      fprintf(stderr, "ERROR [snapshot]: realloc failed\n");
-      abort();
-    }
+    // Local buffer: the previous static realloc'd buffer was never freed,
+    // kept the largest size for the whole process lifetime and made the
+    // function non-reentrant. The allocation cost is negligible compared to
+    // glReadPixels + TIFF encoding.
+    std::vector<GLubyte> image((size_t)width * (size_t)height * 3);
 
     TIFF * file = TIFFOpen(outputfile, "w");
     if(!file) {
@@ -64,7 +62,7 @@ inline void snapshot(int width, int height, const char * outputfile, bool compre
   
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
+    glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image.data());
   
     glCheckError();
     
@@ -83,7 +81,7 @@ inline void snapshot(int width, int height, const char * outputfile, bool compre
     }
   
     for(int i=0; i<height; ++i) {
-      GLubyte * p = image + (width * 3 * (height - 1 - i));
+      GLubyte * p = image.data() + ((size_t)width * 3 * (height - 1 - i));
       if(TIFFWriteScanline(file, p, i, 0) < 0) {
         fprintf(stderr, "ERROR [snapshot]: TIFFWriteScanline failed\n");
         abort();

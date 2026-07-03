@@ -204,7 +204,9 @@ namespace ogl {
       float _scale = scale;
       
       if(isDynamicScale) {
-        float distance = glm::distance(camera.getPosition(), coord);
+        // Clamp the distance: if the camera reaches the text position the
+        // division would produce inf/NaN and blow up the glyph vertices.
+        float distance = glm::max(glm::distance(camera.getPosition(), coord), 1e-3f);
         _scale = scale / distance;
       }
       

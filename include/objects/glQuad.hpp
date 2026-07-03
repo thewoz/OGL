@@ -244,9 +244,12 @@ namespace ogl {
         if(vertices.size() == 6) {
           glm::vec3 edgeA = vertices[1] - vertices[0];
           glm::vec3 edgeB = vertices[2] - vertices[0];
-          glm::vec3 computed = glm::normalize(glm::cross(edgeA, edgeB));
-          if(glm::length(computed) > 0.0f) {
-            normal = computed;
+          // Check the cross product BEFORE normalizing: normalizing a zero
+          // vector (degenerate/collinear vertices) divides by zero and yields
+          // NaN, and a NaN comparison guard breaks under -ffast-math.
+          glm::vec3 cross = glm::cross(edgeA, edgeB);
+          if(glm::length(cross) > 1e-12f) {
+            normal = glm::normalize(cross);
           }
         }
 
@@ -254,7 +257,7 @@ namespace ogl {
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
         glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(1);
         
         glBindBuffer(GL_ARRAY_BUFFER, 0);

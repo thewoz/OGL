@@ -31,16 +31,6 @@ It also provides utilities like window management, camera control, and snapshot 
 
 ---
 
-## 📚 Documentation
-
-Detailed documentation lives in the [`docs/`](docs/) folder:
-
-- [Architecture](docs/architecture.md) — library layout, the GPU life-cycle and the rendering loop
-- [Lighting and Materials](docs/lighting_and_materials.md) — the Phong lighting and material model
-- [Adding a New Object](docs/adding_a_new_object.md) — how to write your own drawable
-
----
-
 ## Dependencies
 
 OGL requires the following libraries:
@@ -102,6 +92,14 @@ make install
 
 This creates a symbolic link at `/usr/local/include/ogl` pointing to the
 `include/` directory, so you can `#include <ogl/ogl.hpp>` in any project.
+
+> **This step is required.** The library does not work from the bare
+> repository checkout: the internal headers include each other as
+> `<ogl/...>`, and the preset shaders, fonts and demo data are loaded at
+> runtime from the installed location. If you install to a different
+> prefix, compile your project with
+> `-DOGL_RESOURCE_DIR='"/your/prefix/ogl"'` so the library can find its
+> shaders, fonts and data.
 
 ### 4. Build the example programs
 
@@ -272,6 +270,17 @@ The Makefile automatically detects whether you are on **Linux** or **macOS**.
 
 ## Known Issues
 
+- **The library is single-threaded by design.** All rendering, resource
+  loading and window management must happen on the main thread: the internal
+  state (texture cache, color palette, font atlas, window counters) is not
+  protected by locks, and GLFW itself requires event processing on the main
+  thread. Multi-threaded use is not supported.
+- **GPU handles are not freed on a context change.** When an object that was
+  uploaded for one window is rendered in a different window, its buffers are
+  re-created in the new context and the handles in the old context are
+  deliberately left to be released when that context is destroyed (freeing
+  them would require re-binding the old context). This is harmless in
+  practice but shows up as "leaked" objects in GPU debuggers.
 - Multi-Sample Anti-Aliasing does not work on Linux (driver/context limitation)
 - **Shared textures are not reference-counted.** `glTextures::load()` de-duplicates textures by file path, so two materials that reference the same image share a single GPU texture. However `glMaterial::cleanInGpu()` (and `~glMaterial`) deletes that texture outright, so destroying one material invalidates the texture for any *other* material still using it. In practice this is safe within a single `glModel` (the model owns its meshes/materials and tears them down together), but sharing a texture across two independent materials/models and destroying one will break the other. A proper fix would reference-count entries in `glTextures`; until then, avoid destroying one of two materials that share an image while the other is still in use.
 

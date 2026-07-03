@@ -38,6 +38,13 @@
 
 #include <SOIL2/SOIL2.h>
 
+// Root directory of the installed OGL resources (shaders, fonts, demo data).
+// Defaults to the `make install` symlink; override at compile time with
+// -DOGL_RESOURCE_DIR='"/custom/prefix"' to relocate the installation.
+#ifndef OGL_RESOURCE_DIR
+  #define OGL_RESOURCE_DIR "/usr/local/include/ogl"
+#endif
+
 #ifndef OGL_WITHOUT_IMGUI
   #define IMGUI_DEFINE_MATH_OPERATORS
   #include <imgui/imgui.hpp>

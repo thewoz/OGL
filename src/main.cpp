@@ -35,7 +35,7 @@
 //*****************************************************************************/
 // main
 //*****************************************************************************/
-int main(int argc, char * const argv[]) {
+int main(int /*argc*/, char * const /*argv*/[]) {
 
   ogl::glWindow window;
   window.create(1024, 768);
@@ -70,7 +70,7 @@ int main(int argc, char * const argv[]) {
 
   ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::white);
 
-  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
+  ogl::glModel model(OGL_RESOURCE_DIR "/data/model/Trex/Trex.fbx");
 
   ogl::glPrint2D fpsText(10, 10, ogl::glColors::white, 0.5f);
 

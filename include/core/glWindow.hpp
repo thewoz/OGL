@@ -64,13 +64,13 @@ namespace ogl {
     }
 
     // Ultima posizione del mouse nella finestra
-    GLfloat lastX; GLfloat lastY;
+    GLfloat lastX = 0; GLfloat lastY = 0;
 
     // Variabile vera ogni volta che il mouse entra per la prima volta nella finestra
-    bool firstMouse;
+    bool firstMouse = true;
 
     // Variabile vera se il mouse e' sopra la finestra
-    bool onFocus;
+    bool onFocus = false;
 
     GLfloat lastTime = 0;
 
@@ -80,7 +80,7 @@ namespace ogl {
 
     bool isProcessMouseMovement = true;
 
-    bool isFullscreen;
+    bool isFullscreen = false;
 
     // Windowed size saved when entering fullscreen, restored on exit. Per-instance
     // (not static) so that toggling fullscreen on one window does not clobber the
@@ -90,7 +90,10 @@ namespace ogl {
 
     bool keybord = false;
 
-    bool imguiFrameActive = false;
+    // Always declared (even without ImGui) so that sizeof(glWindow) does not
+    // change with OGL_WITHOUT_IMGUI: mixing translation units compiled with
+    // different flags would otherwise be an ODR/layout violation.
+    [[maybe_unused]] bool imguiFrameActive = false;
 
     // User-controlled keyboard toggle (disableKeybord/enableKeybord). Kept
     // separate from 'keybord', which is the internal "rendering has started"
@@ -98,12 +101,12 @@ namespace ogl {
     // re-enable input every frame and a user disableKeybord() would never stick.
     bool keyboardUserEnabled = true;
 
-    // ImGui keeps a single global context, so it is created exactly once (by the
-    // first on-screen window) and torn down by that same window. Offscreen
-    // windows never initialise it. 'imguiOwner' marks the window responsible for
-    // the shutdown; 'imguiInitialized' is the shared "context exists" flag.
-    static bool imguiInitialized;
-    bool imguiOwner = false;
+    // Each on-screen window owns its own ImGui context (ImGuiContext*), created
+    // in create() and destroyed with the window: this makes multiple windows
+    // with independent ImGui UIs work. Offscreen windows never initialise it.
+    // Stored as void* so the member exists (same class layout) even when the
+    // library is built with OGL_WITHOUT_IMGUI.
+    [[maybe_unused]] void * imguiCtx = nullptr;
 
     // FPS tracking — per-window (not static) so multiple windows don't share state.
     // One delta is sampled per frame in renderBegin(); getFPS() only reads the
@@ -128,7 +131,7 @@ namespace ogl {
     GLFWwindow * window;
 
     // Id univoco della finestra
-    uint32_t id;
+    uint32_t id = 0;
 
     //*****************************************************************************/
     // glWindow() - Costruttore vuoto
@@ -222,16 +225,19 @@ namespace ogl {
       #endif
 
       #ifndef OGL_WITHOUT_IMGUI
-        if(!imguiInitialized) {
-          IMGUI_CHECKVERSION();
-          ImGui::CreateContext();
-          ImGui::GetIO().IniFilename = nullptr;
-          ImGui_ImplGlfw_InitForOpenGL(window, true);
-          ImGui_ImplOpenGL3_Init("#version 150");
-          ImGui::StyleColorsDark();
-          imguiInitialized = true;
-          imguiOwner       = true;
-        }
+        // One ImGui context per window. The GLFW/OpenGL3 backends store their
+        // state inside the current context, so as long as the right context is
+        // made current (renderBegin/renderEnd do it) every window gets its own
+        // independent UI. Note: ImGui_ImplGlfw chains the callbacks installed
+        // above, so this must run after the glfwSet*Callback calls.
+        IMGUI_CHECKVERSION();
+        ImGuiContext * ctx = ImGui::CreateContext();
+        ImGui::SetCurrentContext(ctx);
+        ImGui::GetIO().IniFilename = nullptr;
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplOpenGL3_Init("#version 150");
+        ImGui::StyleColorsDark();
+        imguiCtx = ctx;
       #endif
 
     }
@@ -298,6 +304,14 @@ namespace ogl {
 
       camera = glCamera(cameraMode, width, height);
 
+      #ifndef __APPLE__
+          // Same GL debug output as create(): headless/batch rendering is where
+          // driver diagnostics are most valuable.
+          glEnable(GL_DEBUG_OUTPUT);
+          glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+          glDebugMessageCallback(glDebugOutput, 0);
+      #endif
+
     }
 
     //*****************************************************************************/
@@ -324,16 +338,16 @@ namespace ogl {
   private:
 
     //****************************************************************************//
-    // shutdownImGui() - tear down ImGui, but only from the window that created it
+    // shutdownImGui() - tear down this window's own ImGui context
     //****************************************************************************//
     inline void shutdownImGui() {
       #ifndef OGL_WITHOUT_IMGUI
-        if(imguiOwner) {
+        if(imguiCtx != nullptr) {
+          ImGui::SetCurrentContext((ImGuiContext*)imguiCtx);
           ImGui_ImplOpenGL3_Shutdown();
           ImGui_ImplGlfw_Shutdown();
-          ImGui::DestroyContext();
-          imguiOwner       = false;
-          imguiInitialized = false;
+          ImGui::DestroyContext((ImGuiContext*)imguiCtx);
+          imguiCtx = nullptr;
         }
       #endif
     }
@@ -363,7 +377,10 @@ namespace ogl {
     //****************************************************************************//
     inline bool imguiWantsMouse() const {
       #ifndef OGL_WITHOUT_IMGUI
-        if(imguiInitialized) return ImGui::GetIO().WantCaptureMouse;
+        if(imguiCtx != nullptr) {
+          ImGui::SetCurrentContext((ImGuiContext*)imguiCtx);
+          return ImGui::GetIO().WantCaptureMouse;
+        }
       #endif
       return false;
     }
@@ -402,10 +419,10 @@ namespace ogl {
     //****************************************************************************//
     // External callback interfaces
     //****************************************************************************//
-    inline void virtual scroll(double xoffset, double yoffset) { };
-    inline void virtual keyboard(int key, int scancode, int action, int mods) { };
-    inline void virtual cursorPos(double xPos, double yPos, double xoffset, double yoffset) { };
-    inline void virtual mouseButton(int button, int action, int mods) { };
+    inline void virtual scroll(double /*xoffset*/, double /*yoffset*/) { };
+    inline void virtual keyboard(int /*key*/, int /*scancode*/, int /*action*/, int /*mods*/) { };
+    inline void virtual cursorPos(double /*xPos*/, double /*yPos*/, double /*xoffset*/, double /*yoffset*/) { };
+    inline void virtual mouseButton(int /*button*/, int /*action*/, int /*mods*/) { };
     inline void virtual cursorEnter(int entered) { if(entered) { onFocus = true; } else { onFocus = false; } }
 
     //****************************************************************************//
@@ -427,6 +444,14 @@ namespace ogl {
 
     inline void keyCallback(int key, int scancode, int action, int mods) {
 
+      // Track key state unconditionally: if a RELEASE arrived while input was
+      // disabled and got dropped, keys[] would stay true forever and the camera
+      // would keep moving after the keyboard is re-enabled.
+      if(key >= 0 && key < 1024) {
+        if(action == GLFW_PRESS)   keys[key] = true;
+        if(action == GLFW_RELEASE) keys[key] = false;
+      }
+
       if(!keybord || !keyboardUserEnabled) return;
 
       if(GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
@@ -434,15 +459,7 @@ namespace ogl {
       }
 
       if(key >= 0 && key < 1024) {
-
-        if(action == GLFW_PRESS) {
-          keys[key] = true;
-        } else if (action == GLFW_RELEASE) {
-          keys[key] = false;
-        }
-
         keyboard(key, scancode, action, mods);
-
       }
 
     }
@@ -643,7 +660,8 @@ namespace ogl {
       #ifndef OGL_WITHOUT_IMGUI
         int monitorCount = 0;
         glfwGetMonitors(&monitorCount);
-        if(imguiInitialized && monitorCount > 0) {
+        if(imguiCtx != nullptr && monitorCount > 0) {
+          ImGui::SetCurrentContext((ImGuiContext*)imguiCtx);
           ImGui_ImplOpenGL3_NewFrame();
           ImGui_ImplGlfw_NewFrame();
           ImGui::NewFrame();
@@ -662,6 +680,7 @@ namespace ogl {
 
       #ifndef OGL_WITHOUT_IMGUI
         if(imguiFrameActive) {
+          ImGui::SetCurrentContext((ImGuiContext*)imguiCtx);
           ImGui::Render();
           ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
           imguiFrameActive = false;
@@ -734,7 +753,28 @@ namespace ogl {
 
   inline uint32_t glWindow::windowsCounter = 0;
   inline uint32_t glWindow::windowsAlive   = 0;
-  inline bool     glWindow::imguiInitialized = false;
+
+  //*****************************************************************************/
+  // currentWindowID() - id of the glWindow owning the current GL context.
+  // Fails with a clear message (instead of dereferencing NULL) when no OGL
+  // window/context is current, e.g. rendering before create() or from a thread
+  // without a context.
+  //*****************************************************************************/
+  inline uint32_t currentWindowID() {
+
+    GLFWwindow * ctx = glfwGetCurrentContext();
+
+    void * ptr = (ctx != NULL) ? glfwGetWindowUserPointer(ctx) : NULL;
+
+    if(ptr == NULL) {
+      fprintf(stderr, "ERROR [ogl]: no active OGL window/context "
+                      "(create a glWindow and call renderBegin() first)\n");
+      abort();
+    }
+
+    return static_cast<glWindow*>(ptr)->id;
+
+  }
 
 } /* namespace ogl */
 

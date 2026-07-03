@@ -133,7 +133,7 @@ namespace ogl {
     // initModel
     //****************************************************************************/
     void initModel() {
-      init("/usr/local/include/ogl/shader/model.vs", "/usr/local/include/ogl/shader/model.fs");
+      init(OGL_RESOURCE_DIR "/shader/model.vs", OGL_RESOURCE_DIR "/shader/model.fs");
       style = STYLE::MODEL;
     }
     
@@ -141,7 +141,7 @@ namespace ogl {
     // initSolid
     //****************************************************************************/
     void initSolid() {
-      init("/usr/local/include/ogl/shader/solid.vs", "/usr/local/include/ogl/shader/solid.fs");
+      init(OGL_RESOURCE_DIR "/shader/solid.vs", OGL_RESOURCE_DIR "/shader/solid.fs");
       style = STYLE::SOLID;
     }
 
@@ -149,7 +149,7 @@ namespace ogl {
     // initShadow - depth-only program used to render the scene shadow map
     //****************************************************************************/
     void initShadow() {
-      init("/usr/local/include/ogl/shader/shadow.vs", "/usr/local/include/ogl/shader/shadow.fs");
+      init(OGL_RESOURCE_DIR "/shader/shadow.vs", OGL_RESOURCE_DIR "/shader/shadow.fs");
       style = STYLE::SHADOW;
     }
 
@@ -157,7 +157,7 @@ namespace ogl {
     // initPlain2D
     //****************************************************************************/
     void initPlain2D() {
-      init("/usr/local/include/ogl/shader/plain2D.vs", "/usr/local/include/ogl/shader/plain2D.fs");
+      init(OGL_RESOURCE_DIR "/shader/plain2D.vs", OGL_RESOURCE_DIR "/shader/plain2D.fs");
       style = STYLE::PLAIN2D;
     }
 
@@ -165,7 +165,7 @@ namespace ogl {
     // initWireframe
     //****************************************************************************/
     void initWireframe() {
-      init("/usr/local/include/ogl/shader/wireframe.vs", "/usr/local/include/ogl/shader/wireframe.fs", "/usr/local/include/ogl/shader/wireframe.gs");
+      init(OGL_RESOURCE_DIR "/shader/wireframe.vs", OGL_RESOURCE_DIR "/shader/wireframe.fs", OGL_RESOURCE_DIR "/shader/wireframe.gs");
       style = STYLE::WIREFRAME;
     }
 
@@ -173,7 +173,7 @@ namespace ogl {
     // initLine
     //****************************************************************************/
     void initLine() {
-      init("/usr/local/include/ogl/shader/line.vs", "/usr/local/include/ogl/shader/line.fs", "/usr/local/include/ogl/shader/line.gs");
+      init(OGL_RESOURCE_DIR "/shader/line.vs", OGL_RESOURCE_DIR "/shader/line.fs", OGL_RESOURCE_DIR "/shader/line.gs");
       style = STYLE::LINE;
     }
     
@@ -181,7 +181,7 @@ namespace ogl {
     // initPoints
     //****************************************************************************/
     void initPoints() {
-      init("/usr/local/include/ogl/shader/points.vs", "/usr/local/include/ogl/shader/points.fs");
+      init(OGL_RESOURCE_DIR "/shader/points.vs", OGL_RESOURCE_DIR "/shader/points.fs");
       style = STYLE::POINTS;
     }
     
@@ -189,7 +189,7 @@ namespace ogl {
     // initText
     //****************************************************************************/
     void initText() {
-      init("/usr/local/include/ogl/shader/text.vs", "/usr/local/include/ogl/shader/text.fs");
+      init(OGL_RESOURCE_DIR "/shader/text.vs", OGL_RESOURCE_DIR "/shader/text.fs");
       style = STYLE::TEXT;
     }
     
@@ -305,8 +305,8 @@ namespace ogl {
     // initInGpu
     //****************************************************************************/
     void initInGpu() {
-    
-      windowID = ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id;
+
+      windowID = currentWindowID();
 
       DEBUG_LOG("glShader::initInGpu(" + name + ") on windowID " + std::to_string(windowID));
 
@@ -434,7 +434,7 @@ namespace ogl {
       
       DEBUG_LOG("glShader::isToInitInGpu(" + name + ")");
             
-      if(windowID != ((glWindow*)glfwGetWindowUserPointer(glfwGetCurrentContext()))->id || !isInitedInGpu) { return true; }
+      if(windowID != currentWindowID() || !isInitedInGpu) { return true; }
       
       return false;
       

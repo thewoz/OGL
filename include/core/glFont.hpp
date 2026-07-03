@@ -97,7 +97,7 @@ namespace ogl {
     //****************************************************************************/
     // load() - build the ASCII glyph atlas (idempotent, needs a GL context)
     //****************************************************************************/
-    void load(const std::string & fontPath = "/usr/local/include/ogl/data/fonts/arial.ttf", unsigned int pixelSize = 48) {
+    void load(const std::string & fontPath = OGL_RESOURCE_DIR "/data/fonts/arial.ttf", unsigned int pixelSize = 48) {
 
       if(loaded) return;
 
