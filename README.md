@@ -170,7 +170,7 @@ int main(int argc, char * const argv[]) {
   ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::white);
   cuboid.translate(glm::vec3(1.2f, 0.25f, 0.0f));
 
-  ogl::glModel model("/usr/local/include/ogl/data/model/Trex/Trex.fbx");
+  ogl::glModel model(OGL_RESOURCE_DIR "/data/model/Trex/Trex.fbx");
 
   ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5f);
 
@@ -265,6 +265,19 @@ The Makefile automatically detects whether you are on **Linux** or **macOS**.
 - Add support for multiple lights per object/model
 - Add render-to-texture support
 - Improve key input management
+- **Batch text rendering**: `glFont` creates one GL texture per glyph and
+  `glPrint2D`/`glPrint3D` issue one draw call per character
+  (bind + buffer upload + draw for every letter). Move to a single glyph
+  atlas texture and one buffered draw call per string.
+- **Deduplicate the VAO/VBO boilerplate**: the same ~15-line
+  `setInGpu()`/`cleanInGpu()` block (gen/bind/attrib/cleanup guard) is
+  copy-pasted across all drawables in `include/objects/`. Extract a small
+  RAII buffer-set helper in `glObject` so handles are zero-initialized by
+  construction and the per-object code shrinks by half.
+- **Unify the glyph-rendering loop** of `glPrint2D` and `glPrint3D`
+  (~50 near-identical lines; only the screen-position computation differs).
+  Best done together with the glyph-atlas batching above, since that work
+  rewrites the same loop.
 
 ---
 
@@ -282,6 +295,13 @@ The Makefile automatically detects whether you are on **Linux** or **macOS**.
   them would require re-binding the old context). This is harmless in
   practice but shows up as "leaked" objects in GPU debuggers.
 - Multi-Sample Anti-Aliasing does not work on Linux (driver/context limitation)
+- **Textures are always loaded as RGB: the alpha channel is dropped.**
+  `glTexture` forces `SOIL_LOAD_RGB`, so transparent PNGs become opaque and
+  the *opacity* texture maps that `glMaterial` accepts have no effect.
+  Proper support requires loading with the source channel count
+  (`SOIL_LOAD_AUTO`), picking `GL_RED`/`GL_RGB`/`GL_RGBA` at upload time,
+  and handling transparency in the model shader (blending plus
+  back-to-front ordering of transparent objects).
 - **Shared textures are not reference-counted.** `glTextures::load()` de-duplicates textures by file path, so two materials that reference the same image share a single GPU texture. However `glMaterial::cleanInGpu()` (and `~glMaterial`) deletes that texture outright, so destroying one material invalidates the texture for any *other* material still using it. In practice this is safe within a single `glModel` (the model owns its meshes/materials and tears them down together), but sharing a texture across two independent materials/models and destroying one will break the other. A proper fix would reference-count entries in `glTextures`; until then, avoid destroying one of two materials that share an image while the other is still in use.
 
 ---

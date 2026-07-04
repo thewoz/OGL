@@ -29,10 +29,13 @@
 #include <cstdio>
 #include <cstring>
 
+#include <string>
+#include <filesystem>
+#include <system_error>
+
 #include <climits>
 #include <unistd.h>
 #include <pwd.h>
-#include <wordexp.h>
 
 //*****************************************************************************
 // ogl::io
@@ -40,174 +43,111 @@
 namespace ogl::io {
 
   //*****************************************************************************
-  // util
+  // expandPath - resolve a path to an absolute, normalized form:
+  //   - a leading '~' expands to the user's home directory;
+  //   - relative paths (with or without a leading '.') are resolved against
+  //     the current working directory;
+  //   - '.', '..' and redundant separators are folded; symlinks are resolved
+  //     for the part of the path that exists (weakly_canonical).
+  // Note: unlike the old wordexp()-based implementation, environment
+  // variables and shell globs are NOT expanded — a path is data, not code.
   //*****************************************************************************
-  namespace util {
+  inline std::string expandPath(const std::string & srcPath) {
 
-    //*****************************************************************************
-    // appendCwd - dst must hold at least PATH_MAX+1 bytes. Every write is
-    // bounds-checked: a result longer than PATH_MAX is a hard error, not a
-    // silent stack overflow.
-    //*****************************************************************************
-    inline void appendCwd(const char * path, char * dst) {
+    namespace fs = std::filesystem;
 
-      const size_t room = PATH_MAX + 1;
-      bool tooLong = false;
+    if(srcPath.empty()) return srcPath;
 
-      if(path[0]=='/') {
-        tooLong = (snprintf(dst, room, "%s", path) >= (int)room);
-      } else if(path[0]=='~') {
-        struct passwd * passwdEnt = getpwuid(getuid());
-        if(passwdEnt == NULL) {
-          fprintf(stderr, "ERROR [getpwuid]: cannot resolve home directory\n");
-          abort();
-        }
-        tooLong = (snprintf(dst, room, "%s%s", passwdEnt->pw_dir, &path[1]) >= (int)room);
-      } else {
-        // relative path (with or without a leading '.'): resolve it against
-        // the current working directory
-        if(getcwd(dst, PATH_MAX)==NULL) {
-          fprintf(stderr, "ERROR [getcwd]: (%d) %s\n", errno, strerror(errno));
-          abort();
-        }
-        size_t len = strlen(dst);
-        tooLong = (snprintf(dst + len, room - len, "/%s", path) >= (int)(room - len));
-      }
+    std::string s = srcPath;
 
-      if(tooLong) {
-        fprintf(stderr, "ERROR [expandPath]: path too long: '%s'\n", path);
+    // '~' -> home directory
+    if(s[0] == '~') {
+      struct passwd * passwdEnt = getpwuid(getuid());
+      if(passwdEnt == NULL) {
+        fprintf(stderr, "ERROR [getpwuid]: cannot resolve home directory\n");
         abort();
       }
-
+      s = std::string(passwdEnt->pw_dir) + s.substr(1);
     }
 
-    //*****************************************************************************
-    // removeJunk
-    //*****************************************************************************
-    inline void removeJunk(char * begin, char * end) {
-      while(*end!=0) { *begin++ = *end++; }
-      *begin = 0;
-    }
+    std::error_code ec;
 
-    //*****************************************************************************
-    // manualPathFold
-    //*****************************************************************************
-    inline char * manualPathFold(char * path) {
-      
-      char *s, *priorSlash;
-      
-      while ((s=strstr(path, "/../"))!=NULL) {
-        *s = 0;
-        if ((priorSlash = strrchr(path, '/'))==NULL) { /* oops */ *s = '/'; break; }
-        removeJunk(priorSlash, s+3);
-      }
-      
-      while ((s=strstr(path, "/./"))!=NULL) { removeJunk(s, s+2); }
-      while ((s=strstr(path, "//"))!=NULL) { removeJunk(s, s+1); }
+    fs::path abs = fs::absolute(fs::path(s), ec);
+    if(ec) abs = fs::path(s);
 
-      size_t len = strlen(path);
-      if(len == 0) return path; // empty path: nothing to fold (avoid pointer underflow below)
+    // Resolve symlinks on the existing prefix and fold '.'/'..'; falls back
+    // to a purely lexical normalization when nothing of the path exists.
+    fs::path canon = fs::weakly_canonical(abs, ec);
+    if(ec || canon.empty()) canon = abs.lexically_normal();
 
-      s = path + (len-1);
+    return canon.string();
 
-      if (s!=path && *s=='/') { *s=0; }
-      
-      return path;
-      
-    }
-
-  } // end namespace util
+  }
 
   //*****************************************************************************
-  // expandPath
+  // expandPath - overloads kept for source compatibility. Every char* output
+  // buffer must hold at least PATH_MAX+1 bytes; longer results are a hard
+  // error instead of a buffer overflow.
   //*****************************************************************************
   inline void expandPath(const char * srcPath, char * destPath) {
-    
-    char buff[PATH_MAX+1];
-    
-    wordexp_t p;
 
-    // WRDE_NOCMD: never run the shell command substitution ($(...) / `...`)
-    // that wordexp performs by default — a path must not execute commands.
-    if(wordexp(srcPath, &p, WRDE_NOCMD)==0){
-      if(p.we_wordc > 0) util::appendCwd(p.we_wordv[0], buff);
-      else               util::appendCwd(srcPath, buff);
-      wordfree(&p);
-    } else {
-      util::appendCwd(srcPath, buff);
+    std::string out = expandPath(std::string(srcPath));
+
+    if(out.size() > PATH_MAX) {
+      fprintf(stderr, "ERROR [expandPath]: path too long: '%s'\n", srcPath);
+      abort();
     }
-    
-    if(realpath(buff, destPath)==NULL)
-      strcpy(destPath, util::manualPathFold(buff));
-    
+
+    memcpy(destPath, out.c_str(), out.size() + 1);
+
   }
 
-  //*****************************************************************************
-  // expandPath
-  //*****************************************************************************
   inline void expandPath(char * path) {
-    
+
     char buff[PATH_MAX+1];
-    
+
     expandPath(path, buff);
-    
+
     strcpy(path, buff);
-    
+
   }
 
-  //*****************************************************************************
-  // expandPath
-  //*****************************************************************************
   inline void expandPath(std::string & path) {
-    
-    char buff[PATH_MAX+1];
-    
-    expandPath(path.c_str(), buff);
-    
-    path = buff;
-    
+
+    path = expandPath(std::string(path));
+
   }
 
-  //*****************************************************************************
-  // expandPath
-  //*****************************************************************************
   inline void expandPath(const std::string & srcPath, std::string & destPath) {
-    
-    char buff[PATH_MAX+1];
-    
-    expandPath(srcPath.c_str(), buff);
-    
-    destPath = buff;
-    
+
+    destPath = expandPath(srcPath);
+
   }
 
-  //*****************************************************************************
-  // expandPath
-  //*****************************************************************************
   inline void expandPath(const std::string & srcPath, char * destPath) {
-    
+
     expandPath(srcPath.c_str(), destPath);
-    
+
   }
 
   //*****************************************************************************
   // basename
   //*****************************************************************************
   inline const char * basename(const char * filename) {
-    
+
     const char * p = strrchr(filename, '/');
-    
+
     return p ? p + 1 : (char *) filename;
-    
+
   }
 
   //*****************************************************************************
   // basename
   //*****************************************************************************
   inline const std::string basename(const std::string & filename) {
-    
+
     const char * p = strrchr(filename.c_str(), '/');
-    
+
     if(p) return std::string(p + 1);
     return filename;
 
@@ -217,13 +157,13 @@ namespace ogl::io {
   // name
   //*****************************************************************************
   inline const std::string name(const std::string & filename) {
-    
+
     std::string str = basename(filename);
-    
+
     size_t lastindex = str.find_last_of(".");
-    
+
     return str.substr(0, lastindex);
-    
+
   }
 
 }

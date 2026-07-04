@@ -60,6 +60,12 @@ namespace ogl {
     GLuint vbo = 0;
     GLuint ibo = 0;
 
+    // Allocated GPU capacity in bytes: the buffers are created once and only
+    // re-allocated when the geometry grows; smaller updates reuse them via
+    // glBufferSubData (same pattern as glLine::setInGpu()).
+    size_t vboCapacity = 0;
+    size_t iboCapacity = 0;
+
     glm::vec3 axisColor = glm::vec3(1.0f);
     glm::vec3 majorTickColor = glm::vec3(0.9f);
     glm::vec3 minorTickColor = glm::vec3(0.6f);
@@ -600,34 +606,53 @@ namespace ogl {
 
       DEBUG_LOG("glPlot::setInGpu(" + name + ")");
 
-      cleanInGpu();
-
       buildGeometry();
 
-      glGenVertexArrays(1, &vao);
+      // First upload in this context, or re-upload after a context change: the
+      // old handles belong to the previous context, so start from fresh ones
+      // instead of deleting them (see the context-change note in glObject).
+      if(!isInitedInGpu || vao == 0) {
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbo);
+        glGenBuffers(1, &ibo);
+        vboCapacity = 0;
+        iboCapacity = 0;
+      }
+
       glBindVertexArray(vao);
 
-      glGenBuffers(1, &vbo);
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3) + colors.size() * sizeof(glm::vec4), nullptr, GL_STATIC_DRAW);
-      glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(glm::vec3), vertices.data());
-      glBufferSubData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), colors.size() * sizeof(glm::vec4), colors.data());
+      const size_t vertexBytes = vertices.size() * sizeof(glm::vec3);
+      const size_t colorBytes  = colors.size()   * sizeof(glm::vec4);
+      const size_t indexBytes  = indices.size()  * sizeof(GLuint);
 
+      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      if(vertexBytes + colorBytes > vboCapacity) {
+        glBufferData(GL_ARRAY_BUFFER, vertexBytes + colorBytes, nullptr, GL_DYNAMIC_DRAW);
+        vboCapacity = vertexBytes + colorBytes;
+      }
+      glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBytes, vertices.data());
+      glBufferSubData(GL_ARRAY_BUFFER, vertexBytes, colorBytes, colors.data());
+
+      // The color offset depends on the vertex count, so the attribute
+      // pointers must be re-specified on every upload.
       glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
       glEnableVertexAttribArray(0);
 
-      glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)(vertices.size() * sizeof(glm::vec3)));
+      glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)vertexBytes);
       glEnableVertexAttribArray(1);
 
-      glGenBuffers(1, &ibo);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+      if(indexBytes > iboCapacity) {
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBytes, nullptr, GL_DYNAMIC_DRAW);
+        iboCapacity = indexBytes;
+      }
+      glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBytes, indices.data());
 
       glBindBuffer(GL_ARRAY_BUFFER, 0);
       glBindVertexArray(0);
 
       glCheckError();
-      
+
     }
 
     //****************************************************************************/
@@ -644,6 +669,9 @@ namespace ogl {
         vao = 0;
         vbo = 0;
         ibo = 0;
+
+        vboCapacity = 0;
+        iboCapacity = 0;
 
         isInitedInGpu = false;
 
