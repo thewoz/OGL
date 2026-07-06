@@ -98,8 +98,9 @@ namespace ogl {
       shader.setName(name);
 
       shader.initPlain2D();
-      
+
       isInited = true;
+      isToUpdateInGpu = true; // re-init after a render must re-upload
 
     }
     
@@ -135,7 +136,10 @@ namespace ogl {
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
       glBindVertexArray(0);
-            
+
+      // Don't leak blending to whatever is drawn next.
+      glDisable(GL_BLEND);
+
       glCheckError();
 
     }
@@ -152,8 +156,12 @@ namespace ogl {
     // setInGpu()
     //****************************************************************************/
     void setInGpu() override {
-      
+
       DEBUG_LOG("glQuad2D::setInGpu(" + name + ")");
+
+      // Same-context re-upload: drop the old buffers first (no-op after a
+      // context change, where isInitedInGpu is already false).
+      cleanInGpu();
 
       glGenVertexArrays(1, &vao);
       glBindVertexArray(vao);

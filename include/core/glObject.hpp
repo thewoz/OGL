@@ -173,9 +173,14 @@ namespace ogl {
       }
       
       setInGpu();
-      
+
       isInitedInGpu = true;
-      
+
+      // A pending update is satisfied by this upload: without this reset, an
+      // init() that set the flag before the very first render would trigger a
+      // second, redundant upload on the following frame.
+      isToUpdateInGpu = false;
+
     }
     
     //****************************************************************************
@@ -189,9 +194,11 @@ namespace ogl {
     //****************************************************************************
     // Position fuction
     //****************************************************************************
+    // Virtual so composite objects (e.g. glAxes, which carries its axis labels
+    // as child glPrint3D objects) can forward the transform to their children.
     virtual void translate(const glm::vec3 & value) { _position = value; updateModelMatrix(); }
-    inline  void rotate   (const glm::vec3 & value) { _rotation = value; updateModelMatrix(); }
-    inline  void scale    (const glm::vec3 & value) { _scale    = value; updateModelMatrix(); }
+    virtual void rotate   (const glm::vec3 & value) { _rotation = value; updateModelMatrix(); }
+    virtual void scale    (const glm::vec3 & value) { _scale    = value; updateModelMatrix(); }
     
     inline void move(const glm::vec3 & value1, const glm::vec3 & value2, const glm::vec3 & value3) {
       _position = value1;

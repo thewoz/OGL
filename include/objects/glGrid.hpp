@@ -89,9 +89,10 @@ namespace ogl {
       cellSize = _cellSize;
 
       color = _color;
-              
+
       isInited = true;
-      
+      isToUpdateInGpu = true; // re-init after a render must re-upload
+
     }
    
     //****************************************************************************/
@@ -137,8 +138,12 @@ namespace ogl {
     // setInGpu()
     //****************************************************************************/
     void setInGpu() override {
-      
+
       DEBUG_LOG("glGrid::setInGpu(" + name + ")");
+
+      // Same-context re-upload: drop the old buffers first (no-op after a
+      // context change, where isInitedInGpu is already false).
+      cleanInGpu();
 
       indices.clear();
 

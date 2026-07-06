@@ -43,7 +43,7 @@ namespace ogl {
     private:
 
       GLuint vao = 0;
-      GLuint vbo[2];
+      GLuint vbo[2] = {0, 0};
       glm::vec2 size;
       bool cullFaceEnabled = false;
 
@@ -96,7 +96,8 @@ namespace ogl {
         color = _color;
 
         isInited = true;
-        
+        isToUpdateInGpu = true; // re-init after a render must re-upload
+
       }
     
       //****************************************************************************/
@@ -125,7 +126,8 @@ namespace ogl {
         vertices = _vertices;
 
         isInited = true;
-        
+        isToUpdateInGpu = true; // re-init after a render must re-upload
+
       }
     
       //****************************************************************************/
@@ -204,9 +206,13 @@ namespace ogl {
       // setInGpu()
       //****************************************************************************/
       void setInGpu() override {
-        
+
         DEBUG_LOG("glQuad::setInGpu(" + name + ")");
-        
+
+        // Same-context re-upload: drop the old buffers first (no-op after a
+        // context change, where isInitedInGpu is already false).
+        cleanInGpu();
+
         GLfloat _vertices[18]; // 6 vertices * 3 coords
         
         if(vertices.size() != 0) {

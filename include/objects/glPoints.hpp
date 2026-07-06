@@ -49,7 +49,7 @@ namespace ogl {
   private:
         
     GLuint vao = 0;
-    GLuint vbo[2];
+    GLuint vbo[2] = {0, 0};
     
     std::vector<glm::vec3> points;
     std::vector<glm::vec4> colors;
@@ -102,11 +102,12 @@ namespace ogl {
       points = _points;
 
       colors.resize(points.size(), _color);
-              
+
       radius = _radius;
 
       isInited = true;
-      
+      isToUpdateInGpu = true; // re-init after a render must re-upload
+
     }
    
     //****************************************************************************/
@@ -131,7 +132,8 @@ namespace ogl {
       radius = _radius;
 
       isInited = true;
-      
+      isToUpdateInGpu = true; // re-init after a render must re-upload
+
     }
     
     //****************************************************************************/
@@ -228,8 +230,12 @@ namespace ogl {
       
       DEBUG_LOG("glPoints::setInGpu(" + name + ")");
 
-      if(!isInitedInGpu) {
-              
+      // Same-context re-upload: drop the old buffers first (no-op after a
+      // context change, where isInitedInGpu is already false).
+      cleanInGpu();
+
+      {
+
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
         

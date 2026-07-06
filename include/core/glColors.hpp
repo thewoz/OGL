@@ -215,8 +215,10 @@ namespace ogl {
     // getRandom()
     //****************************************************************************//
     static const glm::vec4 getRandom() {
-      
-      static std::default_random_engine generator;
+
+      // Seeded once from the system entropy source: with the default seed the
+      // "random" colors would be the same sequence on every run.
+      static std::default_random_engine generator(std::random_device{}());
       static std::uniform_real_distribution<float> distribution(0.0,1.0);
       
       return glm::vec4(distribution(generator), distribution(generator), distribution(generator), 1);

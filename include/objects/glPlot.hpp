@@ -93,6 +93,9 @@ namespace ogl {
     float majorTickStep = 1.0f;
     float minorTickStep = 0.5f;
 
+    // Hard limit on the ticks generated per axis (see buildAxisLinearTicks).
+    static constexpr int maxTicksPerAxis = 10000;
+
     float majorTickSize = 0.03f;
     float minorTickSize = 0.015f;
     float axisLabelScale = 0.6f;
@@ -367,6 +370,14 @@ namespace ogl {
       const float eps = 1e-6f;
       float start = std::ceil(range.min / step) * step;
 
+      // Cap the tick count: a tiny step over a huge range would otherwise
+      // generate an unbounded amount of geometry and freeze the application.
+      if((range.max - start) / step > (float)maxTicksPerAxis) {
+        fprintf(stderr, "WARNING [glPlot]: tick step %g too small for range [%g, %g], skipping ticks (max %d per axis)\n",
+                step, range.min, range.max, maxTicksPerAxis);
+        return;
+      }
+
       for(float v = start; v <= range.max + eps; v += step) {
 
         if(step < majorTickStep && isOnMajorTick(v, range, majorTickStep)) continue;
@@ -541,6 +552,10 @@ namespace ogl {
       const float eps = 1e-6f;
       float start = std::ceil(range.min / step) * step;
       float off = resolvedTickLabelOffset();
+
+      // Same cap as buildAxisLinearTicks (one draw call per label: even more
+      // important to bound it here).
+      if((range.max - start) / step > (float)maxTicksPerAxis) return;
 
       for(float v = start; v <= range.max + eps; v += step) {
         std::string label = formatTickValue(v);
@@ -753,7 +768,9 @@ namespace ogl {
 
       if(majorStep <= 0.0f) return false;
 
-      const float eps = 1e-4f;
+      // Relative epsilon: an absolute 1e-4 misses/false-matches for tick
+      // values much larger or much smaller than 1.
+      const float eps = majorStep * 1e-3f;
       float majorStart = std::ceil(range.min / majorStep) * majorStep;
       float k = std::round((value - majorStart) / majorStep);
       float major = majorStart + k * majorStep;

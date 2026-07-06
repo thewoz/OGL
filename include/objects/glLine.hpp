@@ -41,8 +41,8 @@ namespace ogl {
     
   private:
     
-    GLuint vao;
-    GLuint vbo;
+    GLuint vao = 0;
+    GLuint vbo = 0;
 
     std::vector<glm::vec3> vertices;
     
@@ -82,11 +82,12 @@ namespace ogl {
       shader.initLine();
       
       color = _color;
-      
+
       vertices = _vertices;
-      
+
       isInited = true;
-      
+      isToUpdateInGpu = true; // re-init after a render must re-upload
+
     }
     
     //****************************************************************************/

@@ -27,10 +27,13 @@
 
 #include <iostream>
 
+// do { } while(0) so the macro behaves like a single statement in every
+// context (e.g. an if/else without braces would otherwise break when the
+// macro expands to nothing).
 #ifdef DEBUG_OGL
-  #define DEBUG_LOG(x) (std::cout << x << std::endl)
+  #define DEBUG_LOG(x) do { std::cout << x << std::endl; } while(0)
 #else
-  #define DEBUG_LOG(x)
+  #define DEBUG_LOG(x) do { } while(0)
 #endif
 
 #endif /* _H_OGL_DEBUG_H_ */

@@ -46,7 +46,7 @@ namespace ogl {
   private:
 
       GLuint vao = 0; // 0 = not yet allocated
-      GLuint vbo[4];
+      GLuint vbo[4] = {0, 0, 0, 0};
 
       glm::vec3 size;
 
@@ -92,7 +92,8 @@ namespace ogl {
       color = _color;
 
       isInited = true;
-      
+      isToUpdateInGpu = true; // re-init after a render must re-upload
+
     }
 
     //****************************************************************************/
@@ -166,6 +167,10 @@ namespace ogl {
     void setInGpu() override {
 
       DEBUG_LOG("glCuboid::setInGpu(" + name + ")");
+
+      // Same-context re-upload: drop the old buffers first (no-op after a
+      // context change, where isInitedInGpu is already false).
+      cleanInGpu();
 
       glm::vec3 corners[8] = {
           {-0.5f,  0.5f,  0.5f},

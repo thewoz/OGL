@@ -29,9 +29,11 @@
 #include <cstdio>
 
 //****************************************************************************//
-// glfw
+// ogl::glfw - nested inside ogl so the helper namespace cannot collide with
+// other libraries' symbols (the unqualified glfw:: calls in glWindow resolve
+// here through the enclosing namespace).
 //****************************************************************************//
-namespace glfw {
+namespace ogl::glfw {
   
   //****************************************************************************//
   // glfwErrorCallback
@@ -110,6 +112,6 @@ namespace glfw {
     
   }
   
-} /* namespace glfw */
+} /* namespace ogl::glfw */
 
 #endif /* _H_OGL_GLFW_H_ */

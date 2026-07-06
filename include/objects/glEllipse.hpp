@@ -45,8 +45,8 @@ namespace ogl {
 
   private:
 
-    GLuint vao;
-    GLuint vbo[4];
+    GLuint vao = 0;
+    GLuint vbo[4] = {0, 0, 0, 0};
 
     int stacks;
     int slices;
@@ -102,11 +102,12 @@ namespace ogl {
       c = _c;
 
       style = _style;
-      
+
       color = _color;
-      
+
       isInited = true;
-      
+      isToUpdateInGpu = true; // re-init after a render must re-upload
+
     }
     
     //****************************************************************************/
@@ -182,8 +183,12 @@ namespace ogl {
     void setInGpu() override {
       
       DEBUG_LOG("glEllipse::setInGpu(" + name + ")");
-          
-      if(!isInitedInGpu) {
+
+      // Same-context re-upload: drop the old buffers first (no-op after a
+      // context change, where isInitedInGpu is already false).
+      cleanInGpu();
+
+      {
 
         std::vector<glm::vec3> positions;
         std::vector<glm::vec3> normals;
@@ -255,7 +260,7 @@ namespace ogl {
         
         glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
         
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, 0, nullptr);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
         glEnableVertexAttribArray(1);
         
         glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);

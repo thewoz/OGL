@@ -295,6 +295,12 @@ The Makefile automatically detects whether you are on **Linux** or **macOS**.
   them would require re-binding the old context). This is harmless in
   practice but shows up as "leaked" objects in GPU debuggers.
 - Multi-Sample Anti-Aliasing does not work on Linux (driver/context limitation)
+- **GL state convention: `render()` sets what it needs and restores almost
+  nothing.** Each drawable enables/disables the global GL state it requires
+  (culling, depth test, polygon mode) right before drawing, and only
+  side-effect-heavy state (blending, point size, depth mask) is restored
+  afterwards. Custom rendering code must therefore set its own state before
+  drawing and must not assume a "clean" state after an OGL object rendered.
 - **Textures are always loaded as RGB: the alpha channel is dropped.**
   `glTexture` forces `SOIL_LOAD_RGB`, so transparent PNGs become opaque and
   the *opacity* texture maps that `glMaterial` accepts have no effect.
@@ -302,7 +308,7 @@ The Makefile automatically detects whether you are on **Linux** or **macOS**.
   (`SOIL_LOAD_AUTO`), picking `GL_RED`/`GL_RGB`/`GL_RGBA` at upload time,
   and handling transparency in the model shader (blending plus
   back-to-front ordering of transparent objects).
-- **Shared textures are not reference-counted.** `glTextures::load()` de-duplicates textures by file path, so two materials that reference the same image share a single GPU texture. However `glMaterial::cleanInGpu()` (and `~glMaterial`) deletes that texture outright, so destroying one material invalidates the texture for any *other* material still using it. In practice this is safe within a single `glModel` (the model owns its meshes/materials and tears them down together), but sharing a texture across two independent materials/models and destroying one will break the other. A proper fix would reference-count entries in `glTextures`; until then, avoid destroying one of two materials that share an image while the other is still in use.
+- **Shared textures are not reference-counted.** `glTextures::load()` de-duplicates textures by type + file path, so two materials that reference the same image (for the same map type) share a single GPU texture. However `glMaterial::cleanInGpu()` (and `~glMaterial`) deletes that texture outright, so destroying one material invalidates the texture for any *other* material still using it. In practice this is safe within a single `glModel` (the model owns its meshes/materials and tears them down together), but sharing a texture across two independent materials/models and destroying one will break the other. A proper fix would reference-count entries in `glTextures`; until then, avoid destroying one of two materials that share an image while the other is still in use.
 
 ---
 

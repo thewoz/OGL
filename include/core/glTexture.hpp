@@ -45,23 +45,23 @@ namespace ogl {
   private:
     
     /* texture id */
-    GLuint id;
-    
+    GLuint id = 0;
+
     /* texture name */
     std::string name;
-    
+
     /* texture init flags */
     bool isInited;
     bool isInitedInGpu;
-        
+
     /* texture type */
     std::string type;
-    
+
     /* texture path */
     std::string path;
-    
+
     /* texture size */
-    int width, height;
+    int width = 0, height = 0;
     
     /* texture data */
     std::vector<unsigned char> image;
@@ -257,16 +257,21 @@ namespace ogl {
       //****************************************************************************/
       static int load(const std::string & type, const std::string & filename, const std::string & directory) {
 
-        std::string path = directory + '/' + filename;
-        
-        if(textureMap.count(path)) return textureMap[path];
-                
+        // The type is part of the key: a glTexture stores the sampler uniform
+        // name it binds to ("material.<type>"), so the same image file used
+        // both as e.g. diffuse and specular needs two distinct entries —
+        // deduplicating by path alone would bind the wrong sampler for the
+        // second use.
+        std::string key = type + '|' + directory + '/' + filename;
+
+        if(textureMap.count(key)) return textureMap[key];
+
         textures.push_back(glTexture(type, filename, directory));
-        
-        textureMap[path] = (int)textures.size() - 1;
-        
-        return textureMap[path];
-        
+
+        textureMap[key] = (int)textures.size() - 1;
+
+        return textureMap[key];
+
       }
     
       //****************************************************************************/

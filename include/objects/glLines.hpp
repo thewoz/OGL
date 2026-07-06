@@ -44,8 +44,8 @@ namespace ogl {
     
   private:
     
-    GLuint vao;
-    GLuint vbo[2];
+    GLuint vao = 0;
+    GLuint vbo[2] = {0, 0};
         
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec4> colors;
@@ -86,11 +86,12 @@ namespace ogl {
       shader.initLine();
       
       vertices = _vertices;
-            
+
       colors.resize(vertices.size(), _color);
-            
+
       isInited = true;
-      
+      isToUpdateInGpu = true; // re-init after a render must re-upload
+
     }
     
     //****************************************************************************/
@@ -114,6 +115,7 @@ namespace ogl {
         colors.resize(vertices.size(), colors.empty() ? glm::vec4(1.0f) : colors.back());
 
       isInited = true;
+      isToUpdateInGpu = true; // re-init after a render must re-upload
 
     }
     
@@ -186,9 +188,13 @@ namespace ogl {
     void setInGpu() override {
       
       DEBUG_LOG("glLines::setInGpu(" + name + ")");
-      
-      if(!isInitedInGpu) {
-        
+
+      // Same-context re-upload: drop the old buffers first (no-op after a
+      // context change, where isInitedInGpu is already false).
+      cleanInGpu();
+
+      {
+
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
         

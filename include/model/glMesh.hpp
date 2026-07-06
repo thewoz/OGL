@@ -65,10 +65,10 @@ namespace ogl {
     
     static GLuint globalId;
     
-    GLuint id;
-    
+    GLuint id = 0;
+
     /* Render data */
-    GLuint vao, vbo, ebo;
+    GLuint vao = 0, vbo = 0, ebo = 0;
     
     /* Mesh Data */
     std::vector<glVertex> vertices;

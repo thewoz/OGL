@@ -76,7 +76,13 @@ namespace ogl {
     // init
     //****************************************************************************/
     void init(std::string path, GLfloat normalizeTo = 1.0f) {
-                
+
+      // Re-init must not accumulate: processNode() appends to 'meshes', so a
+      // second init() on the same model would otherwise render both the old
+      // and the new file. Destroying the old meshes also frees their GPU
+      // buffers (valid when re-initing in the same context).
+      meshes.clear();
+
       name = ogl::io::name(path);
       
       DEBUG_LOG("glModel::init(" + name + ")");

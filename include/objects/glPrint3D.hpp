@@ -46,12 +46,12 @@ namespace ogl {
 
   private:
 
-    GLuint vao;
-    GLuint vbo;
+    GLuint vao = 0;
+    GLuint vbo = 0;
 
     glm::vec3 coord;
 
-    float scale;
+    float textScale;
 
     std::string text;
 
@@ -105,7 +105,7 @@ namespace ogl {
       
       color = _color;
       
-      scale = _scale;
+      textScale = _scale;
       
       isDynamicScale = _isDynamicScale;
       
@@ -126,7 +126,7 @@ namespace ogl {
       
       color = _color;
       
-      scale = _scale;
+      textScale = _scale;
       
       _render(camera);
       
@@ -200,26 +200,36 @@ namespace ogl {
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
           
       float tmpX = screen.x;
-      
-      float _scale = scale;
+      float tmpY = screen.y;
+
+      float _scale = textScale;
       
       if(isDynamicScale) {
         // Clamp the distance: if the camera reaches the text position the
         // division would produce inf/NaN and blow up the glyph vertices.
         float distance = glm::max(glm::distance(camera.getPosition(), coord), 1e-3f);
-        _scale = scale / distance;
+        _scale = textScale / distance;
       }
       
       // iterate through all characters
       for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
-        
+
+        // newline: carriage return + line feed (same behaviour as glPrint2D)
+        if(*c == '\n') {
+          const glFont::Character_t * chA = glFont::instance().get('a');
+          float lineHeight = chA ? chA->Size.y * _scale : 0.0f;
+          tmpX  = screen.x;
+          tmpY -= 2 * lineHeight;
+          continue;
+        }
+
         // skip characters that were not loaded (e.g. non-ASCII)
         const glFont::Character_t * chp = glFont::instance().get(*c);
         if(chp == nullptr) continue;
         const glFont::Character_t & ch = *chp;
 
         float xpos = tmpX + ch.Bearing.x * _scale;
-        float ypos = screen.y - (ch.Size.y - ch.Bearing.y) * _scale;
+        float ypos = tmpY - (ch.Size.y - ch.Bearing.y) * _scale;
         
         float w = ch.Size.x * _scale;
         float h = ch.Size.y * _scale;
@@ -251,11 +261,14 @@ namespace ogl {
       }
       
       glBindVertexArray(0);
-      
+
       glBindTexture(GL_TEXTURE_2D, 0);
-      
+
       glDepthMask(GL_TRUE);
-      
+
+      // Don't leak blending to whatever is drawn next.
+      glDisable(GL_BLEND);
+
       glCheckError();
       
       

@@ -46,13 +46,13 @@ namespace ogl {
 
   private:
 
-    GLuint vao;
-    GLuint vbo;
+    GLuint vao = 0;
+    GLuint vbo = 0;
 
     float x;
     float y;
 
-    float scale;
+    float textScale;
 
     std::string text;
 
@@ -110,7 +110,7 @@ namespace ogl {
       
       color = _color;
       
-      scale = _scale;
+      textScale = _scale;
       
       isInited = true;
       
@@ -130,7 +130,7 @@ namespace ogl {
       
       color = _color;
       
-      scale = _scale;
+      textScale = _scale;
       
       _render(camera);
       
@@ -204,7 +204,7 @@ namespace ogl {
         
         if(*c == '\n') {
           const glFont::Character_t * chA = glFont::instance().get('a');
-          float lineHeight = chA ? chA->Size.y * scale : 0.0f;
+          float lineHeight = chA ? chA->Size.y * textScale : 0.0f;
           tmpX  = x;
           tmpY -= 2 * lineHeight;
           continue;
@@ -215,11 +215,11 @@ namespace ogl {
         if(chp == nullptr) continue;
         const glFont::Character_t & ch = *chp;
                 
-        float xpos = tmpX + ch.Bearing.x * scale;
-        float ypos = tmpY - (ch.Size.y - ch.Bearing.y) * scale;
+        float xpos = tmpX + ch.Bearing.x * textScale;
+        float ypos = tmpY - (ch.Size.y - ch.Bearing.y) * textScale;
         
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
+        float w = ch.Size.x * textScale;
+        float h = ch.Size.y * textScale;
         
         // update VBO for each character
         float vertices[6][4] = {
@@ -243,18 +243,21 @@ namespace ogl {
         glDrawArrays(GL_TRIANGLES, 0, 6);
         
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels
-        tmpX += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+        tmpX += (ch.Advance >> 6) * textScale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
         
         glCheckError();
         
       }
       
       glBindTexture(GL_TEXTURE_2D, 0);
-      
+
       glBindVertexArray(0);
-      
+
+      // Don't leak blending to whatever is drawn next.
+      glDisable(GL_BLEND);
+
       glCheckError();
-      
+
     }
     
     //****************************************************************************/

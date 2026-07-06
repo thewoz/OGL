@@ -40,8 +40,8 @@ namespace ogl {
     
     private:
       
-      GLuint vao;
-      GLuint vbo;
+      GLuint vao = 0;
+      GLuint vbo = 0;
       
       std::vector<glm::vec3> vertices;
       std::vector<glm::vec3> colors;
@@ -101,15 +101,21 @@ namespace ogl {
         colors[1] = glm::vec3(0.0f,1.0f,0.0f);
         colors[2] = glm::vec3(0.0f,0.0f,1.0f);
 
-        // The axis lines are scaled through the model matrix, but the labels are
-        // independent objects: scale their anchor points too, so they stay at
-        // the tips of the axes for any _scale.
-        xAxeLabel.init("x", glm::vec3(1.01f,0.01f,0.01f) * _scale, glm::vec3(1.0f), 0.5);
-        yAxeLabel.init("y", glm::vec3(0.01f,1.01f,0.01f) * _scale, glm::vec3(1.0f), 0.5);
-        zAxeLabel.init("z", glm::vec3(0.01f,0.01f,1.01f) * _scale, glm::vec3(1.0f), 0.5);
+        // The labels are independent objects anchored at the unit tips: their
+        // own model matrix (kept in sync by the translate/rotate/scale
+        // overrides below) carries them to the actual axis tips, so they keep
+        // following the axes when the object is transformed after init().
+        xAxeLabel.init("x", glm::vec3(1.01f,0.01f,0.01f), glm::vec3(1.0f), 0.5);
+        yAxeLabel.init("y", glm::vec3(0.01f,1.01f,0.01f), glm::vec3(1.0f), 0.5);
+        zAxeLabel.init("z", glm::vec3(0.01f,0.01f,1.01f), glm::vec3(1.0f), 0.5);
+
+        xAxeLabel.scale(glm::vec3(_scale));
+        yAxeLabel.scale(glm::vec3(_scale));
+        zAxeLabel.scale(glm::vec3(_scale));
 
         isInited = true;
-        
+        isToUpdateInGpu = true; // re-init after a render must re-upload
+
       }
     
       //****************************************************************************/
@@ -173,6 +179,29 @@ namespace ogl {
 
       }
 
+      //****************************************************************************/
+      // rotate() / scale() - keep the label anchors on the axis tips
+      //****************************************************************************/
+      void rotate(const glm::vec3 & value) override {
+
+        glObject::rotate(value);
+
+        xAxeLabel.rotate(value);
+        yAxeLabel.rotate(value);
+        zAxeLabel.rotate(value);
+
+      }
+
+      void scale(const glm::vec3 & value) override {
+
+        glObject::scale(value);
+
+        xAxeLabel.scale(value);
+        yAxeLabel.scale(value);
+        zAxeLabel.scale(value);
+
+      }
+
     
     private:
       
@@ -180,9 +209,14 @@ namespace ogl {
       // setInGpu()
       //****************************************************************************/
       void setInGpu() override {
-   
+
         DEBUG_LOG("glAxes::setInGpu(" + name + ")");
-                  
+
+        // Same-context re-upload (init() called again): drop the old buffers
+        // first. After a context change isInitedInGpu is already false, so this
+        // is a no-op and the old-context handles are (deliberately) left alone.
+        cleanInGpu();
+
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
 

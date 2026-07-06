@@ -40,8 +40,8 @@ namespace ogl {
     
   private:
     
-    GLuint vao;
-    GLuint vbo[2];
+    GLuint vao = 0;
+    GLuint vbo[2] = {0, 0};
 
     constexpr static const GLfloat vertices[] = {
       -0.5,  0.5,  0.5,
@@ -93,9 +93,10 @@ namespace ogl {
       style = glShader::STYLE::LINE;
       
       color = _color;
-      
+
       isInited = true;
-      
+      isToUpdateInGpu = true; // re-init after a render must re-upload
+
     }
     
     //****************************************************************************/
@@ -161,8 +162,12 @@ namespace ogl {
     // setInGpu()
     //****************************************************************************/
     void setInGpu() override {
-      
+
       DEBUG_LOG("glBox::setInGpu(" + name + ")");
+
+      // Same-context re-upload: drop the old buffers first (no-op after a
+      // context change, where isInitedInGpu is already false).
+      cleanInGpu();
 
       static const GLushort indices[] = {
         0, 1,
