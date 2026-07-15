@@ -212,18 +212,16 @@ namespace ogl {
     }
 
     //****************************************************************************//
-    // cleanInGpu - release the material textures from the GPU
+    // cleanInGpu - forget this material's GPU state.
+    // The textures themselves are NOT deleted: they live in the shared
+    // glTextures cache and other materials/models may still reference them
+    // (deleting here used to invalidate the shared texture and abort the next
+    // render of any other material using the same image). Cache entries stay
+    // resident for the process lifetime, like the glFont glyph atlas.
     //****************************************************************************//
     void cleanInGpu() {
 
-      if(isInitedInGpu) {
-
-        for(size_t i=0; i<textures.size(); ++i)
-          glTextures::get(textures[i]).cleanInGpu();
-
-        isInitedInGpu = false;
-
-      }
+      isInitedInGpu = false;
 
     }
 

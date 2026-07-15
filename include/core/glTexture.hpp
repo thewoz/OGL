@@ -135,12 +135,17 @@ namespace ogl {
     // setInGpu
     //****************************************************************************/
     void setInGpu() {
-      
+
       if(!isInited){
          fprintf(stderr, "ERROR [glTexture]: must be initialized before uploading to GPU\n");
          abort();
        }
-      
+
+      // Idempotent: cache entries are shared by every material that references
+      // the same image, so a second material uploading the same texture must
+      // not glGenTextures again (it would leak the first GPU texture).
+      if(isInitedInGpu) return;
+
       glGenTextures(1, &id);
                 
       // Assign texture to ID

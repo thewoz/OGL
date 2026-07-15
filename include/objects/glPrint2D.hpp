@@ -182,7 +182,10 @@ namespace ogl {
       
       shader.setUniform("projection", camera.getOrthoProjection());
       shader.setUniform("color",      color);
-                  
+      // Bind the glyph sampler to unit 0 explicitly instead of relying on the
+      // uniform's default value being 0.
+      shader.setUniform("text", 0);
+
       glEnable(GL_CULL_FACE);
       glCullFace(GL_BACK);
 

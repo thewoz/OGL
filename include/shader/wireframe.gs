@@ -12,7 +12,10 @@ out vec3 fragColor;
 void emitEdge(vec4 a, vec4 b) {
   vec2 ndcA = a.xy / a.w;
   vec2 ndcB = b.xy / b.w;
-  vec2 dir = ndcB - ndcA;
+  // Pixel-space perpendicular for an isotropic thickness (see line.gs):
+  // computed in NDC the width would depend on edge orientation and aspect.
+  vec2 halfViewport = viewport * 0.5;
+  vec2 dir = (ndcB - ndcA) * halfViewport;
   float len = length(dir);
   if(len < 1e-6) {
     dir = vec2(0.0, 1.0);
@@ -20,7 +23,7 @@ void emitEdge(vec4 a, vec4 b) {
     dir /= len;
   }
   vec2 normal = vec2(-dir.y, dir.x);
-  vec2 offset = normal * (lineWidth / viewport);
+  vec2 offset = (normal * (lineWidth * 0.5)) / halfViewport;
 
   vec4 aPos = vec4((ndcA + offset) * a.w, a.z, a.w);
   vec4 aNeg = vec4((ndcA - offset) * a.w, a.z, a.w);

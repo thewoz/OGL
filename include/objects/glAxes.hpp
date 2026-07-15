@@ -79,10 +79,8 @@ namespace ogl {
         DEBUG_LOG("gAxes::init(" + name + ")");
 
         shader.setName(name);
-        
+
         shader.initLine();
-        
-        scale(glm::vec3(_scale));
 
         vertices.resize(6);
         
@@ -109,9 +107,9 @@ namespace ogl {
         yAxeLabel.init("y", glm::vec3(0.01f,1.01f,0.01f), glm::vec3(1.0f), 0.5);
         zAxeLabel.init("z", glm::vec3(0.01f,0.01f,1.01f), glm::vec3(1.0f), 0.5);
 
-        xAxeLabel.scale(glm::vec3(_scale));
-        yAxeLabel.scale(glm::vec3(_scale));
-        zAxeLabel.scale(glm::vec3(_scale));
+        // After the labels exist: the scale() override below forwards the
+        // transform to them, so one call scales both axes and labels.
+        scale(glm::vec3(_scale));
 
         isInited = true;
         isToUpdateInGpu = true; // re-init after a render must re-upload

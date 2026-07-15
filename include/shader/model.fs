@@ -127,10 +127,16 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
     // Material colors (a texture, when present, replaces the flat color).
-    vec3 ambientColor  = material.haveAmbientTexture  ? texture(material.ambientTexture,  fragTexCoord).rgb : material.ambientColor;
-    vec3 diffuseColor  = material.haveDiffuseTexture  ? texture(material.diffuseTexture,  fragTexCoord).rgb : material.diffuseColor;
+    // Color inputs (textures AND flat material colors) are authored in sRGB,
+    // so both are linearized (pow gamma) before lighting; the final
+    // pow(1/gamma) re-encodes once. Linearizing only one branch would make a
+    // flat color and a same-valued texture render at different brightness.
+    // Specular maps are intensity masks and normal/opacity maps are data:
+    // those stay linear.
+    vec3 ambientColor  = pow(material.haveAmbientTexture  ? texture(material.ambientTexture,  fragTexCoord).rgb : material.ambientColor,  vec3(gamma));
+    vec3 diffuseColor  = pow(material.haveDiffuseTexture  ? texture(material.diffuseTexture,  fragTexCoord).rgb : material.diffuseColor,  vec3(gamma));
     vec3 specularColor = material.haveSpecularTexture ? texture(material.specularTexture, fragTexCoord).rgb : material.specularColor;
-    vec3 emissiveColor = material.haveEmissiveTexture ? texture(material.emissiveTexture, fragTexCoord).rgb : material.emissiveColor;
+    vec3 emissiveColor = pow(material.haveEmissiveTexture ? texture(material.emissiveTexture, fragTexCoord).rgb : material.emissiveColor, vec3(gamma));
 
     // Lighting.
     vec3 ambient  = light.ambient  * ambientColor;

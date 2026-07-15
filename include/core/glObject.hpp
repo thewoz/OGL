@@ -200,11 +200,13 @@ namespace ogl {
     virtual void rotate   (const glm::vec3 & value) { _rotation = value; updateModelMatrix(); }
     virtual void scale    (const glm::vec3 & value) { _scale    = value; updateModelMatrix(); }
     
+    // Goes through the virtual setters (not the raw members) so composite
+    // objects that override them (e.g. glAxes forwarding to its labels) stay
+    // in sync when moved through this convenience call too.
     inline void move(const glm::vec3 & value1, const glm::vec3 & value2, const glm::vec3 & value3) {
-      _position = value1;
-      _rotation = value2;
-      _scale    = value3;
-      updateModelMatrix();
+      translate(value1);
+      rotate(value2);
+      scale(value3);
     }
     
     //****************************************************************************
