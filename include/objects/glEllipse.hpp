@@ -27,6 +27,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 //****************************************************************************/
 // namespace ogl

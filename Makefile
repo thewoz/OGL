@@ -34,6 +34,9 @@ endif
 # Targets
 # ==========================
 
+# All targets are actions, not files ('test' would otherwise match the test/ directory)
+.PHONY: all install uninstall example example_imgui test test_asan
+
 all: install
 
 # Install headers as a symbolic link
@@ -60,3 +63,17 @@ example_imgui:
 	@mkdir -p ~/bin
 	$(COMPILER) $(WARNINGS) -march=native -Os -std=c++17 -o ~/bin/ogl_imgui $(INCLUDE) ./src/main.cpp $(LIBS)
 	@echo "ImGui example built at ~/bin/ogl_imgui"
+
+# Build and run the offscreen smoke test (non-interactive; needs the headers installed)
+test:
+	@mkdir -p ~/bin
+	$(COMPILER) $(WARNINGS) -march=native -Os -std=c++17 -o ~/bin/ogl_smoke $(INCLUDE) ./test/smoke.cpp $(LIBS)
+	~/bin/ogl_smoke
+
+# Same smoke test under AddressSanitizer + UndefinedBehaviorSanitizer.
+# detect_leaks=0: LeakSanitizer is not supported on macOS, and the process-lifetime
+# caches (textures, glyph atlas) are by-design reachable at exit anyway.
+test_asan:
+	@mkdir -p ~/bin
+	$(COMPILER) $(WARNINGS) -g -O1 -std=c++17 -fsanitize=address,undefined -fno-omit-frame-pointer -o ~/bin/ogl_smoke_asan $(INCLUDE) ./test/smoke.cpp $(LIBS)
+	ASAN_OPTIONS=detect_leaks=0 UBSAN_OPTIONS=print_stacktrace=1 ~/bin/ogl_smoke_asan

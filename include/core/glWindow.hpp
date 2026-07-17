@@ -72,7 +72,9 @@ namespace ogl {
     // Variabile vera se il mouse e' sopra la finestra
     bool onFocus = false;
 
-    GLfloat lastTime = 0;
+    // In double: dopo ore di esecuzione un float che contiene secondi ha una
+    // risoluzione di millisecondi e deltaTime diventa rumoroso.
+    double lastTime = 0;
 
     bool created = false;
 
@@ -141,7 +143,10 @@ namespace ogl {
     //*****************************************************************************/
     // ~glWindow() - Distruttore
     //*****************************************************************************/
-    ~glWindow() {
+    // Virtual: the callbacks below (scroll/keyboard/cursorPos/mouseButton/
+    // cursorEnter) are virtual, so glWindow is meant to be derived from —
+    // deleting a derived window through a glWindow* needs a virtual dtor.
+    virtual ~glWindow() {
       DEBUG_LOG("glWindow::destroy() windowID " + std::to_string(id));
       shutdownImGui();
       if(window != NULL) { glfwDestroyWindow(window); window = NULL; }
@@ -343,6 +348,11 @@ namespace ogl {
     inline void shutdownImGui() {
       #ifndef OGL_WITHOUT_IMGUI
         if(imguiCtx != nullptr) {
+          // Il backend GL3 di ImGui distrugge le sue risorse nel contesto GL
+          // *corrente*: rendo corrente quello di questa finestra, così con più
+          // finestre (distrutte in qualsiasi ordine) le risorse sono rilasciate
+          // nel contesto che le possiede.
+          if(window != NULL) glfwMakeContextCurrent(window);
           ImGui::SetCurrentContext((ImGuiContext*)imguiCtx);
           ImGui_ImplOpenGL3_Shutdown();
           ImGui_ImplGlfw_Shutdown();
@@ -635,9 +645,10 @@ namespace ogl {
 
       glfwPollEvents();
 
-      GLfloat currentTime = glfwGetTime();
+      double currentTime = glfwGetTime();
 
-      deltaTime = currentTime - lastTime;
+      // Solo la differenza (piccola) scende a float; i tempi assoluti restano double.
+      deltaTime = GLfloat(currentTime - lastTime);
       lastTime  = currentTime;
 
       // Sample the FPS history exactly once per frame; getFPS() is a pure getter.

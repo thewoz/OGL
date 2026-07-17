@@ -25,6 +25,9 @@
   #error "Do not include this header directly; include <ogl/ogl.hpp> instead."
 #endif
 
+#include <cmath>
+#include <cfloat>
+
 //****************************************************************************
 // namespace ogl::draw
 //****************************************************************************

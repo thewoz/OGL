@@ -124,7 +124,25 @@ The executables are placed in `~/bin/ogl` and `~/bin/ogl_imgui`.
 ~/bin/ogl_imgui
 ```
 
-### 6. Uninstall (if needed)
+### 6. Run the tests
+
+A non-interactive smoke test ([test/smoke.cpp](test/smoke.cpp)) renders 30
+offscreen frames with every main object type (shapes, model, text, plot,
+shadow pass, dynamic buffer updates), takes a snapshot and verifies it:
+
+```bash
+# Normal build
+make test
+
+# Same test under AddressSanitizer + UndefinedBehaviorSanitizer
+make test_asan
+```
+
+Both print `SMOKE TEST OK` on success. The headers must be installed first
+(`make install`), since the test loads shaders, fonts and the demo model from
+the installed location.
+
+### 7. Uninstall (if needed)
 
 ```bash
 make uninstall
@@ -134,9 +152,9 @@ make uninstall
 
 ## 🛠 Example Code
 
-Here is a simple example showing how to create a window, set up a camera, and
-render basic objects. It is the same program as [`src/main.cpp`](src/main.cpp)
-(built by `make example`):
+Here is a simplified version of [`src/main.cpp`](src/main.cpp) (built by
+`make example`): it renders two switchable demo scenes — the T-Rex model, or
+a cuboid + sphere + 3D text label — toggled at runtime by pressing **TAB**:
 
 ```cpp
 #define OGL_WITHOUT_IMGUI
@@ -171,26 +189,39 @@ int main(int argc, char * const argv[]) {
   floor.rotate(glm::vec3(-1.57079633f, 0.0f, 0.0f)); // -90° about X: normal up
   floor.translate(glm::vec3(0.0f, -0.01f, 0.0f));
 
-  ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::white);
-  cuboid.translate(glm::vec3(1.2f, 0.25f, 0.0f));
-
-  ogl::glModel model(OGL_RESOURCE_DIR "/data/model/Trex/Trex.fbx");
-
   ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5f);
 
   ogl::glReferenceAxes referenceAxes;
   referenceAxes.setLineWidth(2);
 
+  // Demo scene A: the T-Rex model.
+  ogl::glModel model(OGL_RESOURCE_DIR "/data/model/Trex/Trex.fbx");
+
+  // Demo scene B: primitive shapes + 3D text.
+  ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::white);
+  cuboid.translate(glm::vec3(1.2f, 0.25f, 0.0f));
+  ogl::glSphere sphere(0.35f, 24, 24, ogl::glShader::STYLE::SOLID, ogl::glColors::orange);
+  sphere.translate(glm::vec3(-1.2f, 0.35f, 0.0f));
+  ogl::glPrint3D label3D("OGL", glm::vec3(0.0f, 1.3f, 0.0f), ogl::glColors::white, 0.6f, true);
+
+  bool showTrexScene = true;
+  bool tabWasDown = false;
+
   while(!window.shouldClose()) {
 
     window.renderBegin();
+
+      // TAB toggles between the two demo scenes (edge-triggered).
+      bool tabIsDown = (glfwGetKey(window.window, GLFW_KEY_TAB) == GLFW_PRESS);
+      if(tabIsDown && !tabWasDown) showTrexScene = !showTrexScene;
+      tabWasDown = tabIsDown;
 
       // Shadow pass: render the casters into the scene shadow map.
       if(scene.areShadowsEnabled()) {
         scene.beginShadowPass();
         floor.renderDepth(scene.getShadowShader());
-        cuboid.renderDepth(scene.getShadowShader());
-        model.renderDepth(scene.getShadowShader());
+        if(showTrexScene) model.renderDepth(scene.getShadowShader());
+        else { cuboid.renderDepth(scene.getShadowShader()); sphere.renderDepth(scene.getShadowShader()); }
         scene.endShadowPass();
       }
 
@@ -198,8 +229,13 @@ int main(int argc, char * const argv[]) {
       floor.render(window.getCamera(), &scene);
       axes.render(window.getCamera());
       grid.render(window.getCamera());
-      cuboid.render(window.getCamera(), &scene);
-      model.render(window.getCamera(), &scene);
+      if(showTrexScene) {
+        model.render(window.getCamera(), &scene);
+      } else {
+        cuboid.render(window.getCamera(), &scene);
+        sphere.render(window.getCamera(), &scene);
+        label3D.render(window.getCamera());
+      }
       text.render(window.getCamera(), "FPS: " + std::to_string(window.getFPS()));
       referenceAxes.render(window.getCamera());
 
@@ -259,6 +295,8 @@ make example_imgui
 | `make uninstall`      | Remove the symlink |
 | `make example`        | Build the basic example to `~/bin/ogl` |
 | `make example_imgui`  | Build the ImGui integration example to `~/bin/ogl_imgui` |
+| `make test`           | Build and run the offscreen smoke test |
+| `make test_asan`      | Run the smoke test under ASan + UBSan |
 
 The Makefile automatically detects whether you are on **Linux** or **macOS**.
 

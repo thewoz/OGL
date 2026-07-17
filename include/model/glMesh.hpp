@@ -27,6 +27,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <cfloat>
 
 #include <string>
 #include <sstream>

@@ -326,36 +326,33 @@ namespace ogl {
       // 2. Compile shaders
       GLuint vertex, fragment;
       GLint success;
-      GLchar infoLog[512];
-      
+
       // Vertex Shader
       vertex = glCreateShader(GL_VERTEX_SHADER);
       glShaderSource(vertex, 1, &vShaderCode, NULL);
       glCompileShader(vertex);
-      
+
       // Print compile errors if any
       glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-      
+
       if(!success) {
-        glGetShaderInfoLog( vertex, 512, NULL, infoLog );
-        fprintf(stderr, "ERROR [glShader]: vertex shader compilation failed\n%s\n", infoLog);
+        fprintf(stderr, "ERROR [glShader]: vertex shader compilation failed\n%s\n", shaderInfoLog(vertex).c_str());
         abort();
       }
-            
+
       // Fragment Shader
       fragment = glCreateShader(GL_FRAGMENT_SHADER);
       glShaderSource(fragment, 1, &fShaderCode, NULL);
       glCompileShader(fragment);
-      
+
       // Print compile errors if any
       glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-      
+
       if(!success){
-        glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-        fprintf(stderr, "ERROR [glShader]: fragment shader compilation failed\n%s\n", infoLog);
+        fprintf(stderr, "ERROR [glShader]: fragment shader compilation failed\n%s\n", shaderInfoLog(fragment).c_str());
         abort();
       }
-            
+
       // if geometry shader is given, compile geometry shader
       GLuint geometry = 0;
       if(!geometryCode.empty()) {
@@ -366,31 +363,29 @@ namespace ogl {
         glShaderSource(geometry, 1, &gShaderCode, NULL);
         glCompileShader(geometry);
         glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
-         
+
         if(!success) {
-          glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-          fprintf(stderr, "ERROR [glShader]: geometry shader compilation failed\n%s\n", infoLog);
+          fprintf(stderr, "ERROR [glShader]: geometry shader compilation failed\n%s\n", shaderInfoLog(geometry).c_str());
           abort();
         }
-                  
+
       }
-       
+
       // Shader Program
       program = glCreateProgram();
-             
+
       glAttachShader(program, vertex);
       glAttachShader(program, fragment);
-       
+
       if(!geometryCode.empty()) glAttachShader(program, geometry);
-       
+
       glLinkProgram(program);
-             
+
       // Print linking errors if any
       glGetProgramiv(program, GL_LINK_STATUS, &success);
-       
+
       if(!success) {
-        glGetProgramInfoLog(program, 512, NULL, infoLog);
-        fprintf(stderr, "ERROR [glShader]: program linking failed\n%s\n", infoLog);
+        fprintf(stderr, "ERROR [glShader]: program linking failed\n%s\n", programInfoLog(program).c_str());
         abort();
       }
        
@@ -410,6 +405,28 @@ namespace ogl {
     inline void setName(std::string _name) { name = _name; }
     
   private:
+
+    //****************************************************************************/
+    // shaderInfoLog / programInfoLog - fetch the full driver log; a fixed-size
+    // buffer would truncate long logs (many errors, driver verbosi).
+    //****************************************************************************/
+    static std::string shaderInfoLog(GLuint shaderID) {
+      GLint length = 0;
+      glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &length);
+      if(length <= 0) return "(no log)";
+      std::string log((size_t)length, '\0');
+      glGetShaderInfoLog(shaderID, length, NULL, &log[0]);
+      return log;
+    }
+
+    static std::string programInfoLog(GLuint programID) {
+      GLint length = 0;
+      glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &length);
+      if(length <= 0) return "(no log)";
+      std::string log((size_t)length, '\0');
+      glGetProgramInfoLog(programID, length, NULL, &log[0]);
+      return log;
+    }
 
     //****************************************************************************/
     // getUniformLocation - cached glGetUniformLocation. Misses (including
