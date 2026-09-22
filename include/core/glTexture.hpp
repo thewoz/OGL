@@ -132,6 +132,18 @@ namespace ogl {
     }
     
     //****************************************************************************/
+    // isColorMap - whether this texture carries color (sRGB) or data (linear).
+    // 'type' is the sampler uniform name, e.g. "material.diffuseTexture".
+    //****************************************************************************/
+    bool isColorMap() const {
+
+      return type.find("diffuse")  != std::string::npos ||
+             type.find("ambient")  != std::string::npos ||
+             type.find("emissive") != std::string::npos;
+
+    }
+
+    //****************************************************************************/
     // setInGpu
     //****************************************************************************/
     void setInGpu() {
@@ -155,7 +167,13 @@ namespace ogl {
       // default (4) skews every texture whose width is not a multiple of 4.
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &image[0]);
+      // Color maps are authored in sRGB and must be uploaded as GL_SRGB8 so the
+      // sampler returns linear values to the shader; specular, normal and
+      // opacity maps are data (an intensity mask, a direction, a coverage) and
+      // must stay linear. 'type' already tells the two apart, and the texture
+      // cache is keyed on type|path, so the same image used as two different
+      // maps gets two entries and cannot end up with the wrong encoding.
+      glTexImage2D(GL_TEXTURE_2D, 0, isColorMap() ? GL_SRGB8 : GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &image[0]);
 
       glGenerateMipmap(GL_TEXTURE_2D);
 

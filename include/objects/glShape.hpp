@@ -41,12 +41,42 @@ namespace ogl {
   // Lighting is no longer owned per object: the scene light is supplied through
   // glScene at render time (render(camera, &scene)). Still abstract: subclasses
   // implement setInGpu()/cleanInGpu().
+  //
+  // What IS owned per object is the specular response, because it describes the
+  // surface and not the light: 'shininess' is the Phong exponent (small = broad
+  // dull highlight, large = small sharp one) and 'specularStrength' scales the
+  // highlight, with 0 removing it for a fully matte surface. The defaults, 32
+  // and 1, are the values these were hardcoded to before they were exposed.
+  //
+  // The highlight is deliberately NOT tinted by the object color: on the
+  // dielectrics these shapes usually stand for (paper, cardboard, plastic,
+  // painted surfaces) the specular reflection does not take the body color.
+  // Tinting it is right only for metals, which are the business of glModel,
+  // where the material carries a real specular color.
   //****************************************************************************/
   class glShape : public glObject {
 
   public:
 
     glShape(const std::string & _name = "") : glObject(_name) { }
+
+    //****************************************************************************/
+    // setShininess() - Phong exponent; values below 1 make no physical sense
+    //****************************************************************************/
+    inline void setShininess(float _shininess) { shininess = (_shininess > 1.0f) ? _shininess : 1.0f; }
+
+    //****************************************************************************/
+    // setSpecularStrength() - highlight intensity, 0 = fully matte
+    //****************************************************************************/
+    inline void setSpecularStrength(float _strength) { specularStrength = (_strength > 0.0f) ? _strength : 0.0f; }
+
+    inline float getShininess()        const { return shininess;        }
+    inline float getSpecularStrength() const { return specularStrength; }
+
+  protected:
+
+    float shininess        = 32.0f;
+    float specularStrength = 1.0f;
 
   }; /* class glShape */
 

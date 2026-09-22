@@ -147,6 +147,12 @@ namespace ogl {
 
       // Cull front faces while filling the map to reduce shadow acne (peter-panning
       // is negligible for thin objects and is preferable to surface acne here).
+      // NB: this is only the DEFAULT for the pass. It is right for closed
+      // volumes, where the far surface takes the near one's place, but wrong for
+      // an open surface with no thickness, which it would drop from the map
+      // altogether: those override it in their own renderDepth() (glQuad,
+      // glSheet), so every caster sets the state it needs and the outcome does
+      // not depend on the drawing order.
       glEnable(GL_DEPTH_TEST);
       glEnable(GL_CULL_FACE);
       glCullFace(GL_FRONT);

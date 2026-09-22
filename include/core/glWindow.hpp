@@ -27,6 +27,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <cmath>
 
 #include <deque>
 #include <string>
@@ -173,6 +174,14 @@ namespace ogl {
       // call glfwDefaultWindowHints() here.)
       glfwWindowHint(GLFW_VISIBLE,   GLFW_TRUE);
       glfwWindowHint(GLFW_RESIZABLE, resizable);
+      // Ask for a default framebuffer that can do the sRGB conversion, which is
+      // what lets renderBegin()'s glEnable(GL_FRAMEBUFFER_SRGB) actually take
+      // effect. Required for portability: the Intel/macOS driver converts even
+      // without this hint, but a driver is under no obligation to, and where
+      // the default framebuffer is not sRGB-capable the enable is a silent
+      // no-op and the whole scene renders too dark. The sRGB case of the smoke
+      // test catches exactly that.
+      glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
       // Create a GLFWwindow object that we can use for GLFW's functions
       window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
@@ -259,6 +268,14 @@ namespace ogl {
       // Others Glfw options
       glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
       glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+      // Ask for a default framebuffer that can do the sRGB conversion, which is
+      // what lets renderBegin()'s glEnable(GL_FRAMEBUFFER_SRGB) actually take
+      // effect. Required for portability: the Intel/macOS driver converts even
+      // without this hint, but a driver is under no obligation to, and where
+      // the default framebuffer is not sRGB-capable the enable is a silent
+      // no-op and the whole scene renders too dark. The sRGB case of the smoke
+      // test catches exactly that.
+      glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
       // Create a GLFWwindow object that we can use for GLFW's functions
       window = glfwCreateWindow(width, height, "notitle", NULL, NULL);
@@ -632,6 +649,23 @@ namespace ogl {
     }
 
     //*****************************************************************************/
+    // srgbToLinear - exact sRGB transfer function, the C++ counterpart of the
+    // one in the shaders. Needed for the colors that reach the framebuffer
+    // without passing through a shader of ours, i.e. the clear color
+    //*****************************************************************************/
+    static glm::vec3 srgbToLinear(const glm::vec3 & color) {
+
+      glm::vec3 value;
+
+      for(int i=0; i<3; ++i)
+        value[i] = (color[i] <= 0.04045f) ? color[i] / 12.92f
+                                          : std::pow((color[i] + 0.055f) / 1.055f, 2.4f);
+
+      return value;
+
+    }
+
+    //*****************************************************************************/
     // renderBegin()
     //*****************************************************************************/
     void renderBegin() {
@@ -659,12 +693,41 @@ namespace ogl {
 
       glViewport(0, 0, camera.getWidth(), camera.getHeight());
 
-      glClearColor(background.r, background.g, background.b, 1.0f);
+      // The clear is a framebuffer write like any other, so GL_FRAMEBUFFER_SRGB
+      // encodes it too: the background has to be linearized here or a
+      // setBackground(0.1) would come out at 0.35 on screen.
+      glm::vec3 clear = srgbToLinear(background);
+
+      glClearColor(clear.r, clear.g, clear.b, 1.0f);
 
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LEQUAL);
+
+      // The lit shaders output LINEAR color and the unlit ones linearize theirs,
+      // so the sRGB encoding of every framebuffer write is the GPU's job. This
+      // enable is what turns it on and is REQUIRED on every platform: without
+      // it nothing encodes and the whole scene renders too dark. It is set per
+      // frame rather than once at creation because the flag is context state,
+      // so this way it holds for every window regardless of creation order.
+      //
+      // The companion piece is the GLFW_SRGB_CAPABLE hint in create() and
+      // createOffscreen(), which asks for a default framebuffer that can do the
+      // conversion. That hint is what makes this work outside macOS: the Intel
+      // driver here converts even without it, but a driver is not required to,
+      // and where the default framebuffer is not sRGB-capable this enable is a
+      // silent no-op.
+      //
+      // Do NOT try to check the capability with
+      // GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING: on this driver it reports
+      // GL_LINEAR for the default framebuffer while the conversion does in fact
+      // happen, so it yields a false negative. The reliable check is to render
+      // a known color and read the pixel back, which is what the sRGB case of
+      // the smoke test does (test/smoke.cpp): if a platform ever fails to
+      // encode, that test fails instead of the scene quietly going dark.
+      glEnable(GL_FRAMEBUFFER_SRGB);
+
 
       keybord = true;
 
@@ -693,6 +756,11 @@ namespace ogl {
         if(imguiFrameActive) {
           ImGui::SetCurrentContext((ImGuiContext*)imguiCtx);
           ImGui::Render();
+          // ImGui's own shader writes colors that are already display-referred,
+          // and it is not one of ours to linearize: the sRGB encoding of the
+          // framebuffer has to be off for its draw, or the whole UI comes out
+          // washed out. renderBegin() turns it back on for the next frame.
+          glDisable(GL_FRAMEBUFFER_SRGB);
           ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
           imguiFrameActive = false;
         }

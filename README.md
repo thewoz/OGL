@@ -21,6 +21,7 @@ OGL allows you to render:
 - Grids
 - Boxes
 - Cuboids
+- Curved sheets (open half cylinders)
 - Points
 - Planes
 - 2D and 3D Text
@@ -28,6 +29,36 @@ OGL allows you to render:
 - 3D Plot
 
 It also provides utilities like window management, camera control, and snapshot functionality.
+
+---
+
+## Color and lighting
+
+OGL renders through a **linear lighting pipeline**, which is worth knowing about
+because it defines what the colors you pass in mean.
+
+- Every color you give to an object (`setColor`, the `_color` arguments, material
+  colors) is a **sRGB value**: the color you would pick in a color picker.
+- The shaders linearize it before any lighting math, and the GPU encodes the
+  result back to sRGB on the framebuffer write (`GL_FRAMEBUFFER_SRGB`, enabled by
+  `glWindow`). Color textures are uploaded as `GL_SRGB8`, while specular, normal
+  and opacity maps stay linear because they carry data and not color.
+- A consequence to keep in mind: a lit surface renders **darker** than the color
+  you assigned it, because the light is not at full intensity. With the default
+  light (ambient 0.2, diffuse 0.5) an albedo of 0.45 lands at about 0.38 on
+  screen. Pick albedos, not screen values.
+- Colors written straight through — the unlit objects (lines, axes, grids, plots,
+  text, 2D quads) and the window background — come out on screen exactly as
+  given.
+
+If you write your own shader for a `glShape`, it must output **linear** color:
+the encoding is not its job.
+
+The specular response belongs to the object, not to the light: `setShininess()`
+is the Phong exponent and `setSpecularStrength()` scales the highlight, with 0
+giving a fully matte surface. The highlight is not tinted by the object color,
+which is correct for dielectrics; tinted highlights belong to metals, and those
+are handled by `glModel`, whose material carries a real specular color.
 
 ---
 

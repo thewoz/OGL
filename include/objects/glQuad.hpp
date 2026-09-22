@@ -153,6 +153,8 @@ namespace ogl {
         if(style == glShader::STYLE::SOLID) {
           if(scene) scene->setInShader(shader, camera.getView());
           else { glLight().setInShader(shader, camera.getView()); shader.setUniform("useShadow", false); }
+          shader.setUniform("shininess",        shininess);
+          shader.setUniform("specularStrength", specularStrength);
         }
 
         glBindVertexArray(vao);
@@ -187,8 +189,29 @@ namespace ogl {
 
         depthShader.setUniform("model", modelMatrix);
 
+        // Open surface with no thickness: there is no far surface to fall back on,
+        // so the front face culling that beginPass() sets up would drop this
+        // object from the shadow map entirely whenever the light happens to see
+        // its front, and it would cast no shadow at all. Culling is therefore off
+        // here, so that the surface is recorded whichever side the light sees.
+        //
+        // What the culling was buying, though, was protection from the surface
+        // shadowing itself, and with no thickness the bias in solid.fs is not
+        // enough on its own: at grazing light the acne comes back as striping.
+        // The polygon offset pushes the recorded depth away from the light, which
+        // is the per-object equivalent of what the culling did for the closed
+        // volumes. It MUST be turned off again right after the draw, or the
+        // closed casters drawn later inherit it and their shadows detach.
+        glDisable(GL_CULL_FACE);
+
+        glEnable(GL_POLYGON_OFFSET_FILL);
+        glPolygonOffset(2.0f, 4.0f);
+
         glBindVertexArray(vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // vedi sopra: l'offset non deve sopravvivere a questo oggetto
+        glDisable(GL_POLYGON_OFFSET_FILL);
         glBindVertexArray(0);
 
         glCheckError();

@@ -31,8 +31,21 @@ in float fragRadiusView;
 
 out vec4 outColor;
 
-const float shininess = 32.0;
-const float gamma     = 2.2;
+uniform float shininess;         // specular exponent (PHONG only)
+uniform float specularStrength;  // highlight intensity, 0 disables it
+
+//
+// srgbToLinear - exact sRGB electro-optical transfer function (the piecewise
+// one, with the linear segment near black; not the pow 2.2 approximation).
+// Colors coming in as uniforms are authored in sRGB and must be linearized
+// before any lighting math. The re-encoding on the way out is NOT done here:
+// the default framebuffer is sRGB and the GPU encodes the write (glWindow
+// enables GL_FRAMEBUFFER_SRGB), so using the exact curve here makes the
+// round trip exact for the colors that are written through unchanged.
+//
+vec3 srgbToLinear(vec3 c) {
+    return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
 
 void main() {
 
@@ -58,9 +71,10 @@ void main() {
 
   if(shadingMode == 0) {
 
-    // FLAT: uniform matte colour, view independent. No lighting and no gamma so
-    // the colour assigned to the point is reproduced exactly.
-    outRGB = fragColor.rgb;
+    // FLAT: uniform matte colour, view independent. No lighting. The value is
+    // linearized so that the sRGB encoding of the framebuffer write gives back
+    // exactly the colour assigned to the point.
+    outRGB = srgbToLinear(fragColor.rgb);
 
   } else {
 
@@ -79,8 +93,11 @@ void main() {
 
     float diff = max(dot(norm, lightDir), 0.0);
 
-    vec3 ambient = light.ambient * fragColor.rgb;
-    vec3 diffuse = light.diffuse * diff * fragColor.rgb;
+    // sRGB-authored colour in, linear lighting (as in solid.fs).
+    vec3 base = srgbToLinear(fragColor.rgb);
+
+    vec3 ambient = light.ambient * base;
+    vec3 diffuse = light.diffuse * diff * base;
 
     vec3 lighting = ambient + diffuse;
 
@@ -88,11 +105,11 @@ void main() {
     if(shadingMode == 2) {
       vec3  reflectDir = reflect(-lightDir, norm);
       float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
-      lighting += light.specular * spec;
+      lighting += light.specular * spec * specularStrength;
     }
 
-    // Gamma-correct the final color for display (consistent with solid/model).
-    outRGB = pow(lighting, vec3(1.0 / gamma));
+    // Linear out: the GPU does the sRGB encoding (GL_FRAMEBUFFER_SRGB).
+    outRGB = lighting;
 
   }
 

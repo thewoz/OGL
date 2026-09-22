@@ -20,7 +20,8 @@
 /**
  * Smoke test offscreen (non interattivo): esercita finestra offscreen, tutti i
  * principali tipi di oggetto, la shadow pass, gli update dinamici dei buffer,
- * lo snapshot e il teardown. Esce con 0 se tutto funziona.
+ * la pipeline colore sRGB, lo snapshot e il teardown. Esce con 0 se tutto
+ * funziona.
  *
  * Build ed esecuzione:  make test          (build normale)
  *                       make test_asan     (AddressSanitizer + UBSan)
@@ -28,11 +29,72 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 #include <sys/stat.h>
 
 #define OGL_WITHOUT_IMGUI
 #include <ogl/ogl.hpp>
+
+//*****************************************************************************/
+// checkSrgbPipeline - il controllo di portabilita' della pipeline colore.
+//
+// OGL delega alla GPU la codifica sRGB delle scritture nel framebuffer
+// (GL_FRAMEBUFFER_SRGB in renderBegin, piu' l'hint GLFW_SRGB_CAPABLE alla
+// creazione della finestra), e in cambio gli shader emettono colore lineare.
+// Se su una piattaforma quella codifica NON avviene - default framebuffer non
+// sRGB-capable, o enum non supportato - non si vede un errore: tutta la scena
+// esce semplicemente troppo scura. Questo test rende quel caso un fallimento.
+//
+// glQuad2D passa da plain2D.fs, che linearizza il colore proprio perche' la
+// GPU lo ri-codifica: il round-trip deve quindi restituire esattamente il
+// colore dato. NB: non si puo' usare la query COLOR_ENCODING al suo posto,
+// perche' su almeno un driver (Intel/macOS) riporta GL_LINEAR per il default
+// framebuffer anche quando la conversione avviene davvero.
+//*****************************************************************************/
+static bool checkSrgbPipeline(ogl::glWindow & window, int width, int height) {
+
+  const float levels[] = { 0.05f, 0.25f, 0.5f, 0.75f, 1.0f };
+
+  bool ok = true;
+
+  for(float level : levels) {
+
+    ogl::glQuad2D probe;
+    probe.init(glm::vec2(0.0f), glm::vec2((float) width, (float) height),
+               glm::vec4(level, level, level, 1.0f));
+
+    unsigned char pixel[3] = {0, 0, 0};
+
+    // Il pixel va letto PRIMA di renderEnd(): dopo lo swap dei buffer il
+    // contenuto del back buffer e' indefinito da specifica, quindi leggerlo
+    // dopo funzionerebbe per caso su alcuni driver e non su altri.
+    window.renderBegin();
+    probe.render(window.getCamera());
+
+    glReadBuffer(GL_BACK);
+    glReadPixels(width / 2, height / 2, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+
+    window.renderEnd();
+
+    int expected = (int) std::lround(level * 255.0f);
+
+    // una tolleranza di 1 LSB copre l'arrotondamento della conversione
+    if(std::abs((int) pixel[0] - expected) > 1) {
+      fprintf(stderr, "SMOKE TEST FAILED: sRGB round trip broken, color %.2f "
+                      "read back as %d instead of %d.\n"
+                      "  The framebuffer is not encoding to sRGB: check that the\n"
+                      "  GLFW_SRGB_CAPABLE hint is honoured and that\n"
+                      "  glEnable(GL_FRAMEBUFFER_SRGB) is supported here.\n",
+              level, (int) pixel[0], expected);
+      ok = false;
+    }
+
+  }
+
+  return ok;
+
+}
 
 int main() {
 
@@ -68,6 +130,19 @@ int main() {
     ogl::glSphere sphere(0.3f, 16, 16, ogl::glShader::STYLE::SOLID, ogl::glColors::red);
     sphere.translate(glm::vec3(-1.0f, 0.3f, 0.5f));
 
+    ogl::glSheet sheet(0.4f, 0.8f, 32, ogl::glShader::STYLE::SOLID, ogl::glColors::blue);
+    sheet.translate(glm::vec3(0.0f, 0.9f, -1.2f));
+    sheet.setSpecularStrength(0.3f);
+    sheet.setShininess(64.0f);
+
+    // WIREFRAME copre wireframe.vs/gs/fs, che nessun altro oggetto qui usa
+    ogl::glCuboid wire(glm::vec3(0.3f), ogl::glShader::STYLE::WIREFRAME, ogl::glColors::magenta);
+    wire.translate(glm::vec3(-1.2f, 0.4f, -0.8f));
+
+    // glQuad2D copre plain2D.vs/fs
+    ogl::glQuad2D overlay;
+    overlay.init(glm::vec2(10.0f, 60.0f), glm::vec2(120.0f, 40.0f), glm::vec4(0.2f, 0.4f, 0.8f, 0.6f));
+
     ogl::glModel model(OGL_RESOURCE_DIR "/data/model/Trex/Trex.fbx");
 
     std::vector<glm::vec3> pts = { {0,1,0}, {0.5f,1,0}, {1,1,0.5f} };
@@ -93,6 +168,7 @@ int main() {
         floor.renderDepth(scene.getShadowShader());
         cuboid.renderDepth(scene.getShadowShader());
         sphere.renderDepth(scene.getShadowShader());
+        sheet.renderDepth(scene.getShadowShader());
         model.renderDepth(scene.getShadowShader());
         scene.endShadowPass();
       }
@@ -102,12 +178,15 @@ int main() {
       grid.render(window.getCamera());
       cuboid.render(window.getCamera(), &scene);
       sphere.render(window.getCamera(), &scene);
+      sheet.render(window.getCamera(), &scene);
+      wire.render(window.getCamera());
       model.render(window.getCamera(), &scene);
       points.render(window.getCamera(), 0, -1, -1, &scene);
       line.render(window.getCamera());
       text.render(window.getCamera(), "frame " + std::to_string(frame) + "\nsecond line");
       label.render(window.getCamera());
       plot.render(window.getCamera());
+      overlay.render(window.getCamera());
       refAxes.render(window.getCamera());
 
       // Update dinamico dei buffer (percorso isToUpdateInGpu).
@@ -123,6 +202,11 @@ int main() {
     }
 
     window.snapshot(snapshotPath);
+
+    if(!checkSrgbPipeline(window, width, height)) {
+      window.destroy();
+      return 1;
+    }
 
     window.destroy();
   }

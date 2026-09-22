@@ -101,6 +101,7 @@
 #include <ogl/objects/glCuboid.hpp>
 #include <ogl/objects/glQuad.hpp>
 #include <ogl/objects/glQuad2D.hpp>
+#include <ogl/objects/glSheet.hpp>
 #include <ogl/objects/glAxes.hpp>
 #include <ogl/objects/glPlot.hpp>
 #include <ogl/objects/glReferenceAxes.hpp>

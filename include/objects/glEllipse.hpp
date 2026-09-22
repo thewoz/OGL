@@ -134,6 +134,8 @@ namespace ogl {
       if(style == glShader::STYLE::SOLID) {
         if(scene) scene->setInShader(shader, camera.getView());
         else { glLight().setInShader(shader, camera.getView()); shader.setUniform("useShadow", false); }
+        shader.setUniform("shininess",        shininess);
+        shader.setUniform("specularStrength", specularStrength);
       }
 
       glBindVertexArray(vao);
@@ -167,6 +169,15 @@ namespace ogl {
       if(isToInitInGpu()) initInGpu();
 
       depthShader.setUniform("model", modelMatrix);
+
+      // Closed volume: front face culling records the far surface, which is
+      // deeper than the near one and keeps the shadow test off its own
+      // geometry (anti-acne). Set here rather than relying on the state left by
+      // beginPass(), so the result does not depend on the order in which the
+      // casters are drawn: an open surface drawn before this one turns culling
+      // off for itself (see glQuad / glSheet).
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_FRONT);
 
       glBindVertexArray(vao);
       glDrawElements(GL_TRIANGLES, slices * stacks * 6, GL_UNSIGNED_INT, nullptr);

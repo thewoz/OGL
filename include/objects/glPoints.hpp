@@ -168,6 +168,8 @@ namespace ogl {
       shader.setUniform("model",      modelMatrix);
       shader.setUniform("pointSize",  radius);
       shader.setUniform("shadingMode", shadingMode);
+      shader.setUniform("shininess",        shininess);
+      shader.setUniform("specularStrength", specularStrength);
       shader.setUniform("viewport",   camera.getViewport());
 
       // Shade the impostors with the scene light (head-light fallback by default).

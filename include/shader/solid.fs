@@ -25,8 +25,21 @@ in  vec3 fragNormal;       // fragment normal   in view space
 in  vec4 fragPosLightSpace; // fragment position in light clip space
 out vec4 outColor;
 
-const float shininess = 32.0;
-const float gamma     = 2.2;
+uniform float shininess;         // specular exponent
+uniform float specularStrength;  // specular intensity, 0 disables the highlight
+
+//
+// srgbToLinear - exact sRGB electro-optical transfer function (the piecewise
+// one, with the linear segment near black; not the pow 2.2 approximation).
+// Colors coming in as uniforms are authored in sRGB and must be linearized
+// before any lighting math. The re-encoding on the way out is NOT done here:
+// the default framebuffer is sRGB and the GPU encodes the write (glWindow
+// enables GL_FRAMEBUFFER_SRGB), so using the exact curve here makes the
+// round trip exact for the colors that are written through unchanged.
+//
+vec3 srgbToLinear(vec3 c) {
+    return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
 
 //
 // shadowCalc - fraction of this fragment that is in shadow (0 = lit, 1 = shadow).
@@ -61,6 +74,21 @@ void main() {
     // In view space the eye is at the origin, so -fragPos points to the camera.
     vec3 viewDir = normalize(-fragPos);
 
+    // Two-sided shading. On a surface seen from its back the normal points away
+    // from the eye, so the diffuse and specular terms collapse to zero and the
+    // face comes out flat ambient: flipping the normal shades that side
+    // properly. This matters for the objects drawn with back face culling off
+    // (glSheet, and glQuad with setCullFaceEnabled(false)), which are the only
+    // ones whose far side is ever rasterized.
+    //
+    // The test is on the view direction and NOT on gl_FrontFacing, which is
+    // unreliable here: on this driver a shader reading it twice gets two
+    // different answers, and using it flipped the normals of the culled closed
+    // objects too (the sphere came out visibly darker). dot(norm, viewDir) is
+    // the geometric condition we actually care about and does not depend on the
+    // winding of the triangles.
+    if(dot(norm, viewDir) < 0.0) norm = -norm;
+
     // Choose the light direction: explicit direction, else point light,
     // else a head light coming straight from the camera.
     vec3 lightDir;
@@ -73,15 +101,24 @@ void main() {
     vec3  reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
 
-    vec3 ambient  = light.ambient  * color;
-    vec3 diffuse  = light.diffuse  * diff * color;
-    vec3 specular = light.specular * spec;
+    // The base color arrives as an sRGB-authored value and the light
+    // intensities are already linear, so only the former is converted.
+    vec3 base = srgbToLinear(color);
+
+    vec3 ambient  = light.ambient  * base;
+    vec3 diffuse  = light.diffuse  * diff * base;
+
+    // The highlight is NOT tinted by the base color: on a dielectric (paper,
+    // cardboard, painted surfaces) the specular reflection does not take the
+    // body color. Metals do tint it, and those belong to model.fs, which has a
+    // real specular color in the material.
+    vec3 specular = light.specular * spec * specularStrength;
 
     // Shadow only attenuates the direct (diffuse + specular) terms.
     float shadow = useShadow ? shadowCalc(norm, lightDir) : 0.0;
 
     vec3 lighting = ambient + (1.0 - shadow) * (diffuse + specular);
 
-    // Gamma-correct the final color for display (consistent with model.fs).
-    outColor = vec4(pow(lighting, vec3(1.0 / gamma)), 1.0);
+    // Linear out: GL_FRAMEBUFFER_SRGB is on, the GPU does the sRGB encoding.
+    outColor = vec4(lighting, 1.0);
 }

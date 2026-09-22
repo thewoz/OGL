@@ -71,7 +71,18 @@ out vec4 outColor;
 /*****************************************************************************/
 // Constants
 /*****************************************************************************/
-const float gamma = 2.2;
+//
+// srgbToLinear - exact sRGB electro-optical transfer function (the piecewise
+// one, with the linear segment near black; not the pow 2.2 approximation).
+// Colors coming in as uniforms are authored in sRGB and must be linearized
+// before any lighting math. The re-encoding on the way out is NOT done here:
+// the default framebuffer is sRGB and the GPU encodes the write (glWindow
+// enables GL_FRAMEBUFFER_SRGB), so using the exact curve here makes the
+// round trip exact for the colors that are written through unchanged.
+//
+vec3 srgbToLinear(vec3 c) {
+    return mix(c / 12.92, pow((c + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c));
+}
 
 /*****************************************************************************/
 // shadowCalc - fraction of this fragment in shadow (0 = lit, 1 = shadow).
@@ -127,16 +138,17 @@ void main() {
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
     // Material colors (a texture, when present, replaces the flat color).
-    // Color inputs (textures AND flat material colors) are authored in sRGB,
-    // so both are linearized (pow gamma) before lighting; the final
-    // pow(1/gamma) re-encodes once. Linearizing only one branch would make a
-    // flat color and a same-valued texture render at different brightness.
+    // Everything below must end up linear before the lighting math. The two
+    // branches get there differently and must not be converted the same way:
+    // the color textures (diffuse, ambient, emissive) are uploaded as GL_SRGB8
+    // so the sampler already returns linear, while the flat material colors
+    // arrive as sRGB-authored uniforms and are converted here.
     // Specular maps are intensity masks and normal/opacity maps are data:
-    // those stay linear.
-    vec3 ambientColor  = pow(material.haveAmbientTexture  ? texture(material.ambientTexture,  fragTexCoord).rgb : material.ambientColor,  vec3(gamma));
-    vec3 diffuseColor  = pow(material.haveDiffuseTexture  ? texture(material.diffuseTexture,  fragTexCoord).rgb : material.diffuseColor,  vec3(gamma));
+    // those are uploaded linear and stay linear on both branches.
+    vec3 ambientColor  = material.haveAmbientTexture  ? texture(material.ambientTexture,  fragTexCoord).rgb : srgbToLinear(material.ambientColor);
+    vec3 diffuseColor  = material.haveDiffuseTexture  ? texture(material.diffuseTexture,  fragTexCoord).rgb : srgbToLinear(material.diffuseColor);
     vec3 specularColor = material.haveSpecularTexture ? texture(material.specularTexture, fragTexCoord).rgb : material.specularColor;
-    vec3 emissiveColor = pow(material.haveEmissiveTexture ? texture(material.emissiveTexture, fragTexCoord).rgb : material.emissiveColor, vec3(gamma));
+    vec3 emissiveColor = material.haveEmissiveTexture ? texture(material.emissiveTexture, fragTexCoord).rgb : srgbToLinear(material.emissiveColor);
 
     // Lighting.
     vec3 ambient  = light.ambient  * ambientColor;
@@ -151,9 +163,7 @@ void main() {
     // Opacity (from the opacity map when available).
     float opacity = material.haveOpacityTexture ? texture(material.opacityTexture, fragTexCoord).r : material.opacity;
 
-    // Gamma correction.
-    vec3 gammaCorrected = pow(lighting, vec3(1.0 / gamma));
-
-    outColor = vec4(gammaCorrected, opacity);
+    // Linear out: GL_FRAMEBUFFER_SRGB is on, the GPU does the sRGB encoding.
+    outColor = vec4(lighting, opacity);
 
 }
