@@ -27,6 +27,9 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
+
+#include <vector>
 
 
 //*****************************************************************************/
@@ -51,6 +54,21 @@ namespace ogl {
     float cellSize;
 
     std::vector<GLuint> indices;
+
+    // Modalita' "intervallo", alternativa a rows/cols/cellSize: le linee stanno
+    // ai multipli di 'rangeStep' dentro il rettangolo [rangeXMin, rangeXMax] x
+    // [rangeZMin, rangeZMax], piu' il bordo del rettangolo. Cosi' la griglia
+    // copre esattamente un'area data e le sue linee cadono sugli stessi valori
+    // dei tick di un glPlot, invece di partire dal centro con celle intere.
+    // Vedi initRange()
+    bool  useRange = false;
+    float rangeXMin = 0.0f, rangeXMax = 1.0f;
+    float rangeZMin = 0.0f, rangeZMax = 1.0f;
+    float rangeStep = 1.0f;
+
+    // tetto alle linee per direzione, come i tick di glPlot: un passo minuscolo
+    // non deve generare milioni di segmenti
+    static constexpr int maxLinesPerAxis = 10000;
     
   public:
     
@@ -95,6 +113,44 @@ namespace ogl {
 
     }
    
+    //****************************************************************************/
+    // initRange() - griglia sul piano XZ (a y = 0, si sposta con translate())
+    // con le linee ai multipli di 'step' dentro [xMin, xMax] x [zMin, zMax] e il
+    // bordo del rettangolo. La init() compila lo shader, quindi va fatta una
+    // volta sola: per cambiare l'area o il passo dopo si usa setRange()
+    //****************************************************************************/
+    void initRange(float _xMin, float _xMax, float _zMin, float _zMax, float _step, const glm::vec3 & _color = glm::vec3(0.0)) {
+
+      DEBUG_LOG("glGrid::initRange(" + name + ")");
+
+      shader.setName(name);
+
+      shader.initLine();
+
+      color = _color;
+
+      isInited = true;
+
+      setRange(_xMin, _xMax, _zMin, _zMax, _step);
+
+    }
+
+    //****************************************************************************/
+    // setRange() - cambia area e passo di una griglia in modalita' intervallo,
+    // senza toccare gli shader. Un passo non positivo lascia solo il bordo
+    //****************************************************************************/
+    void setRange(float _xMin, float _xMax, float _zMin, float _zMax, float _step) {
+
+      useRange = true;
+
+      rangeXMin = _xMin; rangeXMax = _xMax;
+      rangeZMin = _zMin; rangeZMax = _zMax;
+      rangeStep = _step;
+
+      isToUpdateInGpu = true;
+
+    }
+
     //****************************************************************************/
     // render()
     //****************************************************************************/
@@ -147,27 +203,69 @@ namespace ogl {
 
       indices.clear();
 
-      float halfWidth  = (cols * cellSize) * 0.5f;
-      float halfHeight = (rows * cellSize) * 0.5f;
-
       std::vector<glm::vec3> vertices;
 
-      // Linee verticali
-      for(int i = 0; i <= cols; ++i) {
-          float x = -halfWidth + i * cellSize;
-          vertices.push_back(glm::vec3(x, 0.0f, -halfHeight));
-          vertices.push_back(glm::vec3(x, 0.0f,  halfHeight));
-          indices.push_back((GLuint)vertices.size() - 2);
-          indices.push_back((GLuint)vertices.size() - 1);
-      }
+      auto addLine = [&](const glm::vec3 & a, const glm::vec3 & b) {
+        vertices.push_back(a);
+        vertices.push_back(b);
+        indices.push_back((GLuint)vertices.size() - 2);
+        indices.push_back((GLuint)vertices.size() - 1);
+      };
 
-      // Linee orizzontali
-      for(int j = 0; j <= rows; ++j) {
+      if(useRange) {
+
+        // il bordo del rettangolo
+        addLine(glm::vec3(rangeXMin, 0.0f, rangeZMin), glm::vec3(rangeXMax, 0.0f, rangeZMin));
+        addLine(glm::vec3(rangeXMin, 0.0f, rangeZMax), glm::vec3(rangeXMax, 0.0f, rangeZMax));
+        addLine(glm::vec3(rangeXMin, 0.0f, rangeZMin), glm::vec3(rangeXMin, 0.0f, rangeZMax));
+        addLine(glm::vec3(rangeXMax, 0.0f, rangeZMin), glm::vec3(rangeXMax, 0.0f, rangeZMax));
+
+        // le linee interne, ai multipli del passo. Il confronto e' negato per
+        // scartare anche i NaN. Si conta con un intero e non accumulando un
+        // float, che a molte linee deriverebbe
+        if(rangeStep > 0.0f) {
+
+          const float epsilon = 1e-5f * rangeStep;
+
+          // parallele a z, a x costante
+          if((rangeXMax - rangeXMin) / rangeStep <= (float) maxLinesPerAxis) {
+            for(long k = (long) std::ceil(rangeXMin / rangeStep); ; ++k) {
+              float x = (float) k * rangeStep;
+              if(x > rangeXMax + epsilon) break;
+              if(x <= rangeXMin + epsilon || x >= rangeXMax - epsilon) continue;   // sono gia' il bordo
+              addLine(glm::vec3(x, 0.0f, rangeZMin), glm::vec3(x, 0.0f, rangeZMax));
+            }
+          }
+
+          // parallele a x, a z costante
+          if((rangeZMax - rangeZMin) / rangeStep <= (float) maxLinesPerAxis) {
+            for(long k = (long) std::ceil(rangeZMin / rangeStep); ; ++k) {
+              float z = (float) k * rangeStep;
+              if(z > rangeZMax + epsilon) break;
+              if(z <= rangeZMin + epsilon || z >= rangeZMax - epsilon) continue;
+              addLine(glm::vec3(rangeXMin, 0.0f, z), glm::vec3(rangeXMax, 0.0f, z));
+            }
+          }
+
+        }
+
+      } else {
+
+        float halfWidth  = (cols * cellSize) * 0.5f;
+        float halfHeight = (rows * cellSize) * 0.5f;
+
+        // Linee verticali
+        for(int i = 0; i <= cols; ++i) {
+          float x = -halfWidth + i * cellSize;
+          addLine(glm::vec3(x, 0.0f, -halfHeight), glm::vec3(x, 0.0f, halfHeight));
+        }
+
+        // Linee orizzontali
+        for(int j = 0; j <= rows; ++j) {
           float z = -halfHeight + j * cellSize;
-          vertices.push_back(glm::vec3(-halfWidth, 0, z));
-          vertices.push_back(glm::vec3( halfWidth, 0, z));
-          indices.push_back((GLuint)vertices.size() - 2);
-          indices.push_back((GLuint)vertices.size() - 1);
+          addLine(glm::vec3(-halfWidth, 0.0f, z), glm::vec3(halfWidth, 0.0f, z));
+        }
+
       }
 
       glGenVertexArrays(1, &vao);

@@ -73,10 +73,19 @@ namespace ogl {
     inline float getShininess()        const { return shininess;        }
     inline float getSpecularStrength() const { return specularStrength; }
 
+    //****************************************************************************/
+    // setUnlit() - draw the shape with its own color and no lighting at all, so
+    // that it reads exactly as the given color from any side and with any light
+    // (white comes out as full white). Only the SOLID style is affected.
+    //****************************************************************************/
+    inline void setUnlit(bool _unlit) { unlit = _unlit; }
+    inline bool isUnlit() const { return unlit; }
+
   protected:
 
     float shininess        = 32.0f;
     float specularStrength = 1.0f;
+    bool  unlit            = false;
 
   }; /* class glShape */
 

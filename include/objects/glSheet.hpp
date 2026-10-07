@@ -42,27 +42,32 @@ namespace ogl {
   // Open half cylinder of axis Y: a curved sheet, the lateral surface of half a
   // cylinder with no caps and no lid. Supports SOLID and WIREFRAME styles.
   //
-  // Geometry, with 'radius' R and 'height' H:
+  // The cross section is a half ELLIPSE: 'radius' is its semi-axis along X (half
+  // the chord between the two open edges) and 'depth' the one along Z (how far
+  // the ridge is from the chord). With depth equal to the radius, which is the
+  // default, it is the half circle of a true half cylinder.
+  //
+  // Geometry, with 'radius' R, 'depth' D and 'height' H:
   //
   //   - the axis is Y, the top edge lies at y = 0 and the bottom one at y = -H,
   //     so the sheet develops downwards like the other landmark shapes
-  //   - the arc runs from the open edge (+R, y, 0) to the opposite one
-  //     (-R, y, 0) passing through the ridge (0, y, +R): the chord between the
+  //   - the arc runs from the open edge (-R, y, 0) to the opposite one
+  //     (+R, y, 0) passing through the ridge (0, y, -D): the chord between the
   //     two open edges lies on X, its midpoint is the origin, and the concave
-  //     side faces -Z
+  //     side faces +Z, so the sheet occupies z from -D to 0
   //   - the surface is centred on the origin in XZ; move it with translate()
   //
   // Unlike a strip of independent glQuads, the arc is a single indexed mesh in
   // one VAO drawn with one call, and the normals are the analytic ones of the
-  // cylinder, (-cos a, 0, -sin a) at the angle a, so they are per vertex and
+  // ellipse, proportional to (-cos a / R, 0, -sin a / D) at the angle a (the
+  // gradient of x^2/R^2 + z^2/D^2), so they are per vertex and
   // the shading comes out smooth instead of faceted. 'segments' therefore costs
   // vertices only, not draw calls or shader programs.
   //
   // The normals point towards the axis, i.e. towards the concave side, which is
   // the one being observed. Back face culling is off by default so the sheet is
-  // rendered from both sides (see setCullFaceEnabled); note that solid.fs does
-  // not flip the normal on back faces, so the convex side only receives the
-  // ambient term.
+  // rendered from both sides (see setCullFaceEnabled). solid.fs flips the normal
+  // when it points away from the eye, so the convex side is lit properly too.
   //****************************************************************************/
   class glSheet : public glShape {
 
@@ -71,7 +76,8 @@ namespace ogl {
     GLuint vao = 0;
     GLuint vbo[3] = {0, 0, 0};   // positions, normals, indices
 
-    float radius = 1.0f;
+    float radius = 1.0f;   // semi-axis along X
+    float depth  = 1.0f;   // semi-axis along Z
     float height = 1.0f;
 
     int segments = 32;
@@ -90,11 +96,11 @@ namespace ogl {
     //****************************************************************************/
     // glSheet()
     //****************************************************************************/
-    glSheet(float _radius, float _height, int _segments = 32, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
+    glSheet(float _radius, float _height, int _segments = 32, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "", float _depth = -1.0f) {
 
       name = _name;
 
-      init(_radius, _height, _segments, _style, _color);
+      init(_radius, _height, _segments, _style, _color, _depth);
 
     }
 
@@ -109,7 +115,10 @@ namespace ogl {
     //****************************************************************************/
     // init()
     //****************************************************************************/
-    void init(float _radius, float _height, int _segments = 32, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f)) {
+    // _depth is the semi-axis along Z; a value that is not positive (the
+    // default) means "same as the radius", i.e. a half circle. It comes last so
+    // that every existing call keeps its meaning
+    void init(float _radius, float _height, int _segments = 32, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f), float _depth = -1.0f) {
 
       DEBUG_LOG("glSheet::init(" + name + ")");
 
@@ -127,6 +136,7 @@ namespace ogl {
       }
 
       radius = _radius;
+      depth  = (_depth > 0.0f) ? _depth : _radius;
       height = _height;
 
       // below three segments the arc is not a curve any more
@@ -167,6 +177,7 @@ namespace ogl {
         else { glLight().setInShader(shader, camera.getView()); shader.setUniform("useShadow", false); }
         shader.setUniform("shininess",        shininess);
         shader.setUniform("specularStrength", specularStrength);
+        shader.setUniform("unlit",            unlit);
       }
 
       glBindVertexArray(vao);
@@ -239,6 +250,7 @@ namespace ogl {
     // interrogation
     //****************************************************************************/
     float getRadius()   const { return radius;   }
+    float getDepth()    const { return depth;    }
     float getHeight()   const { return height;   }
     int   getSegments() const { return segments; }
 
@@ -276,15 +288,24 @@ namespace ogl {
         // 2k is the top one (y = 0) and 2k+1 the bottom one (y = -height).
         for(int k=0; k<=segments; ++k) {
 
-          double angle = M_PI * (double) k / (double) segments;
+          // The half turn is the one from pi to 2 pi, i.e. the arc rotated by
+          // 180 degrees about Y with respect to the one from 0 to pi: (x, z)
+          // becomes (-x, -z), so the ridge lies on -Z and the concave side
+          // faces +Z. It is a proper rotation, so the winding below and the
+          // analytic normal keep their meaning unchanged.
+          double angle = M_PI + M_PI * (double) k / (double) segments;
 
           float x = radius * (float) std::cos(angle);
-          float z = radius * (float) std::sin(angle);
+          float z = depth  * (float) std::sin(angle);
 
-          // Analytic normal of the cylinder: the outward radial direction is
-          // (cos a, 0, sin a), so the inward one is its opposite. No cross
-          // product, hence no discontinuity between the segments.
-          glm::vec3 normal(-(float) std::cos(angle), 0.0f, -(float) std::sin(angle));
+          // Analytic normal. The outward one is the gradient of the implicit
+          // equation of the ellipse, (x/R^2, 0, z/D^2), which is proportional to
+          // (cos a / R, 0, sin a / D); the inward one is its opposite. With
+          // R = D it reduces to (-cos a, 0, -sin a) of the half circle. A
+          // surface normal is NOT the position vector for an ellipse, same
+          // point as in glEllipse. No cross product, hence no discontinuity
+          // between the segments.
+          glm::vec3 normal = glm::normalize(glm::vec3(-(float) std::cos(angle) / radius, 0.0f, -(float) std::sin(angle) / depth));
 
           positions.push_back(glm::vec3(x,  0.0f,    z));
           normals.push_back(normal);

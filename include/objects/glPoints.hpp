@@ -206,15 +206,19 @@ namespace ogl {
       //glEnable(GL_CULL_FACE);
       //glCullFace(GL_BACK);
 
-      // points.fs outputs a premultiplied color (rgb*alpha, alpha) to antialias
-      // the disc edge; without blending the rim pixels turn dark instead of
-      // fading out. Premultiplied blend keeps interior pixels (alpha=1) exact.
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+      // points.fs antialiases the disc edge through its alpha, which here is
+      // turned into MSAA coverage instead of being blended. Blending the rim
+      // made the picture depend on the draw order: the impostors write their
+      // spherical depth, so a translucent rim of a point in front, drawn first,
+      // stops a point behind it from showing under the rim and the background
+      // shows through instead (a white ring on a white background). Coverage
+      // and depth are resolved per sample, so the order does not matter.
+      glDisable(GL_BLEND);
+      glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 
       glDrawArrays(GL_POINTS, from, count);
 
-      glDisable(GL_BLEND);
+      glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
       glDisable(GL_PROGRAM_POINT_SIZE);
 
       glBindVertexArray(0);

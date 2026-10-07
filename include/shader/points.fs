@@ -6,6 +6,18 @@
 // Lighting uses the same model as solid.fs (scene light + head-light fallback),
 // so glPoints now reacts to setLight() instead of a hard-coded light.
 //
+// The disc edge is antialiased with ALPHA TO COVERAGE, not with blending: the
+// alpha computed below is turned by the hardware into a number of covered MSAA
+// samples (glPoints enables GL_SAMPLE_ALPHA_TO_COVERAGE and turns blending
+// off). This matters because the impostors write their real spherical depth
+// and are drawn in index order, not depth order. A blended translucent rim
+// writes depth too, so when a point in front is drawn before the one behind it
+// the rim hides the point behind and the background shows through instead: a
+// ring around the front point, white on a white background. Coverage is
+// resolved per sample, with the depth per sample, so the result no longer
+// depends on the draw order. On a framebuffer without multisampling the alpha
+// has no effect and the edge is simply hard, which is still order independent.
+//
 
 struct Light {
     vec3 direction;  // directional light (view space); zero means "not used"
@@ -117,6 +129,7 @@ void main() {
   float delta = fwidth(r2);
   float alpha = 1.0 - smoothstep(1.0 - delta, 1.0 + delta, r2);
 
-  outColor = vec4(outRGB, 1.0) * alpha;
+  // NOT premultiplied: blending is off and the alpha drives the coverage
+  outColor = vec4(outRGB, alpha);
 
 }

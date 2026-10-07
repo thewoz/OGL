@@ -97,6 +97,7 @@
 #include <ogl/objects/glEllipse.hpp>
 #include <ogl/objects/glSphere.hpp>
 #include <ogl/objects/glGrid.hpp>
+#include <ogl/objects/glInfiniteGrid.hpp>
 #include <ogl/objects/glBox.hpp>
 #include <ogl/objects/glCuboid.hpp>
 #include <ogl/objects/glQuad.hpp>

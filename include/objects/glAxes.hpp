@@ -200,6 +200,20 @@ namespace ogl {
 
       }
 
+      //****************************************************************************/
+      // setLabelColor() - color of the three axis labels, white by default. The
+      // labels are separate glPrint3D objects with their own color, which init()
+      // resets, so this has to be called after init(). The axis lines keep their
+      // red, green and blue: those identify the axes and read on any background
+      //****************************************************************************/
+      void setLabelColor(const glm::vec3 & _color) {
+
+        xAxeLabel.setColor(_color);
+        yAxeLabel.setColor(_color);
+        zAxeLabel.setColor(_color);
+
+      }
+
     
     private:
       

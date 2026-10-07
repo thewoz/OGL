@@ -75,6 +75,16 @@ namespace ogl {
     AxisRange zRange;
     glm::vec3 axisOrigin = glm::vec3(0.0f);
 
+    // Dove si incrociano gli assi. L'origine (axisOrigin) fa due cose: dice dove
+    // sta range.min di ciascun asse, cioe' da dove partono i valori, e di default
+    // anche dove gli assi si incrociano. Con un incrocio esplicito le due cose si
+    // separano: gli assi si incrociano li' e i valori restano dove stanno. Serve
+    // per mettere, per esempio, gli assi Y e Z all'estremo massimo di X senza
+    // spostare l'asse X, che altrimenti partirebbe dall'incrocio e uscirebbe dal
+    // grafico. Vedi setAxisCrossing()
+    glm::vec3 axisCrossing = glm::vec3(0.0f);
+    bool      haveCrossing = false;
+
     bool useManualRange = true;
 
     bool xLog = false;
@@ -86,12 +96,16 @@ namespace ogl {
     bool drawAxisLabels = true;
     bool drawTickLabels = true;
 
-    // se true i tick vengono disegnati solo verso l'interno (direzione positiva
-    // rispetto all'origine degli assi) invece che simmetrici sui due lati.
+    // se true i tick vengono disegnati solo verso l'interno invece che simmetrici
+    // sui due lati. "Interno" e' verso il centro del grafico: con l'origine
+    // degli assi all'estremo minimo e' la direzione positiva (e' sempre stato
+    // cosi'), con l'origine all'estremo massimo si inverte da sola, vedi
+    // tickSign(), altrimenti i tick uscirebbero dal grafico.
     bool tickInward = false;
 
-    float majorTickStep = 1.0f;
-    float minorTickStep = 0.5f;
+    // un passo per asse (0 = x, 1 = y, 2 = z)
+    float majorTickStep[3] = { 1.0f, 1.0f, 1.0f };
+    float minorTickStep[3] = { 0.5f, 0.5f, 0.5f };
 
     // Hard limit on the ticks generated per axis (see buildAxisLinearTicks).
     static constexpr int maxTicksPerAxis = 10000;
@@ -106,6 +120,14 @@ namespace ogl {
     // i tick possono essere piccoli senza spostare/affollare le scritte.
     float axisLabelOffset = 0.0f;
     float tickLabelOffset = 0.0f;
+
+    // da che parte dell'asse stanno le scritte, per ciascun asse: la direzione
+    // in cui si spostano dalla retta dell'asse, di axisLabelOffset per il nome e
+    // di tickLabelOffset per i valori. I default sono quelli storici (X: nome in
+    // -Z e valori in -Y; Y: -X; Z: nome in -X e valori in -Y). Si cambiano con
+    // setLabelSide()
+    glm::vec3 axisLabelDirection[3] = { glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f) };
+    glm::vec3 tickLabelDirection[3] = { glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f) };
 
     std::string xAxisLabel = "X";
     std::string yAxisLabel = "Y";
@@ -206,16 +228,30 @@ namespace ogl {
     //****************************************************************************/
     // setTickSteps()
     //****************************************************************************/
+    // lo stesso passo per tutti e tre gli assi; valori <= 0 lasciano quello che c'e'
     void setTickSteps(float _majorTickStep, float _minorTickStep = -1.0f) {
-      majorTickStep = (_majorTickStep > 0.0f) ? _majorTickStep : majorTickStep;
-      if(_minorTickStep > 0.0f) minorTickStep = _minorTickStep;
-      isToUpdateInGpu = true;
+      for(int axis=0; axis<3; ++axis) setAxisTickSteps(axis, _majorTickStep, _minorTickStep);
     }
+
+    //****************************************************************************/
+    // setAxisTickSteps() - il passo di un solo asse (0 = x, 1 = y, 2 = z)
+    //****************************************************************************/
+    void setAxisTickSteps(int axis, float _majorTickStep, float _minorTickStep = -1.0f) {
+      if(axis < 0 || axis > 2) return;
+      // si ricostruisce solo se cambia qualcosa: chi la chiama a ogni frame (un
+      // pannello) non deve rifare la geometria a ogni frame
+      if(_majorTickStep > 0.0f && _majorTickStep != majorTickStep[axis]) { majorTickStep[axis] = _majorTickStep; isToUpdateInGpu = true; }
+      if(_minorTickStep > 0.0f && _minorTickStep != minorTickStep[axis]) { minorTickStep[axis] = _minorTickStep; isToUpdateInGpu = true; }
+    }
+
+    float getMajorTickStep(int axis) const { return (axis >= 0 && axis < 3) ? majorTickStep[axis] : 0.0f; }
+    float getMinorTickStep(int axis) const { return (axis >= 0 && axis < 3) ? minorTickStep[axis] : 0.0f; }
 
     //****************************************************************************/
     // setTickVisibility()
     //****************************************************************************/
     void setTickVisibility(bool _drawMajorTicks, bool _drawMinorTicks) {
+      if(_drawMajorTicks == drawMajorTicks && _drawMinorTicks == drawMinorTicks) return;   // vedi setAxisTickSteps()
       drawMajorTicks = _drawMajorTicks;
       drawMinorTicks = _drawMinorTicks;
       isToUpdateInGpu = true;
@@ -241,8 +277,11 @@ namespace ogl {
     // setTickSize()
     //****************************************************************************/
     void setTickSize(float _majorTickSize, float _minorTickSize) {
-      majorTickSize = (_majorTickSize > 0.0f) ? _majorTickSize : majorTickSize;
-      minorTickSize = (_minorTickSize > 0.0f) ? _minorTickSize : minorTickSize;
+      float major = (_majorTickSize > 0.0f) ? _majorTickSize : majorTickSize;
+      float minor = (_minorTickSize > 0.0f) ? _minorTickSize : minorTickSize;
+      if(major == majorTickSize && minor == minorTickSize) return;   // vedi setAxisTickSteps()
+      majorTickSize = major;
+      minorTickSize = minor;
       isToUpdateInGpu = true;
     }
 
@@ -257,6 +296,26 @@ namespace ogl {
     void setLabelScale(float _axisLabelScale, float _tickLabelScale = -1.0f) {
       axisLabelScale = (_axisLabelScale > 0.0f) ? _axisLabelScale : axisLabelScale;
       if(_tickLabelScale > 0.0f) tickLabelScale = _tickLabelScale;
+    }
+
+    //****************************************************************************/
+    // setLabelSide() - da che parte dell'asse 'axis' (0 = X, 1 = Y, 2 = Z) stanno
+    // le sue scritte, sia il nome sia i valori: la direzione in cui si spostano
+    // dalla retta dell'asse. Una direzione nulla o un asse fuori da 0..2 non
+    // fanno niente. Non serve che sia di lunghezza 1: la distanza la decidono
+    // gli offset di setLabelOffsets()
+    //****************************************************************************/
+    void setLabelSide(int axis, const glm::vec3 & direction) {
+
+      if(axis < 0 || axis > 2) return;
+
+      if(!(glm::length(direction) > 0.0f)) return;
+
+      glm::vec3 unit = glm::normalize(direction);
+
+      axisLabelDirection[axis] = unit;
+      tickLabelDirection[axis] = unit;
+
     }
 
     //****************************************************************************/
@@ -301,6 +360,24 @@ namespace ogl {
     //****************************************************************************/
     void setAxisOrigin(const glm::vec3 & _axisOrigin) {
       axisOrigin = _axisOrigin;
+      isToUpdateInGpu = true;
+    }
+
+    //****************************************************************************/
+    // setAxisCrossing() - il punto in cui si incrociano gli assi, se diverso
+    // dall'origine. L'asse X corre lungo la retta (y, z) dell'incrocio, e cosi'
+    // via per gli altri; i valori di ogni asse partono comunque dall'origine, cioe'
+    // range.min sta a axisOrigin. Senza questa chiamata, o dopo
+    // clearAxisCrossing(), gli assi si incrociano nell'origine come sempre
+    //****************************************************************************/
+    void setAxisCrossing(const glm::vec3 & _axisCrossing) {
+      axisCrossing = _axisCrossing;
+      haveCrossing = true;
+      isToUpdateInGpu = true;
+    }
+
+    void clearAxisCrossing() {
+      haveCrossing = false;
       isToUpdateInGpu = true;
     }
 
@@ -365,32 +442,36 @@ namespace ogl {
     //****************************************************************************/
     void buildAxisLinearTicks(int axis, const AxisRange & range, float step, float tickSize, const glm::vec3 & color) {
 
+      const glm::vec3 cr = crossing();   // dove si incrociano gli assi
+
       if(step <= 0.0f) return;
 
-      const float eps = 1e-6f;
-      float start = std::ceil(range.min / step) * step;
+      long first, last;
+      tickIndexRange(range, step, first, last);
 
       // Cap the tick count: a tiny step over a huge range would otherwise
       // generate an unbounded amount of geometry and freeze the application.
-      if((range.max - start) / step > (float)maxTicksPerAxis) {
+      if(last - first > (long)maxTicksPerAxis) {
         fprintf(stderr, "WARNING [glPlot]: tick step %g too small for range [%g, %g], skipping ticks (max %d per axis)\n",
                 step, range.min, range.max, maxTicksPerAxis);
         return;
       }
 
-      for(float v = start; v <= range.max + eps; v += step) {
+      for(long k = first; k <= last; ++k) {
 
-        if(step < majorTickStep && isOnMajorTick(v, range, majorTickStep)) continue;
+        float v = tickValue(k, step);
+
+        if(step < majorTickStep[axis] && isOnMajorTick(v, range, majorTickStep[axis])) continue;
 
         float axisValue = mapAxisValue(range, v, axisOriginByAxis(axis), false);
 
         // tick solo verso l'interno (t0=0) oppure simmetrico (t0=-tickSize)
         float t0 = tickInward ? 0.0f : -tickSize;
-        float t1 = tickSize;
+        float t1 = tickInward ? tickSize * tickSign(axis) : tickSize;
 
-        if(axis == 0) addSegment(glm::vec3(axisValue, axisOrigin.y + t0, axisOrigin.z), glm::vec3(axisValue, axisOrigin.y + t1, axisOrigin.z), color);
-        if(axis == 1) addSegment(glm::vec3(axisOrigin.x + t0, axisValue, axisOrigin.z), glm::vec3(axisOrigin.x + t1, axisValue, axisOrigin.z), color);
-        if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + t0, axisValue), glm::vec3(axisOrigin.x, axisOrigin.y + t1, axisValue), color);
+        if(axis == 0) addSegment(glm::vec3(axisValue, cr.y + t0, cr.z), glm::vec3(axisValue, cr.y + t1, cr.z), color);
+        if(axis == 1) addSegment(glm::vec3(cr.x + t0, axisValue, cr.z), glm::vec3(cr.x + t1, axisValue, cr.z), color);
+        if(axis == 2) addSegment(glm::vec3(cr.x, cr.y + t0, axisValue), glm::vec3(cr.x, cr.y + t1, axisValue), color);
       }
       
     }
@@ -399,6 +480,8 @@ namespace ogl {
     // buildAxisLogTicks()
     //****************************************************************************/
     void buildAxisLogTicks(int axis, const AxisRange & range, float tickSize, const glm::vec3 & color, bool addMinor) {
+
+      const glm::vec3 cr = crossing();   // dove si incrociano gli assi
 
       if(range.min <= 0.0f || range.max <= 0.0f) return;
 
@@ -410,28 +493,28 @@ namespace ogl {
         float major = std::pow(10.0f, (float)e);
 
         float t0 = tickInward ? 0.0f : -tickSize;
-        float t1 = tickSize;
+        float t1 = tickInward ? tickSize * tickSign(axis) : tickSize;
 
         if(major >= range.min && major <= range.max) {
           float pos = mapAxisValue(range, major, axisOriginByAxis(axis), true);
-          if(axis == 0) addSegment(glm::vec3(pos, axisOrigin.y + t0, axisOrigin.z), glm::vec3(pos, axisOrigin.y + t1, axisOrigin.z), color);
-          if(axis == 1) addSegment(glm::vec3(axisOrigin.x + t0, pos, axisOrigin.z), glm::vec3(axisOrigin.x + t1, pos, axisOrigin.z), color);
-          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + t0, pos), glm::vec3(axisOrigin.x, axisOrigin.y + t1, pos), color);
+          if(axis == 0) addSegment(glm::vec3(pos, cr.y + t0, cr.z), glm::vec3(pos, cr.y + t1, cr.z), color);
+          if(axis == 1) addSegment(glm::vec3(cr.x + t0, pos, cr.z), glm::vec3(cr.x + t1, pos, cr.z), color);
+          if(axis == 2) addSegment(glm::vec3(cr.x, cr.y + t0, pos), glm::vec3(cr.x, cr.y + t1, pos), color);
         }
 
         if(!addMinor) continue;
 
         float m0 = tickInward ? 0.0f : -minorTickSize;
-        float m1 = minorTickSize;
+        float m1 = tickInward ? minorTickSize * tickSign(axis) : minorTickSize;
 
         for(int i = 2; i < 10; ++i) {
           float minor = major * (float)i;
           if(minor >= range.max) break;
           if(minor < range.min) continue;
           float pos = mapAxisValue(range, minor, axisOriginByAxis(axis), true);
-          if(axis == 0) addSegment(glm::vec3(pos, axisOrigin.y + m0, axisOrigin.z), glm::vec3(pos, axisOrigin.y + m1, axisOrigin.z), minorTickColor);
-          if(axis == 1) addSegment(glm::vec3(axisOrigin.x + m0, pos, axisOrigin.z), glm::vec3(axisOrigin.x + m1, pos, axisOrigin.z), minorTickColor);
-          if(axis == 2) addSegment(glm::vec3(axisOrigin.x, axisOrigin.y + m0, pos), glm::vec3(axisOrigin.x, axisOrigin.y + m1, pos), minorTickColor);
+          if(axis == 0) addSegment(glm::vec3(pos, cr.y + m0, cr.z), glm::vec3(pos, cr.y + m1, cr.z), minorTickColor);
+          if(axis == 1) addSegment(glm::vec3(cr.x + m0, pos, cr.z), glm::vec3(cr.x + m1, pos, cr.z), minorTickColor);
+          if(axis == 2) addSegment(glm::vec3(cr.x, cr.y + m0, pos), glm::vec3(cr.x, cr.y + m1, pos), minorTickColor);
         }
       }
       
@@ -450,30 +533,34 @@ namespace ogl {
       AxisRange yDrawRange = getDrawRange(yRange, axisOrigin.y, yLog);
       AxisRange zDrawRange = getDrawRange(zRange, axisOrigin.z, zLog);
 
-      addSegment(glm::vec3(mapAxisValue(xRange, xDrawRange.min, axisOrigin.x, xLog), axisOrigin.y, axisOrigin.z), glm::vec3(mapAxisValue(xRange, xDrawRange.max, axisOrigin.x, xLog), axisOrigin.y, axisOrigin.z), axisColor);
-      addSegment(glm::vec3(axisOrigin.x, mapAxisValue(yRange, yDrawRange.min, axisOrigin.y, yLog), axisOrigin.z), glm::vec3(axisOrigin.x, mapAxisValue(yRange, yDrawRange.max, axisOrigin.y, yLog), axisOrigin.z), axisColor);
-      addSegment(glm::vec3(axisOrigin.x, axisOrigin.y, mapAxisValue(zRange, zDrawRange.min, axisOrigin.z, zLog)), glm::vec3(axisOrigin.x, axisOrigin.y, mapAxisValue(zRange, zDrawRange.max, axisOrigin.z, zLog)), axisColor);
+      // lungo l'asse i valori partono dall'origine; le altre due coordinate sono
+      // quelle dell'incrocio
+      const glm::vec3 cr = crossing();
+
+      addSegment(glm::vec3(mapAxisValue(xRange, xDrawRange.min, axisOrigin.x, xLog), cr.y, cr.z), glm::vec3(mapAxisValue(xRange, xDrawRange.max, axisOrigin.x, xLog), cr.y, cr.z), axisColor);
+      addSegment(glm::vec3(cr.x, mapAxisValue(yRange, yDrawRange.min, axisOrigin.y, yLog), cr.z), glm::vec3(cr.x, mapAxisValue(yRange, yDrawRange.max, axisOrigin.y, yLog), cr.z), axisColor);
+      addSegment(glm::vec3(cr.x, cr.y, mapAxisValue(zRange, zDrawRange.min, axisOrigin.z, zLog)), glm::vec3(cr.x, cr.y, mapAxisValue(zRange, zDrawRange.max, axisOrigin.z, zLog)), axisColor);
 
       if(drawMajorTicks) {
         if(xLog) buildAxisLogTicks(0, xRange, majorTickSize, majorTickColor, false);
-        else     buildAxisLinearTicks(0, xRange, majorTickStep, majorTickSize, majorTickColor);
+        else     buildAxisLinearTicks(0, xRange, majorTickStep[0], majorTickSize, majorTickColor);
 
         if(yLog) buildAxisLogTicks(1, yRange, majorTickSize, majorTickColor, false);
-        else     buildAxisLinearTicks(1, yRange, majorTickStep, majorTickSize, majorTickColor);
+        else     buildAxisLinearTicks(1, yRange, majorTickStep[1], majorTickSize, majorTickColor);
 
         if(zLog) buildAxisLogTicks(2, zRange, majorTickSize, majorTickColor, false);
-        else     buildAxisLinearTicks(2, zRange, majorTickStep, majorTickSize, majorTickColor);
+        else     buildAxisLinearTicks(2, zRange, majorTickStep[2], majorTickSize, majorTickColor);
       }
 
       if(drawMinorTicks) {
         if(xLog) buildAxisLogTicks(0, xRange, majorTickSize, minorTickColor, true);
-        else     buildAxisLinearTicks(0, xRange, minorTickStep, minorTickSize, minorTickColor);
+        else     buildAxisLinearTicks(0, xRange, minorTickStep[0], minorTickSize, minorTickColor);
 
         if(yLog) buildAxisLogTicks(1, yRange, majorTickSize, minorTickColor, true);
-        else     buildAxisLinearTicks(1, yRange, minorTickStep, minorTickSize, minorTickColor);
+        else     buildAxisLinearTicks(1, yRange, minorTickStep[1], minorTickSize, minorTickColor);
 
         if(zLog) buildAxisLogTicks(2, zRange, majorTickSize, minorTickColor, true);
-        else     buildAxisLinearTicks(2, zRange, minorTickStep, minorTickSize, minorTickColor);
+        else     buildAxisLinearTicks(2, zRange, minorTickStep[2], minorTickSize, minorTickColor);
       }
       
     }
@@ -518,25 +605,26 @@ namespace ogl {
         float yMid = 0.5f * (yDrawRange.min + yDrawRange.max);
         float zMid = 0.5f * (zDrawRange.min + zDrawRange.max);
 
-        // X: offset in -Z → rimane sul piano XY (y=axisOrigin.y)
-        axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(mapAxisValue(xRange, xMid, axisOrigin.x, xLog), axisOrigin.y, axisOrigin.z - xOff), axisColor, axisLabelScale);
-        // Y: offset in -X → rimane sul piano XY (z=axisOrigin.z)
-        axisLabelPrinter.render(camera, yAxisLabel, glm::vec3(axisOrigin.x - yOff, mapAxisValue(yRange, yMid, axisOrigin.y, yLog), axisOrigin.z), axisColor, axisLabelScale);
-        // Z: offset in -X → rimane sul piano XZ (y=axisOrigin.y)
-        axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(axisOrigin.x - zOff, axisOrigin.y, mapAxisValue(zRange, zMid, axisOrigin.z, zLog)), axisColor, axisLabelScale);
+        // ciascun nome sta sulla retta del suo asse, spostato nella direzione
+        // scelta per quell'asse (vedi setLabelSide)
+        const glm::vec3 cr = crossing();
+
+        axisLabelPrinter.render(camera, xAxisLabel, glm::vec3(mapAxisValue(xRange, xMid, axisOrigin.x, xLog), cr.y, cr.z) + axisLabelDirection[0] * xOff, axisColor, axisLabelScale);
+        axisLabelPrinter.render(camera, yAxisLabel, glm::vec3(cr.x, mapAxisValue(yRange, yMid, axisOrigin.y, yLog), cr.z) + axisLabelDirection[1] * yOff, axisColor, axisLabelScale);
+        axisLabelPrinter.render(camera, zAxisLabel, glm::vec3(cr.x, cr.y, mapAxisValue(zRange, zMid, axisOrigin.z, zLog)) + axisLabelDirection[2] * zOff, axisColor, axisLabelScale);
         
       }
 
       if(drawTickLabels && drawMajorTicks) {
         
         if(xLog) renderAxisLogTickLabels(camera, 0, xRange);
-        else renderAxisLinearTickLabels(camera, 0, xRange, majorTickStep);
+        else renderAxisLinearTickLabels(camera, 0, xRange, majorTickStep[0]);
 
         if(yLog) renderAxisLogTickLabels(camera, 1, yRange);
-        else renderAxisLinearTickLabels(camera, 1, yRange, majorTickStep);
+        else renderAxisLinearTickLabels(camera, 1, yRange, majorTickStep[1]);
 
         if(zLog) renderAxisLogTickLabels(camera, 2, zRange);
-        else renderAxisLinearTickLabels(camera, 2, zRange, majorTickStep);
+        else renderAxisLinearTickLabels(camera, 2, zRange, majorTickStep[2]);
         
       }
       
@@ -547,22 +635,25 @@ namespace ogl {
     //****************************************************************************/
     void renderAxisLinearTickLabels(const glCamera & camera, int axis, const AxisRange & range, float step) {
 
+      const glm::vec3 cr = crossing();   // dove si incrociano gli assi
+
       if(step <= 0.0f) return;
 
-      const float eps = 1e-6f;
-      float start = std::ceil(range.min / step) * step;
+      long first, last;
+      tickIndexRange(range, step, first, last);
       float off = resolvedTickLabelOffset();
 
       // Same cap as buildAxisLinearTicks (one draw call per label: even more
       // important to bound it here).
-      if((range.max - start) / step > (float)maxTicksPerAxis) return;
+      if(last - first > (long)maxTicksPerAxis) return;
 
-      for(float v = start; v <= range.max + eps; v += step) {
+      for(long k = first; k <= last; ++k) {
+        float v = tickValue(k, step);
         std::string label = formatTickValue(v);
         float axisValue = mapAxisValue(range, v, axisOriginByAxis(axis), false);
-        if(axis == 0) tickLabelPrinter.render(camera, label, glm::vec3(axisValue, axisOrigin.y - off, axisOrigin.z), majorTickColor, tickLabelScale);
-        if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x - off, axisValue, axisOrigin.z), majorTickColor, tickLabelScale);
-        if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x, axisOrigin.y - off, axisValue), majorTickColor, tickLabelScale);
+        if(axis == 0) tickLabelPrinter.render(camera, label, glm::vec3(axisValue, cr.y, cr.z) + tickLabelDirection[0] * off, majorTickColor, tickLabelScale);
+        if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(cr.x, axisValue, cr.z) + tickLabelDirection[1] * off, majorTickColor, tickLabelScale);
+        if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(cr.x, cr.y, axisValue) + tickLabelDirection[2] * off, majorTickColor, tickLabelScale);
       }
       
     }
@@ -571,6 +662,8 @@ namespace ogl {
     // renderAxisLogTickLabels()
     //****************************************************************************/
     void renderAxisLogTickLabels(const glCamera & camera, int axis, const AxisRange & range) {
+
+      const glm::vec3 cr = crossing();   // dove si incrociano gli assi
 
       if(range.min <= 0.0f || range.max <= 0.0f) return;
 
@@ -584,9 +677,9 @@ namespace ogl {
 
         std::string label = formatTickValue(major);
         float pos = mapAxisValue(range, major, axisOriginByAxis(axis), true);
-        if(axis == 0) tickLabelPrinter.render(camera, label, glm::vec3(pos, axisOrigin.y - off, axisOrigin.z), majorTickColor, tickLabelScale);
-        if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x - off, pos, axisOrigin.z), majorTickColor, tickLabelScale);
-        if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(axisOrigin.x, axisOrigin.y - off, pos), majorTickColor, tickLabelScale);
+        if(axis == 0) tickLabelPrinter.render(camera, label, glm::vec3(pos, cr.y, cr.z) + tickLabelDirection[0] * off, majorTickColor, tickLabelScale);
+        if(axis == 1) tickLabelPrinter.render(camera, label, glm::vec3(cr.x, pos, cr.z) + tickLabelDirection[1] * off, majorTickColor, tickLabelScale);
+        if(axis == 2) tickLabelPrinter.render(camera, label, glm::vec3(cr.x, cr.y, pos) + tickLabelDirection[2] * off, majorTickColor, tickLabelScale);
       }
       
     }
@@ -755,6 +848,32 @@ namespace ogl {
     //****************************************************************************/
     // axisOriginByAxis()
     //****************************************************************************/
+    // Il segno con cui i tick "interni" si allontanano dalla retta dell'asse:
+    // verso il centro del range dell'asse perpendicolare. I tick di X e di Z sono
+    // perpendicolari lungo Y, quelli di Y lungo X. Con l'origine all'estremo
+    // minimo, o al centro, e' +1: la direzione positiva di sempre
+    float tickSign(int axis) const {
+      if(axis == 1) return (crossing().x <= 0.5f * (xRange.min + xRange.max)) ? 1.0f : -1.0f;
+      return (crossing().y <= 0.5f * (yRange.min + yRange.max)) ? 1.0f : -1.0f;
+    }
+
+    //****************************************************************************/
+    // tickIndexRange() / tickValue() - i tick lineari sono i multipli interi del
+    // passo dentro il range. Si conta con un intero k e il valore e' k * step:
+    // sommando step a ogni giro l'errore si accumulava e lo zero usciva come
+    // 2.98e-08. La tolleranza e' relativa al passo, cosi' vale a ogni scala
+    //****************************************************************************/
+    static void tickIndexRange(const AxisRange & range, float step, long & first, long & last) {
+      const double eps = (double) step * 1e-4;
+      first = (long) std::ceil ((range.min - eps) / step);
+      last  = (long) std::floor((range.max + eps) / step);
+    }
+
+    static float tickValue(long k, float step) { return (float) ((double) k * step); }
+
+    // dove si incrociano gli assi: l'incrocio esplicito se c'e', altrimenti l'origine
+    glm::vec3 crossing() const { return haveCrossing ? axisCrossing : axisOrigin; }
+
     float axisOriginByAxis(int axis) const {
       if(axis == 1) return axisOrigin.y;
       if(axis == 2) return axisOrigin.z;

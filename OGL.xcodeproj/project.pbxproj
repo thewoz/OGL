@@ -42,6 +42,9 @@
 		3A3D08CB2F33B882008EAF80 /* wireframe.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = wireframe.vs; sourceTree = "<group>"; };
 		3A83B8882DBE9E9B00E0397A /* glQuad2D.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad2D.hpp; sourceTree = "<group>"; };
 		01E08255D54A8DD4BB559029 /* glSheet.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glSheet.hpp; sourceTree = "<group>"; };
+		01E08255D54A8DD4BB55902A /* glInfiniteGrid.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glInfiniteGrid.hpp; sourceTree = "<group>"; };
+		01E08255D54A8DD4BB55902B /* grid.fs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = grid.fs; sourceTree = "<group>"; };
+		01E08255D54A8DD4BB55902C /* grid.vs */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = grid.vs; sourceTree = "<group>"; };
 		3A8B011F2FF6909E007B8023 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		3AAB1A9F2FE74F9C00157213 /* glDraw.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glDraw.hpp; sourceTree = "<group>"; };
 		3AB7EB3C2DBE770C00A73EF1 /* glQuad.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = glQuad.hpp; sourceTree = "<group>"; };
@@ -137,6 +140,7 @@
 				3AC10E9D2DBE35F7000C540C /* glCuboid.hpp */,
 				3AC10E9E2DBE35F7000C540C /* glEllipse.hpp */,
 				3AC10E9F2DBE35F7000C540C /* glGrid.hpp */,
+				01E08255D54A8DD4BB55902A /* glInfiniteGrid.hpp */,
 				3AC10EA02DBE35F7000C540C /* glLine.hpp */,
 				3AC10EA12DBE35F7000C540C /* glLines.hpp */,
 				3A07EE142F6809E200D5D460 /* glPlot.hpp */,
@@ -155,6 +159,8 @@
 		3AC10EB32DBE35F7000C540C /* shader */ = {
 			isa = PBXGroup;
 			children = (
+				01E08255D54A8DD4BB55902B /* grid.fs */,
+				01E08255D54A8DD4BB55902C /* grid.vs */,
 				3A3D08BC2F33B882008EAF80 /* line.fs */,
 				3A3D08BD2F33B882008EAF80 /* line.gs */,
 				3A3D08BE2F33B882008EAF80 /* line.vs */,

@@ -104,6 +104,11 @@ namespace ogl {
     // re-enable input every frame and a user disableKeybord() would never stick.
     bool keyboardUserEnabled = true;
 
+    // ESC closes the window, unless the application turns it off with
+    // setCloseOnEscape(false): then ESC is only passed to keyboard() like any
+    // other key, and the application decides what it does
+    bool closeOnEscape = true;
+
     // Each on-screen window owns its own ImGui context (ImGuiContext*), created
     // in create() and destroyed with the window: this makes multiple windows
     // with independent ImGui UIs work. Offscreen windows never initialise it.
@@ -481,7 +486,7 @@ namespace ogl {
 
       if(!keybord || !keyboardUserEnabled) return;
 
-      if(GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
+      if(closeOnEscape && GLFW_KEY_ESCAPE == key && GLFW_PRESS == action) {
         setShouldClose(GL_TRUE);
       }
 
@@ -567,6 +572,9 @@ namespace ogl {
     //*****************************************************************************/
     void disableKeyboard() { keyboardUserEnabled = false; }
     void enableKeyboard()  { keyboardUserEnabled = true;  }
+
+    // whether ESC closes the window (the default); see closeOnEscape
+    void setCloseOnEscape(bool close) { closeOnEscape = close; }
 
     // Deprecated misspelled aliases, kept for source compatibility.
     void disableKeybord() { disableKeyboard(); }
@@ -693,18 +701,6 @@ namespace ogl {
 
       glViewport(0, 0, camera.getWidth(), camera.getHeight());
 
-      // The clear is a framebuffer write like any other, so GL_FRAMEBUFFER_SRGB
-      // encodes it too: the background has to be linearized here or a
-      // setBackground(0.1) would come out at 0.35 on screen.
-      glm::vec3 clear = srgbToLinear(background);
-
-      glClearColor(clear.r, clear.g, clear.b, 1.0f);
-
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      glEnable(GL_DEPTH_TEST);
-      glDepthFunc(GL_LEQUAL);
-
       // The lit shaders output LINEAR color and the unlit ones linearize theirs,
       // so the sRGB encoding of every framebuffer write is the GPU's job. This
       // enable is what turns it on and is REQUIRED on every platform: without
@@ -727,6 +723,26 @@ namespace ogl {
       // the smoke test does (test/smoke.cpp): if a platform ever fails to
       // encode, that test fails instead of the scene quietly going dark.
       glEnable(GL_FRAMEBUFFER_SRGB);
+      //
+      // ORDER MATTERS: this has to come BEFORE the glClear below. renderEnd()
+      // turns the encoding off to draw ImGui, so at the start of every frame it
+      // is off, and a clear done first is not encoded: the linearized background
+      // would come out far too dark (setBackground(0.1) as 3/255 instead of
+      // 26/255). Without ImGui the state just stays on, which hides the problem
+      // from a headless run: it only shows in a real window.
+
+      // The clear is a framebuffer write like any other, so GL_FRAMEBUFFER_SRGB
+      // encodes it too: the background has to be linearized here or a
+      // setBackground(0.1) would come out at 0.35 on screen.
+      glm::vec3 clear = srgbToLinear(background);
+
+      glClearColor(clear.r, clear.g, clear.b, 1.0f);
+
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LEQUAL);
+
 
 
       keybord = true;

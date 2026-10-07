@@ -73,7 +73,7 @@ namespace ogl {
 
   public:
     
-    enum STYLE { SOLID, WIREFRAME, LINE, POINTS, TEXT, MODEL, PLAIN2D, SHADOW };
+    enum STYLE { SOLID, WIREFRAME, LINE, POINTS, TEXT, MODEL, PLAIN2D, SHADOW, GRID };
 
     int style = STYLE::SOLID;
     
@@ -177,6 +177,14 @@ namespace ogl {
       style = STYLE::LINE;
     }
     
+    //****************************************************************************/
+    // initGrid - the infinite floor grid, see glInfiniteGrid
+    //****************************************************************************/
+    void initGrid() {
+      init(OGL_RESOURCE_DIR "/shader/grid.vs", OGL_RESOURCE_DIR "/shader/grid.fs");
+      style = STYLE::GRID;
+    }
+
     //****************************************************************************/
     // initPoints
     //****************************************************************************/

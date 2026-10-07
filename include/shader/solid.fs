@@ -27,6 +27,7 @@ out vec4 outColor;
 
 uniform float shininess;         // specular exponent
 uniform float specularStrength;  // specular intensity, 0 disables the highlight
+uniform bool  unlit;             // no lighting: the color as given, see glShape::setUnlit()
 
 //
 // srgbToLinear - exact sRGB electro-optical transfer function (the piecewise
@@ -68,6 +69,14 @@ float shadowCalc(vec3 norm, vec3 lightDir) {
 }
 
 void main() {
+
+    // Unlit: the surface shows its own color exactly, whatever the light and
+    // the point of view (a printed pattern that must read as true white and
+    // black). Linearized like the lit path, the framebuffer encodes it back
+    if(unlit) {
+        outColor = vec4(srgbToLinear(color), 1.0);
+        return;
+    }
 
     vec3 norm = normalize(fragNormal);
 

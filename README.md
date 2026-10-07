@@ -19,6 +19,7 @@ OGL allows you to render:
 - Spheres
 - Ellipses
 - Grids
+- Infinite ground grids (shader-based, with adjustable cell size and distance fade)
 - Boxes
 - Cuboids
 - Curved sheets (open half cylinders)

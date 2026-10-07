@@ -155,6 +155,7 @@ namespace ogl {
           else { glLight().setInShader(shader, camera.getView()); shader.setUniform("useShadow", false); }
           shader.setUniform("shininess",        shininess);
           shader.setUniform("specularStrength", specularStrength);
+          shader.setUniform("unlit",            unlit);
         }
 
         glBindVertexArray(vao);
