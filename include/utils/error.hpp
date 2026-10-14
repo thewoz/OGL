@@ -84,10 +84,31 @@ inline GLenum glCheckError_(const char *file, int line) {
 
 #define glCheckError() glCheckError_(__FILE__, __LINE__)
  
-#ifndef __APPLE__
+//****************************************************************************/
+// GL debug output - the driver reports errors and warnings through a callback.
+// It needs OpenGL 4.3 or the KHR_debug extension, so two things must hold:
+//   - the installed glad must have been generated with it: if not, it does not
+//     define GL_DEBUG_OUTPUT and glDebugMessageCallback, and the code that uses
+//     them would not compile (older Ubuntu installs, macOS);
+//   - the driver must provide it at run time: glad leaves the function pointer
+//     null when it does not (macOS stops at OpenGL 4.1), and calling it would
+//     crash.
+// enableGlDebugOutput() checks both and otherwise does nothing.
+//****************************************************************************/
+#ifdef GL_DEBUG_OUTPUT
 inline void GLAPIENTRY glDebugOutput(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+    (void) source; (void) id; (void) length; (void) userParam;
     fprintf(stderr, "ERROR [GL callback]: type=0x%x severity=0x%x message=%s\n", type, severity, message);
 }
 #endif
+
+inline void enableGlDebugOutput() {
+#ifdef GL_DEBUG_OUTPUT
+    if(glDebugMessageCallback == nullptr) return;
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(glDebugOutput, 0);
+#endif
+}
 
 #endif /* _H_OGL_ERROR_H_ */

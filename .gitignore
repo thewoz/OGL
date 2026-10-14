@@ -74,3 +74,6 @@ DerivedData/
 ./imgui/build
 
 imgui.ini
+
+# log di external/install.sh
+external/install.log

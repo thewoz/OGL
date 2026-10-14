@@ -237,11 +237,8 @@ namespace ogl {
 
       camera = glCamera(cameraMode, width, height);
 
-      #ifndef __APPLE__
-          glEnable(GL_DEBUG_OUTPUT);
-          glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-          glDebugMessageCallback(glDebugOutput, 0);
-      #endif
+      // only where glad and the driver have it, see utils/error.hpp
+      enableGlDebugOutput();
 
       #ifndef OGL_WITHOUT_IMGUI
         // One ImGui context per window. The GLFW/OpenGL3 backends store their
@@ -331,13 +328,10 @@ namespace ogl {
 
       camera = glCamera(cameraMode, width, height);
 
-      #ifndef __APPLE__
-          // Same GL debug output as create(): headless/batch rendering is where
-          // driver diagnostics are most valuable.
-          glEnable(GL_DEBUG_OUTPUT);
-          glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-          glDebugMessageCallback(glDebugOutput, 0);
-      #endif
+      // Same GL debug output as create(): headless/batch rendering is where
+      // driver diagnostics are most valuable. Only where glad and the driver
+      // have it, see utils/error.hpp
+      enableGlDebugOutput();
 
     }
 
