@@ -29,6 +29,10 @@ OGL allows you to render:
 - 3D Models
 - 3D Plot
 
+The solid shapes and the models are Phong-lit by the light of a `glScene` and
+can cast and receive shadows (shadow mapping); most shapes also have a
+wireframe style.
+
 It also provides utilities like window management, camera control, and snapshot functionality.
 
 ---
@@ -60,6 +64,8 @@ is the Phong exponent and `setSpecularStrength()` scales the highlight, with 0
 giving a fully matte surface. The highlight is not tinted by the object color,
 which is correct for dielectrics; tinted highlights belong to metals, and those
 are handled by `glModel`, whose material carries a real specular color.
+`setUnlit(true)` skips the lighting altogether, so a solid shape shows exactly
+the color it was given.
 
 ---
 
@@ -88,8 +94,8 @@ do not need to be downloaded separately (see below).
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your_username/ogl.git
-cd ogl
+git clone https://github.com/thewoz/OGL.git
+cd OGL
 ```
 
 ### 2. Install system dependencies
@@ -158,9 +164,11 @@ The executables are placed in `~/bin/ogl` and `~/bin/ogl_imgui`.
 
 ### 6. Run the tests
 
-A non-interactive smoke test ([test/smoke.cpp](test/smoke.cpp)) renders 30
+A non-interactive smoke test ([test/smoke.cpp](test/smoke.cpp)) renders
 offscreen frames with every main object type (shapes, model, text, plot,
-shadow pass, dynamic buffer updates), takes a snapshot and verifies it:
+shadow pass, dynamic buffer updates), takes a snapshot and verifies it. It also
+reads pixels back to check the sRGB color pipeline, the infinite grid and that
+the point rendering does not depend on the draw order:
 
 ```bash
 # Normal build
@@ -192,7 +200,7 @@ a cuboid + sphere + 3D text label — toggled at runtime by pressing **TAB**:
 #define OGL_WITHOUT_IMGUI
 #include <ogl/ogl.hpp>
 
-int main(int argc, char * const argv[]) {
+int main() {
 
   ogl::glWindow window;
 

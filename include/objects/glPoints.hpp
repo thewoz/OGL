@@ -101,7 +101,8 @@ namespace ogl {
       
       points = _points;
 
-      colors.resize(points.size(), _color);
+      // assign, not resize: on a re-init resize() would keep the old colors
+      colors.assign(points.size(), _color);
 
       radius = _radius;
 

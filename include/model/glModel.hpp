@@ -155,6 +155,15 @@ namespace ogl {
 
       depthShader.setUniform("model", modelMatrix);
 
+      // Front face culling, like the closed volumes (glCuboid, glEllipse): the
+      // far surface is recorded, which keeps the shadow test off the model's
+      // own geometry. Set here rather than relying on the state left by
+      // beginPass(), so the result does not depend on the order in which the
+      // casters are drawn: an open surface drawn before this one turns culling
+      // off for itself (see glQuad / glSheet).
+      glEnable(GL_CULL_FACE);
+      glCullFace(GL_FRONT);
+
       for(std::size_t i=0; i<meshes.size(); ++i) meshes[i].renderDepth();
 
     }

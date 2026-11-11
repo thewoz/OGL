@@ -216,7 +216,9 @@ namespace ogl {
       glfwSetScrollCallback(window, scrollCallback);
       glfwSetKeyCallback(window, keyCallback);
       glfwSetCursorEnterCallback(window, cursorEnterCallback);
-      glfwSetWindowSizeCallback(window, sizeCallback);
+      // framebuffer size (pixels), not window size (screen coordinates): the
+      // two differ on HiDPI displays and the camera viewport is in pixels
+      glfwSetFramebufferSizeCallback(window, sizeCallback);
 
       glfwSwapInterval(1);
 
@@ -307,7 +309,9 @@ namespace ogl {
       glfwSetScrollCallback(window, scrollCallback);
       glfwSetKeyCallback(window, keyCallback);
       glfwSetCursorEnterCallback(window, cursorEnterCallback);
-      glfwSetWindowSizeCallback(window, sizeCallback);
+      // framebuffer size (pixels), not window size (screen coordinates): the
+      // two differ on HiDPI displays and the camera viewport is in pixels
+      glfwSetFramebufferSizeCallback(window, sizeCallback);
 
       glfwSwapInterval(1);
 
@@ -554,6 +558,9 @@ namespace ogl {
 
     inline void setSize(int width, int height) {
       glfwSetWindowSize(window, width, height);
+      // the viewport is in pixels: ask for the framebuffer size, which on a
+      // HiDPI display is not the window size just set
+      glfwGetFramebufferSize(window, &width, &height);
       camera.setViewport(width, height);
     }
 

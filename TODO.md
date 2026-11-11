@@ -32,8 +32,8 @@ Ordered with the review priority scale (Critica / Alta / Media / Bassa).
 Correzioni proposte nella revisione 2026-07 e non (ancora) autorizzate:
 
 - **FIX-004** — cast espliciti `(GLfloat)` sulle coordinate mouse/scroll in
-  `glWindow.hpp` (7 warning `-Wimplicit-float-conversion` residui; benigni).
-- **FIX-005** — cast espliciti `(GLsizeiptr)`/`(GLuint)` sui ~44
+  `glWindow.hpp` (9 warning `-Wimplicit-float-conversion` residui; benigni).
+- **FIX-005** — cast espliciti `(GLsizeiptr)`/`(GLuint)` sui ~53
   `-Wsign-conversion` residui (benigni; solo se si vuole dichiarare la
   libreria warning-free anche con `-Wconversion`).
 - **FIX-006** — `glShader::setUniform`: rinominare il parametro `name`
@@ -47,6 +47,12 @@ Correzioni proposte nella revisione 2026-07 e non (ancora) autorizzate:
   esplicito dell'alpha (2 warning nella build ImGui; cambia una firma pubblica).
 - **FIX-013** — `glMesh::bounds()` su mesh senza vertici restituisce valori
   spazzatura (FLT_MAX); aggiungere early-return a zero (caso remoto).
+- **Verifica su display HiDPI della revisione 2026-11**: `glWindow` ora
+  aggiorna il viewport dalla dimensione del framebuffer in pixel
+  (`glfwSetFramebufferSizeCallback`, e `glfwGetFramebufferSize` in
+  `setSize()`) invece che da quella della finestra in coordinate schermo.
+  Verificato solo su un display a scala 1, dove le due coincidono: da
+  confermare su Retina ridimensionando una finestra.
 - Strumenti di analisi statica non presenti sul sistema (cppcheck,
   clang-tidy, scan-build): installarli e integrarli nel flusso
   (`brew install cppcheck llvm`).

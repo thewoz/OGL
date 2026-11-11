@@ -44,15 +44,17 @@ namespace ogl {
     
   private:
     
-    /* texture id */
-    GLuint id = 0;
+    /* texture id, one per window: a GL texture lives in the context it was
+       created in and the contexts of the windows are not shared, while a cache
+       entry is used by every model in every window. The key is the window id
+       (currentWindowID()), which is never reused. */
+    std::unordered_map<uint32_t, GLuint> ids;
 
     /* texture name */
     std::string name;
 
-    /* texture init flags */
+    /* texture init flag */
     bool isInited;
-    bool isInitedInGpu;
 
     /* texture type */
     std::string type;
@@ -71,12 +73,12 @@ namespace ogl {
     //****************************************************************************/
     // glTexture
     //****************************************************************************/
-    glTexture() : isInited(false), isInitedInGpu(false) { }
-    
+    glTexture() : isInited(false) { }
+
     //****************************************************************************/
     // glTexture
     //****************************************************************************/
-    glTexture(const std::string & _type, const std::string & filename, const std::string & directory) : isInited(false), isInitedInGpu(false) {
+    glTexture(const std::string & _type, const std::string & filename, const std::string & directory) : isInited(false) {
       init(_type, filename, directory);
     }
     
@@ -155,8 +157,13 @@ namespace ogl {
 
       // Idempotent: cache entries are shared by every material that references
       // the same image, so a second material uploading the same texture must
-      // not glGenTextures again (it would leak the first GPU texture).
-      if(isInitedInGpu) return;
+      // not glGenTextures again (it would leak the first GPU texture). It is
+      // per window: a window that has not seen this texture yet gets its own.
+      const uint32_t window = currentWindowID();
+
+      if(ids.count(window) != 0) return;
+
+      GLuint id = 0;
 
       glGenTextures(1, &id);
                 
@@ -184,9 +191,9 @@ namespace ogl {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
       
       glBindTexture(GL_TEXTURE_2D, 0);
-     
-      isInitedInGpu = true;
-      
+
+      ids[window] = id;
+
       glCheckError();
       
     }
@@ -196,7 +203,9 @@ namespace ogl {
     //****************************************************************************/
     inline void setInShader(const ogl::glShader & shader, GLenum unit) {
 
-      if(!isInitedInGpu) {
+      auto it = ids.find(currentWindowID());
+
+      if(it == ids.end()) {
         fprintf(stderr, "ERROR [glTexture]: must be initialized in GPU before use\n");
         abort();
       }
@@ -205,7 +214,7 @@ namespace ogl {
       glActiveTexture(GL_TEXTURE0 + unit);
 
       // And finally bind the texture
-      glBindTexture(GL_TEXTURE_2D, id);
+      glBindTexture(GL_TEXTURE_2D, it->second);
 
       // Tell the matching sampler (e.g. "material.diffuseTexture") to read from
       // this texture unit. Without this every sampler would default to unit 0.
@@ -220,16 +229,21 @@ namespace ogl {
     //****************************************************************************/
     void cleanInGpu() {
       
-      if(isInitedInGpu) {
-        
-        DEBUG_LOG("glTexture::cleanInGpu(" + name + ")");
+      if(ids.empty()) return;
 
-        glDeleteTextures(1, &id);
-        
-        isInitedInGpu = false;
-        
+      DEBUG_LOG("glTexture::cleanInGpu(" + name + ")");
+
+      // Only the texture of the current window can be deleted: an id of
+      // another window, deleted here, would hit an unrelated texture of this
+      // one. The others go away with their context. At process exit GLFW is
+      // already terminated and there is no context at all.
+      if(glfw::inited && glfwGetCurrentContext() != NULL) {
+        auto it = ids.find(currentWindowID());
+        if(it != ids.end()) glDeleteTextures(1, &it->second);
       }
-      
+
+      ids.clear();
+
     }
     
     //****************************************************************************/
@@ -244,18 +258,17 @@ namespace ogl {
     //****************************************************************************/
     void moveFrom(glTexture && other) {
 
-      id            = other.id;
+      ids           = std::move(other.ids);
       name          = std::move(other.name);
       isInited      = other.isInited;
-      isInitedInGpu = other.isInitedInGpu;
       type          = std::move(other.type);
       path          = std::move(other.path);
       width         = other.width;
       height        = other.height;
       image         = std::move(other.image);
 
-      // the moved-from object must not delete the GPU texture we just took over
-      other.isInitedInGpu = false;
+      // the moved-from object must not delete the GPU textures we just took over
+      other.ids.clear();
 
     }
 

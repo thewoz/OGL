@@ -210,7 +210,10 @@ namespace ogl {
       if(isDynamicScale) {
         // Clamp the distance: if the camera reaches the text position the
         // division would produce inf/NaN and blow up the glyph vertices.
-        float distance = glm::max(glm::distance(camera.getPosition(), coord), 1e-3f);
+        // The eye comes from the view matrix and not from camera.getPosition(),
+        // which in ORBIT mode is not where the eye is (see glInfiniteGrid).
+        glm::vec3 eye = glm::vec3(glm::inverse(camera.getView())[3]);
+        float distance = glm::max(glm::distance(eye, coord), 1e-3f);
         _scale = textScale / distance;
       }
       

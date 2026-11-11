@@ -106,6 +106,9 @@ namespace ogl {
       
       cellSize = _cellSize;
 
+      // torna alla modalita' righe/colonne anche dopo una initRange()/setRange()
+      useRange = false;
+
       color = _color;
 
       isInited = true;
@@ -227,8 +230,12 @@ namespace ogl {
 
           const float epsilon = 1e-5f * rangeStep;
 
+          // oltre questo indice un float non distingue piu' una linea dalla
+          // successiva (e il cast a long andrebbe in overflow): niente linee
+          const float maxIndex = 1e6f;
+
           // parallele a z, a x costante
-          if((rangeXMax - rangeXMin) / rangeStep <= (float) maxLinesPerAxis) {
+          if((rangeXMax - rangeXMin) / rangeStep <= (float) maxLinesPerAxis && std::fabs(rangeXMin / rangeStep) < maxIndex) {
             for(long k = (long) std::ceil(rangeXMin / rangeStep); ; ++k) {
               float x = (float) k * rangeStep;
               if(x > rangeXMax + epsilon) break;
@@ -238,7 +245,7 @@ namespace ogl {
           }
 
           // parallele a x, a z costante
-          if((rangeZMax - rangeZMin) / rangeStep <= (float) maxLinesPerAxis) {
+          if((rangeZMax - rangeZMin) / rangeStep <= (float) maxLinesPerAxis && std::fabs(rangeZMin / rangeStep) < maxIndex) {
             for(long k = (long) std::ceil(rangeZMin / rangeStep); ; ++k) {
               float z = (float) k * rangeStep;
               if(z > rangeZMax + epsilon) break;

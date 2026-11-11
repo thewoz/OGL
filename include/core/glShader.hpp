@@ -213,6 +213,11 @@ namespace ogl {
       uniformLocationCache.clear();
       isInitedInGpu = false;
 
+      // A re-init without a geometry shader must not keep the one of the
+      // previous init (e.g. an object going from WIREFRAME to SOLID): it would
+      // be attached to the new program, which then fails to link.
+      geometryCode.clear();
+
       // 1. Retrieve the vertex/fragment source code from filePath
       std::ifstream vShaderFile;
       std::ifstream fShaderFile;
@@ -314,6 +319,14 @@ namespace ogl {
     //****************************************************************************/
     void initInGpu() {
 
+      // Recompiling in the same context: drop the previous program so its
+      // handle is not leaked. After a context change the old handle belongs to
+      // the other window and must NOT be deleted here: in this context that
+      // name either does not exist (GL_INVALID_VALUE) or is somebody else's
+      // program. It is left to its own context, like the buffers of glObject.
+      if(program != 0 && windowID == currentWindowID()) glDeleteProgram(program);
+      program = 0;
+
       windowID = currentWindowID();
 
       DEBUG_LOG("glShader::initInGpu(" + name + ") on windowID " + std::to_string(windowID));
@@ -323,9 +336,7 @@ namespace ogl {
         abort();
       }
 
-      // Recompiling (e.g. after a context change): drop the previous program so
-      // its handle is not leaked, and invalidate the stale uniform locations.
-      if(program != 0) { glDeleteProgram(program); program = 0; }
+      // invalidate the stale uniform locations
       uniformLocationCache.clear();
 
       const GLchar * vShaderCode = vertexCode.c_str();

@@ -44,8 +44,9 @@ namespace ogl {
   // Class glFont
   //****************************************************************************/
   // Shared glyph atlas used by both glPrint2D and glPrint3D. The ASCII glyph
-  // textures are loaded from FreeType exactly once (program-lifetime) instead
-  // of per text instance, which used to upload 128 textures for every label.
+  // textures are loaded from FreeType exactly once per window (and kept for
+  // the program lifetime) instead of per text instance, which used to upload
+  // 128 textures for every label.
   //
   // It is a process-wide singleton: call glFont::instance().load() with an
   // active GL context (the text objects do this on their first setInGpu), then
@@ -65,9 +66,11 @@ namespace ogl {
 
   private:
 
-    std::map<GLchar, Character_t> characters;
-
-    bool loaded = false;
+    // One atlas per window: the glyph textures live in the GL context they
+    // were created in and the contexts of the windows are not shared, so the
+    // ids of one window mean nothing in another. The key is the window id
+    // (currentWindowID()), which is never reused.
+    std::map<uint32_t, std::map<GLchar, Character_t>> atlases;
 
     glFont() { }
 
@@ -84,14 +87,18 @@ namespace ogl {
     //****************************************************************************/
     // isLoaded()
     //****************************************************************************/
-    inline bool isLoaded() const { return loaded; }
+    // whether the atlas of the current window has been built
+    inline bool isLoaded() const { return atlases.count(currentWindowID()) != 0; }
 
     //****************************************************************************/
-    // get() - glyph for a character, or nullptr if it was not loaded
+    // get() - glyph for a character in the current window, or nullptr if it
+    // was not loaded
     //****************************************************************************/
     const Character_t * get(GLchar c) const {
-      auto it = characters.find(c);
-      return (it == characters.end()) ? nullptr : &it->second;
+      auto atlas = atlases.find(currentWindowID());
+      if(atlas == atlases.end()) return nullptr;
+      auto it = atlas->second.find(c);
+      return (it == atlas->second.end()) ? nullptr : &it->second;
     }
 
     //****************************************************************************/
@@ -99,7 +106,11 @@ namespace ogl {
     //****************************************************************************/
     void load(const std::string & fontPath = OGL_RESOURCE_DIR "/data/fonts/arial.ttf", unsigned int pixelSize = 48) {
 
-      if(loaded) return;
+      const uint32_t window = currentWindowID();
+
+      if(atlases.count(window) != 0) return;
+
+      std::map<GLchar, Character_t> & characters = atlases[window];
 
       FT_Library ft;
 
@@ -169,8 +180,6 @@ namespace ogl {
       // destroy FreeType once we're finished
       FT_Done_Face(face);
       FT_Done_FreeType(ft);
-
-      loaded = true;
 
       glCheckError();
 

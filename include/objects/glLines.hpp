@@ -87,7 +87,8 @@ namespace ogl {
       
       vertices = _vertices;
 
-      colors.resize(vertices.size(), _color);
+      // assign, not resize: on a re-init resize() would keep the old colors
+      colors.assign(vertices.size(), _color);
 
       isInited = true;
       isToUpdateInGpu = true; // re-init after a render must re-upload

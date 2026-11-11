@@ -447,11 +447,10 @@ namespace ogl {
       if(step <= 0.0f) return;
 
       long first, last;
-      tickIndexRange(range, step, first, last);
 
       // Cap the tick count: a tiny step over a huge range would otherwise
       // generate an unbounded amount of geometry and freeze the application.
-      if(last - first > (long)maxTicksPerAxis) {
+      if(!tickIndexRange(range, step, first, last)) {
         fprintf(stderr, "WARNING [glPlot]: tick step %g too small for range [%g, %g], skipping ticks (max %d per axis)\n",
                 step, range.min, range.max, maxTicksPerAxis);
         return;
@@ -495,7 +494,10 @@ namespace ogl {
         float t0 = tickInward ? 0.0f : -tickSize;
         float t1 = tickInward ? tickSize * tickSign(axis) : tickSize;
 
-        if(major >= range.min && major <= range.max) {
+        // the minor pass draws only the minor ticks: the major ones belong to
+        // the major pass, and drawn again here they would cover those in the
+        // minor color (same rule as the linear ticks, see isOnMajorTick)
+        if(!addMinor && major >= range.min && major <= range.max) {
           float pos = mapAxisValue(range, major, axisOriginByAxis(axis), true);
           if(axis == 0) addSegment(glm::vec3(pos, cr.y + t0, cr.z), glm::vec3(pos, cr.y + t1, cr.z), color);
           if(axis == 1) addSegment(glm::vec3(cr.x + t0, pos, cr.z), glm::vec3(cr.x + t1, pos, cr.z), color);
@@ -640,12 +642,11 @@ namespace ogl {
       if(step <= 0.0f) return;
 
       long first, last;
-      tickIndexRange(range, step, first, last);
       float off = resolvedTickLabelOffset();
 
       // Same cap as buildAxisLinearTicks (one draw call per label: even more
       // important to bound it here).
-      if(last - first > (long)maxTicksPerAxis) return;
+      if(!tickIndexRange(range, step, first, last)) return;
 
       for(long k = first; k <= last; ++k) {
         float v = tickValue(k, step);
@@ -863,10 +864,18 @@ namespace ogl {
     // sommando step a ogni giro l'errore si accumulava e lo zero usciva come
     // 2.98e-08. La tolleranza e' relativa al passo, cosi' vale a ogni scala
     //****************************************************************************/
-    static void tickIndexRange(const AxisRange & range, float step, long & first, long & last) {
+    // Ritorna false, senza toccare first e last, se i tick sarebbero piu' di
+    // maxTicksPerAxis. Il controllo si fa sui double, PRIMA del cast a long: con
+    // un range assurdo (1e30) il cast andrebbe in overflow. I confronti sono
+    // negati per scartare anche i NaN
+    static bool tickIndexRange(const AxisRange & range, float step, long & first, long & last) {
       const double eps = (double) step * 1e-4;
-      first = (long) std::ceil ((range.min - eps) / step);
-      last  = (long) std::floor((range.max + eps) / step);
+      const double f = std::ceil ((range.min - eps) / step);
+      const double l = std::floor((range.max + eps) / step);
+      if(!(l - f <= (double) maxTicksPerAxis) || !(std::fabs(f) < 1e15) || !(std::fabs(l) < 1e15)) return false;
+      first = (long) f;
+      last  = (long) l;
+      return true;
     }
 
     static float tickValue(long k, float step) { return (float) ((double) k * step); }

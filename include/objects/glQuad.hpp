@@ -95,6 +95,9 @@ namespace ogl {
         style = _style;
         color = _color;
 
+        // back to the size-based quad even after an init(vertices)
+        vertices.clear();
+
         isInited = true;
         isToUpdateInGpu = true; // re-init after a render must re-upload
 
