@@ -146,22 +146,6 @@ context and runs its frame for you, so you just issue `ImGui::` widgets between
 
 ---
 
-## Camera controls
-
-The window drives its camera according to the camera mode
-(`window.getCamera().setMode()`, FLY by default):
-
-| Input | FLY | ORBIT | FIXED |
-|:------|:----|:------|:------|
-| Mouse move | look around | orbit around the target | — |
-| Ctrl + mouse move | translate along the world X / Y axes | pan | — |
-| Arrow keys | move forward / back / left / right | pan, with Shift held | — |
-| Scroll wheel | — | dolly in / out | — |
-
-**ESC** closes the window; turn that off with `window.setCloseOnEscape(false)`.
-
----
-
 ## TODO, known issues and license
 
 Open work and documented limitations are in [TODO.md](TODO.md).
