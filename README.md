@@ -73,8 +73,11 @@ installed.
 
 ## Example
 
-A minimal program: a lit, shadow-casting cuboid on a floor. The full example,
-with a model, text and two switchable scenes, is [`src/main.cpp`](src/main.cpp).
+A minimal program: a cuboid and a sphere on a floor, lit and casting shadows.
+The full example, with a model, text and two switchable scenes, is
+[`src/main.cpp`](src/main.cpp).
+
+![The example below, as rendered by OGL](docs/example.png)
 
 ```cpp
 #define OGL_WITHOUT_IMGUI
@@ -86,22 +89,26 @@ int main() {
   window.create(1024, 768);
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
 
-  window.getCamera().setPosition(3, 1.5f, 0);
-  window.getCamera().lookAt(0, 0.25f, 0);
+  window.getCamera().setPosition(3, 2, 2.5f);
+  window.getCamera().lookAt(0, 0.3f, 0);
   window.getCamera().setzNearFar(0.1f, 100.0f);
 
   // The scene owns the light and the shadow map shared by every lit object.
   ogl::glScene scene;
-  scene.setDirectionalLight(glm::vec3(-1.0f, -1.0f, -1.0f));
+  scene.setDirectionalLight(glm::vec3(0.6f, -1.0f, -0.8f));
   scene.enableShadows(true);
   scene.setBounds(glm::vec3(0.0f, 0.5f, 0.0f), 3.0f);
 
   // A quad laid flat on the XZ plane, as the floor.
   ogl::glQuad floor(glm::vec2(10.0f), glm::vec3(0.55f));
   floor.rotate(glm::vec3(-1.57079633f, 0.0f, 0.0f));
+  floor.translate(glm::vec3(0.0f, -0.01f, 0.0f));
 
   ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::orange);
   cuboid.translate(glm::vec3(0.0f, 0.25f, 0.0f));
+
+  ogl::glSphere sphere(0.3f, 32, 32, ogl::glShader::STYLE::SOLID, ogl::glColors::white);
+  sphere.translate(glm::vec3(0.0f, 0.3f, 0.9f));
 
   ogl::glAxes axes;
   ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5f);
@@ -114,13 +121,15 @@ int main() {
       scene.beginShadowPass();
       floor.renderDepth(scene.getShadowShader());
       cuboid.renderDepth(scene.getShadowShader());
+      sphere.renderDepth(scene.getShadowShader());
       scene.endShadowPass();
 
       // Render pass: lit objects take the light and the shadows from &scene.
       floor.render(window.getCamera(), &scene);
       cuboid.render(window.getCamera(), &scene);
+      sphere.render(window.getCamera(), &scene);
       axes.render(window.getCamera());
-      text.render(window.getCamera(), "FPS: " + std::to_string(window.getFPS()));
+      text.render(window.getCamera(), "Hello, OGL!");
 
     window.renderEnd();
 
@@ -150,24 +159,6 @@ The window drives its camera according to the camera mode
 | Scroll wheel | — | dolly in / out | — |
 
 **ESC** closes the window; turn that off with `window.setCloseOnEscape(false)`.
-
----
-
-## Colors
-
-OGL renders through a linear lighting pipeline:
-
-- Every color you pass in is an **sRGB value**, the one you would pick in a
-  color picker. The shaders linearize it and the GPU encodes the result back.
-- A lit surface therefore renders **darker** than its color, because the light
-  is not at full intensity: with the default light an albedo of 0.45 lands at
-  about 0.38 on screen.
-- Unlit objects (lines, axes, grids, plots, text, 2D quads) and the window
-  background come out exactly as given; so does a solid shape after
-  `setUnlit(true)`.
-- `setShininess()` and `setSpecularStrength()` set the highlight of a shape;
-  0 strength gives a fully matte surface.
-- A custom shader for a `glShape` must output **linear** color.
 
 ---
 
