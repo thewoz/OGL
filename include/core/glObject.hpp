@@ -34,7 +34,123 @@
 // namespace ogl
 //****************************************************************************
 namespace ogl {
-  
+
+  //****************************************************************************
+  // Class glBuffers
+  //****************************************************************************
+  // The vertex array and the buffers of a drawable, with the handful of calls
+  // every setInGpu() needs: the handles are zero by construction and the
+  // gen / bind / upload / attribute boilerplate lives here once instead of
+  // being repeated in every object.
+  //
+  // It is a plain set of GL names and deletes nothing on its own: a GL name
+  // can only be deleted in the context that created it, and that is known by
+  // the owner (see glObject::releaseInGpu()), which calls destroy() or
+  // forget() accordingly.
+  //****************************************************************************
+  class glBuffers {
+
+  public:
+
+    static constexpr int maxBuffers = 4;
+
+  private:
+
+    GLuint vao = 0;
+    GLuint vbo[maxBuffers] = {0, 0, 0, 0};
+    int    count = 0;
+
+  public:
+
+    //**************************************************************************
+    // create() - a new vertex array with 'count' buffers. The previous names,
+    // if any, are NOT deleted: after a context change they belong to the old
+    // context (call destroy() first when they are to be freed).
+    //**************************************************************************
+    void create(int _count) {
+
+      if(_count < 0 || _count > maxBuffers) {
+        fprintf(stderr, "ERROR [glBuffers]: at most %d buffers\n", maxBuffers);
+        abort();
+      }
+
+      count = _count;
+
+      glGenVertexArrays(1, &vao);
+
+      if(count > 0) glGenBuffers(count, vbo);
+
+    }
+
+    //**************************************************************************
+    // destroy() - delete the names (in the current context) / forget() - drop
+    // them without deleting anything
+    //**************************************************************************
+    void destroy() {
+
+      if(count > 0) glDeleteBuffers(count, vbo);
+      if(vao != 0)  glDeleteVertexArrays(1, &vao);
+
+      forget();
+
+    }
+
+    void forget() {
+
+      vao = 0;
+      for(int i=0; i<maxBuffers; ++i) vbo[i] = 0;
+      count = 0;
+
+    }
+
+    bool isCreated() const { return vao != 0; }
+
+    GLuint buffer(int index) const { return vbo[index]; }
+
+    //**************************************************************************
+    // bind() / unbind()
+    //**************************************************************************
+    void bind() const { glBindVertexArray(vao); }
+
+    static void unbind() {
+      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBindVertexArray(0);
+    }
+
+    //**************************************************************************
+    // data() - upload a vertex buffer and leave it bound, for pointer()
+    //**************************************************************************
+    void data(int index, const void * data, size_t bytes, GLenum usage = GL_STATIC_DRAW) const {
+      glBindBuffer(GL_ARRAY_BUFFER, vbo[index]);
+      glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) bytes, data, usage);
+    }
+
+    //**************************************************************************
+    // pointer() - a float attribute read from the vertex buffer bound now
+    //**************************************************************************
+    void pointer(GLuint location, GLint components, size_t stride = 0, size_t offset = 0) const {
+      glVertexAttribPointer(location, components, GL_FLOAT, GL_FALSE, (GLsizei) stride, reinterpret_cast<void *>(offset));
+      glEnableVertexAttribArray(location);
+    }
+
+    //**************************************************************************
+    // attribute() - a buffer that holds one float attribute: data() + pointer()
+    //**************************************************************************
+    void attribute(int index, GLuint location, GLint components, const void * data, size_t bytes, GLenum usage = GL_STATIC_DRAW) const {
+      this->data(index, data, bytes, usage);
+      pointer(location, components);
+    }
+
+    //**************************************************************************
+    // elements() - upload the index buffer of the vertex array
+    //**************************************************************************
+    void elements(int index, const void * data, size_t bytes, GLenum usage = GL_STATIC_DRAW) const {
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[index]);
+      glBufferData(GL_ELEMENT_ARRAY_BUFFER, (GLsizeiptr) bytes, data, usage);
+    }
+
+  }; /* class glBuffers */
+
   //****************************************************************************
   // Class glObject
   //****************************************************************************
@@ -58,7 +174,10 @@ namespace ogl {
     uint32_t windowID;
     
     glShader shader;
-    
+
+    // vertex array and buffers, see glBuffers
+    glBuffers buffers;
+
     bool isInited;
     bool isInitedInGpu;
     bool isToUpdateInGpu;
@@ -110,9 +229,20 @@ namespace ogl {
     // Drawables are therefore non-copyable but movable: moving transfers
     // ownership of the GPU resources and neuters the moved-from object (see
     // below). The virtual destructor makes deletion through a glObject* well
-    // defined.
+    // defined. It frees the buffers itself: at this point the virtual calls
+    // resolve to the glObject versions, which is right for every object whose
+    // GPU state is just 'buffers'; a class with more than that (glModel) calls
+    // releaseInGpu() from its own destructor first.
     //***************************************************************************
-    virtual ~glObject() { }
+    virtual ~glObject() {
+
+      // qualified on purpose: in a destructor there is no virtual dispatch,
+      // and these are the versions meant here (see the comment above)
+      if(isInitedInGpu && !isCurrentWindow(windowID)) glObject::forgetInGpu();
+
+      glObject::cleanInGpu();
+
+    }
 
     glObject(const glObject &) = delete;
     glObject & operator = (const glObject &) = delete;
@@ -126,20 +256,23 @@ namespace ogl {
     //***************************************************************************
     glObject(glObject && o) noexcept
       : name(std::move(o.name)), windowID(o.windowID), shader(std::move(o.shader)),
-        isInited(o.isInited), isInitedInGpu(o.isInitedInGpu), isToUpdateInGpu(o.isToUpdateInGpu),
+        buffers(o.buffers), isInited(o.isInited), isInitedInGpu(o.isInitedInGpu), isToUpdateInGpu(o.isToUpdateInGpu),
         _position(o._position), _rotation(o._rotation), _scale(o._scale),
         modelMatrix(o.modelMatrix), style(o.style), lineWidth(o.lineWidth), color(o.color) {
       o.isInited        = false;
       o.isInitedInGpu   = false;
       o.isToUpdateInGpu = false;
       o.windowID        = 0;
+      o.buffers.forget();
     }
 
     glObject & operator = (glObject && o) noexcept {
       if(this != &o) {
+        releaseInGpu();   // the buffers this object held until now
         name            = std::move(o.name);
         windowID        = o.windowID;
         shader          = std::move(o.shader);
+        buffers         = o.buffers;
         isInited        = o.isInited;
         isInitedInGpu   = o.isInitedInGpu;
         isToUpdateInGpu = o.isToUpdateInGpu;
@@ -154,6 +287,7 @@ namespace ogl {
         o.isInitedInGpu   = false;
         o.isToUpdateInGpu = false;
         o.windowID        = 0;
+        o.buffers.forget();
       }
       return *this;
     }
@@ -186,13 +320,13 @@ namespace ogl {
     //****************************************************************************
     // renderDepth() - draw this object's geometry into the scene shadow map,
     // using the scene's depth-only shader. Default is a no-op: only the solid
-    // shadow casters (model, cuboid, quad, sphere, ellipse) override it. Lines,
+    // shadow casters (model, cuboid, quad, sheet, sphere, ellipse) override it. Lines,
     // points, text and axes do not cast meaningful shadows.
     //****************************************************************************
     virtual void renderDepth(const glShader & /*depthShader*/) { }
 
     //****************************************************************************
-    // Position fuction
+    // Position function
     //****************************************************************************
     // Virtual so composite objects (e.g. glAxes, which carries its axis labels
     // as child glPrint3D objects) can forward the transform to their children.
@@ -244,7 +378,7 @@ namespace ogl {
     //****************************************************************************
     // setName()
     //****************************************************************************
-    inline void setName(std::string _name) { name = _name; }  
+    inline void setName(const std::string & _name) { name = _name; }  
     
   protected:
     
@@ -271,10 +405,59 @@ namespace ogl {
     virtual void setInGpu() = 0;
     
     //****************************************************************************
-    // cleanInGpu
+    // cleanInGpu - free the GPU handles in the current context. The default is
+    // enough for an object whose GPU state is 'buffers'.
     //****************************************************************************
-    virtual void cleanInGpu() = 0;
+    virtual void cleanInGpu() {
+
+      if(isInitedInGpu) {
+        buffers.destroy();
+        isInitedInGpu = false;
+      }
+
+    }
+
+    //****************************************************************************
+    // prepareBuffers - what a setInGpu() starts with: the vertex array, with
+    // 'count' buffers, bound and ready to be filled. On the first upload in a
+    // context the names are created (after a context change isInitedInGpu is
+    // false and the old ones are left to their own context); on an update in
+    // the same context the existing ones are filled again.
+    //****************************************************************************
+    void prepareBuffers(int count) {
+
+      if(!isInitedInGpu || !buffers.isCreated()) buffers.create(count);
+
+      buffers.bind();
+
+    }
     
+    //****************************************************************************
+    // releaseInGpu - what the destructors call to free the GPU handles. They
+    // are deleted only if the context that owns them is the current one: with
+    // another window current the same names belong to its objects, and
+    // deleting them would destroy those. In that case the handles are just
+    // forgotten and go away with their own context.
+    //****************************************************************************
+    void releaseInGpu() {
+
+      if(isInitedInGpu && !isCurrentWindow(windowID)) forgetInGpu();
+
+      cleanInGpu();
+
+    }
+
+    //****************************************************************************
+    // forgetInGpu - drop the GPU state without deleting anything
+    //****************************************************************************
+    virtual void forgetInGpu() {
+
+      buffers.forget();
+
+      isInitedInGpu = false;
+
+    }
+
     //****************************************************************************
     // _setInGpu
     //****************************************************************************

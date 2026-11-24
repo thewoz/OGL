@@ -19,7 +19,8 @@ void main() {
 
   gl_Position = projection * posView;
 
-  // Scale the sprite by distance so points keep a consistent apparent size.
+  // Scale the sprite with the inverse of the distance from the eye, so the
+  // points shrink as they get farther away.
   float Z = length(posView.xyz);
   float pixelDiameter = pointSize / Z;
   gl_PointSize = pixelDiameter;

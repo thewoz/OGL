@@ -42,8 +42,8 @@ namespace ogl {
   // glModel
   //****************************************************************************/
   // A renderable 3D model loaded from disk through Assimp. A model is a list of
-  // meshes (each with its own material) sharing a single light and the "model"
-  // shader. On construction the file is imported, triangulated and (optionally)
+  // meshes (each with its own material) sharing the "model" shader; the light
+  // comes from the glScene passed to render(). On construction the file is imported, triangulated and (optionally)
   // normalized so that its bounding radius equals 'normalizeTo'.
   //****************************************************************************/
   class glModel : public glObject {
@@ -68,7 +68,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glModel() -
     //****************************************************************************/
-    ~glModel() { cleanInGpu(); }
+    ~glModel() { releaseInGpu(); }
 
     glModel(glModel &&) noexcept = default;
     glModel & operator = (glModel &&) noexcept = default;
@@ -81,7 +81,9 @@ namespace ogl {
       // Re-init must not accumulate: processNode() appends to 'meshes', so a
       // second init() on the same model would otherwise render both the old
       // and the new file. Destroying the old meshes also frees their GPU
-      // buffers (valid when re-initing in the same context).
+      // buffers, which is right only in the context that owns them: in another
+      // one they are forgotten first (see glObject::releaseInGpu()).
+      if(isInitedInGpu && !isCurrentWindow(windowID)) forgetInGpu();
       meshes.clear();
 
       name = ogl::io::name(path);
@@ -298,7 +300,8 @@ namespace ogl {
   private:
         
     //****************************************************************************/
-    // normalize() - Normalize and set the center of the model
+    // normalize() - Scale the model so that its bounding radius is 'normalizeTo'
+    // (the model is not re-centered)
     //****************************************************************************/
     void normalize(double normalizeTo) {
             
@@ -338,6 +341,17 @@ namespace ogl {
       
     }
     
+    //****************************************************************************/
+    // forgetInGpu() - the buffers live in the meshes
+    //****************************************************************************/
+    void forgetInGpu() override {
+
+      for(std::size_t i=0; i<meshes.size(); ++i) meshes[i].forgetInGpu();
+
+      isInitedInGpu = false;
+
+    }
+
     //****************************************************************************/
     // cleanInGpu() -
     //****************************************************************************/

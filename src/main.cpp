@@ -40,7 +40,7 @@ int main(int /*argc*/, char * const /*argv*/[]) {
   ogl::glWindow window;
   window.create(1024, 768);
   // Start in free-look mode: the cursor is captured and drives the camera.
-  // Press P to reveal the ImGui panel (see the loop below).
+  // In the ImGui build, press P to reveal the panel (see the loop below).
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
 
   window.getCamera().setPosition(3, 1.5f, 0);
@@ -173,7 +173,10 @@ int main(int /*argc*/, char * const /*argv*/[]) {
 
     // --- Apply ImGui parameters to the scene ---
 
-    scene.setDirectionalLight(lightDir);
+    // A null direction is not a direction: keep the last valid one, otherwise
+    // the shading would fall back to the head light while the shadow is still
+    // cast from a default direction.
+    if(glm::length(lightDir) > 0.0f) scene.setDirectionalLight(lightDir);
     scene.setAmbient (glm::vec3(0.2f));
     scene.setDiffuse (glm::vec3(0.5f * lightIntensity));
     scene.setSpecular(glm::vec3(1.0f * lightIntensity));

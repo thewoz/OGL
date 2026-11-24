@@ -178,7 +178,7 @@ namespace ogl {
     //****************************************************************************//
     void bind(const glShader & shader, int unit = 8) const {
 
-      glActiveTexture(GL_TEXTURE0 + unit);
+      glActiveTexture(GL_TEXTURE0 + (GLenum)unit);
       glBindTexture(GL_TEXTURE_2D, depthTex);
 
       shader.setUniform("shadowMap", unit);
@@ -249,11 +249,12 @@ namespace ogl {
     // cleanInGpu
     //****************************************************************************//
     void cleanInGpu() {
-      if(isInitedInGpu) {
+      // only in the context that owns them, see isCurrentWindow()
+      if(isInitedInGpu && isCurrentWindow(windowID)) {
         glDeleteTextures(1, &depthTex);
         glDeleteFramebuffers(1, &fbo);
-        isInitedInGpu = false;
       }
+      isInitedInGpu = false;
     }
 
   }; /* class glShadow */

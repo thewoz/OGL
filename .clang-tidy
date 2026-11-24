@@ -1,0 +1,34 @@
+# clang-tidy configuration for OGL, used by `make lint`.
+#
+# Bug and performance checks only, no style. The checks switched off are the
+# ones that only produce noise on this code base:
+#   reserved-identifier            the header guards (_H_OGL_*) and the _name
+#                                  parameters are the style of the library
+#   narrowing-conversions          int -> float everywhere in graphics code; the
+#                                  conversions that matter are covered by the
+#                                  compiler (-Wconversion builds clean)
+#   signed-bitwise                 GL bit masks and shifts by a literal
+#   easily-swappable-parameters    (x, y, z), (width, height), ...
+#   exception-escape,
+#   throwing-static-initialization the library reports errors with abort(), and
+#                                  only an allocation failure can throw
+#   derived-method-shadowing...    glQuad2D::setColor replaces the inherited one
+#                                  on purpose (RGBA fill color)
+#   enum-size, no-int-to-ptr       micro-optimizations that do not apply here
+Checks: >
+  -*,
+  clang-analyzer-*,
+  bugprone-*,
+  performance-*,
+  -bugprone-reserved-identifier,
+  -bugprone-narrowing-conversions,
+  -bugprone-signed-bitwise,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-exception-escape,
+  -bugprone-throwing-static-initialization,
+  -bugprone-derived-method-shadowing-base-method,
+  -performance-enum-size,
+  -performance-no-int-to-ptr
+# the OGL headers only (they are reached through the installed ogl/ link), not
+# the third-party ones and not the bundled icon font table
+HeaderFilterRegex: '.*/ogl/(ogl\.hpp|(core|model|objects)/.*|utils/(debug|error|glfw|snapshot|stdio)\.hpp)'

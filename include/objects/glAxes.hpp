@@ -40,8 +40,6 @@ namespace ogl {
     
     private:
       
-      GLuint vao = 0;
-      GLuint vbo = 0;
       
       std::vector<glm::vec3> vertices;
       std::vector<glm::vec3> colors;
@@ -66,7 +64,7 @@ namespace ogl {
       //****************************************************************************/
       // ~glAxes()
       //****************************************************************************/
-      ~glAxes() { cleanInGpu(); }
+      ~glAxes() { releaseInGpu(); }
 
       glAxes(glAxes &&) noexcept = default;
       glAxes & operator = (glAxes &&) noexcept = default;
@@ -109,7 +107,9 @@ namespace ogl {
 
         // After the labels exist: the scale() override below forwards the
         // transform to them, so one call scales both axes and labels.
-        scale(glm::vec3(_scale));
+        // (qualified: init() also runs from the constructor, where a virtual
+        // call would not dispatch anyway)
+        glAxes::scale(glm::vec3(_scale));
 
         isInited = true;
         isToUpdateInGpu = true; // re-init after a render must re-upload
@@ -138,7 +138,7 @@ namespace ogl {
         shader.setUniform("lineWidth",  lineWidth);
         shader.setUniform("viewport",   camera.getViewport());
                 
-        glBindVertexArray(vao);
+        buffers.bind();
 
         glDisable(GL_CULL_FACE);
         glDisableVertexAttribArray(1);
@@ -146,7 +146,7 @@ namespace ogl {
 
         for(int i=0; i<3; ++i) {
           
-          shader.setUniform("uniformColor", glm::vec4(colors[i], 1.0f));
+          shader.setUniform("uniformColor", glm::vec4(colors[(size_t)i], 1.0f));
  	 
           glDrawArrays(GL_LINES, i*2, 2);
 
@@ -224,46 +224,15 @@ namespace ogl {
 
         DEBUG_LOG("glAxes::setInGpu(" + name + ")");
 
-        // Same-context re-upload (init() called again): drop the old buffers
-        // first. After a context change isInitedInGpu is already false, so this
-        // is a no-op and the old-context handles are (deliberately) left alone.
-        cleanInGpu();
+        prepareBuffers(1);
 
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        buffers.attribute(0, 0, 3, vertices.data(), vertices.size() * sizeof(glm::vec3));
 
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
-        glEnableVertexAttribArray(0); 
-        
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
-       
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        glBuffers::unbind();
         
         glCheckError();
         
       }
-    
-  private:
-    
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-
-      if(isInitedInGpu) {
-
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-        
-        isInitedInGpu = false;
-
-      }
-      
-    }
     
   };
 

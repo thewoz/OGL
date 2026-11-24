@@ -81,12 +81,14 @@ namespace ogl {
     // glShader
     //****************************************************************************/
     glShader() : isInited(false), isInitedInGpu(false) { }
-    glShader(std::string vertexPath, std::string fragmentPath, std::string geometryPath = "") : isInitedInGpu(false) { init(vertexPath,fragmentPath, geometryPath); }
+    glShader(const std::string & vertexPath, const std::string & fragmentPath, const std::string & geometryPath = "") : isInitedInGpu(false) { init(vertexPath,fragmentPath, geometryPath); }
     
     //****************************************************************************/
     // ~glShader
     //****************************************************************************/
-    ~glShader() { if(program != 0) glDeleteProgram(program); }
+    // The program is deleted only if its own context is the current one: in
+    // another window the same name is a different program (see initInGpu()).
+    ~glShader() { if(program != 0 && isCurrentWindow(windowID)) glDeleteProgram(program); }
 
     //****************************************************************************/
     // A shader owns a GL program handle, so it is non-copyable: copying would
@@ -112,7 +114,7 @@ namespace ogl {
 
     glShader & operator = (glShader && o) noexcept {
       if(this != &o) {
-        if(program != 0) glDeleteProgram(program);
+        if(program != 0 && isCurrentWindow(windowID)) glDeleteProgram(program);
         windowID     = o.windowID;
         program      = o.program;      o.program = 0;
         vertexCode   = std::move(o.vertexCode);
@@ -202,14 +204,14 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // init - Constructor generates the shader on the fly
+    // init - load the shader sources from disk; compiling and linking are
+    // deferred to the first use()
     //****************************************************************************/
     void init(std::string vertexPath, std::string fragmentPath, std::string geometryPath = "") {
 
-      if(program != 0) {
-        glDeleteProgram(program);
-        program = 0;
-      }
+      // only in its own context, see initInGpu()
+      if(program != 0 && isCurrentWindow(windowID)) glDeleteProgram(program);
+      program = 0;
       uniformLocationCache.clear();
       isInitedInGpu = false;
 
@@ -299,14 +301,14 @@ namespace ogl {
     // are silently skipped; this avoids spurious aborts on unused uniforms.
     //****************************************************************************/
     template <typename T>
-    inline void setUniform(const std::string & name, const T & value) const {
+    inline void setUniform(const std::string & uniformName, const T & value) const {
 
       if(!isInitedInGpu) {
         fprintf(stderr, "ERROR [glShader]: must be initialized in GPU before use\n");
         abort();
       }
 
-      GLint location = getUniformLocation(name);
+      GLint location = getUniformLocation(uniformName);
 
       if(location == -1) return; // inactive / optimized-out uniform
 
@@ -324,7 +326,7 @@ namespace ogl {
       // the other window and must NOT be deleted here: in this context that
       // name either does not exist (GL_INVALID_VALUE) or is somebody else's
       // program. It is left to its own context, like the buffers of glObject.
-      if(program != 0 && windowID == currentWindowID()) glDeleteProgram(program);
+      if(program != 0 && isCurrentWindow(windowID)) glDeleteProgram(program);
       program = 0;
 
       windowID = currentWindowID();
@@ -421,13 +423,13 @@ namespace ogl {
     //****************************************************************************/
     // setName() -
     //****************************************************************************/
-    inline void setName(std::string _name) { name = _name; }
+    inline void setName(const std::string & _name) { name = _name; }
     
   private:
 
     //****************************************************************************/
     // shaderInfoLog / programInfoLog - fetch the full driver log; a fixed-size
-    // buffer would truncate long logs (many errors, driver verbosi).
+    // buffer would truncate long logs (many errors, verbose drivers).
     //****************************************************************************/
     static std::string shaderInfoLog(GLuint shaderID) {
       GLint length = 0;

@@ -81,8 +81,8 @@ inline void snapshot(int width, int height, const char * outputfile, bool compre
     }
   
     for(int i=0; i<height; ++i) {
-      GLubyte * p = image.data() + ((size_t)width * 3 * (height - 1 - i));
-      if(TIFFWriteScanline(file, p, i, 0) < 0) {
+      GLubyte * p = image.data() + ((size_t)width * 3 * (size_t)(height - 1 - i));
+      if(TIFFWriteScanline(file, p, (uint32_t)i, 0) < 0) {
         fprintf(stderr, "ERROR [snapshot]: TIFFWriteScanline failed\n");
         abort();
       }
@@ -104,7 +104,7 @@ inline void snapshotPBO(int width, int height, const char* outputfile, bool comp
 
     // 2. Bind del PBO e allocazione spazio
     glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
-    glBufferData(GL_PIXEL_PACK_BUFFER, (size_t)width * (size_t)height * 3, NULL, GL_STREAM_READ);
+    glBufferData(GL_PIXEL_PACK_BUFFER, (GLsizeiptr)((size_t)width * (size_t)height * 3), NULL, GL_STREAM_READ);
 
     // 3. Impostazioni corrette
     glReadBuffer(GL_BACK);
@@ -148,8 +148,8 @@ inline void snapshotPBO(int width, int height, const char* outputfile, bool comp
 
     // 7. Scriviamo il file (invertendo le righe)
     for(int i=0; i<height; ++i) {
-      const GLubyte* p = ptr + (width * 3 * (height - 1 - i)); // 3 bytes per pixel (RGB)
-      if(TIFFWriteScanline(file, (void*)p, i, 0) < 0) {
+      const GLubyte* p = ptr + ((size_t)width * 3 * (size_t)(height - 1 - i)); // 3 bytes per pixel (RGB)
+      if(TIFFWriteScanline(file, (void*)p, (uint32_t)i, 0) < 0) {
         fprintf(stderr, "ERROR [snapshotPBO]: TIFFWriteScanline failed at row %d\n", i);
         abort();
       }

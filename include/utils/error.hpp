@@ -58,6 +58,7 @@ inline GLenum glCheckError_(const char *file, int line) {
       case GL_INVALID_OPERATION:             error = "INVALID_OPERATION"; break;
       case GL_OUT_OF_MEMORY:                 error = "OUT_OF_MEMORY"; break;
       case GL_INVALID_FRAMEBUFFER_OPERATION: error = "INVALID_FRAMEBUFFER_OPERATION"; break;
+      default: break;   // stays "Unknown"
     }
 
     // Any non-GL_NO_ERROR code is fatal, including codes not in the switch

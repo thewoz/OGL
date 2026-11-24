@@ -98,10 +98,10 @@ namespace ogl {
     // different flags would otherwise be an ODR/layout violation.
     [[maybe_unused]] bool imguiFrameActive = false;
 
-    // User-controlled keyboard toggle (disableKeybord/enableKeybord). Kept
+    // User-controlled keyboard toggle (disableKeyboard/enableKeyboard). Kept
     // separate from 'keybord', which is the internal "rendering has started"
     // gate raised by renderBegin(): without this split, renderBegin() would
-    // re-enable input every frame and a user disableKeybord() would never stick.
+    // re-enable input every frame and a user disableKeyboard() would never stick.
     bool keyboardUserEnabled = true;
 
     // ESC closes the window, unless the application turns it off with
@@ -131,7 +131,7 @@ namespace ogl {
     bool keys[1024] = {false, };
 
     // Tempo passato dall'ultima volta che e' stato effettuato il rendering
-    GLfloat deltaTime;
+    GLfloat deltaTime = 0.0f;
 
   public:
 
@@ -158,7 +158,8 @@ namespace ogl {
       if(window != NULL) { glfwDestroyWindow(window); window = NULL; }
       if(created) {
         created = false;
-        if(windowsAlive > 0 && --windowsAlive == 0) { glfw::terminate(); }
+        if(windowsAlive > 0) --windowsAlive;
+        if(windowsAlive == 0) { glfw::terminate(); }
       }
 
     }
@@ -169,6 +170,10 @@ namespace ogl {
     void create(GLint width, GLint height, const std::string & title = "OpenGL window", glCamera::MODE cameraMode = glCamera::FLY, bool resizable = false) {
 
       DEBUG_LOG("glWindow::create() windowID " + std::to_string(windowsCounter));
+
+      // A window created twice: the previous one is closed first, otherwise
+      // its GLFW window and its slot in the counters would be lost.
+      if(window != NULL) destroy();
 
       glfw::init();
 
@@ -267,6 +272,10 @@ namespace ogl {
 
       DEBUG_LOG("glWindow::createOffscreen() windowID " + std::to_string(windowsCounter));
 
+      // A window created twice: the previous one is closed first, otherwise
+      // its GLFW window and its slot in the counters would be lost.
+      if(window != NULL) destroy();
+
       glfw::init();
 
       // Others Glfw options
@@ -355,7 +364,8 @@ namespace ogl {
 
       if(created) {
         created = false;
-        if(windowsAlive > 0 && --windowsAlive == 0) { glfw::terminate(); }
+        if(windowsAlive > 0) --windowsAlive;
+        if(windowsAlive == 0) { glfw::terminate(); }
       }
 
     }
@@ -468,7 +478,7 @@ namespace ogl {
 
     inline void scrollCallback(double xoffset, double yoffset) {
       if(imguiWantsMouse()) return;
-      camera.processMouseScroll(yoffset);
+      camera.processMouseScroll((GLfloat)yoffset);
       scroll(xoffset, yoffset);
     }
 
@@ -499,16 +509,16 @@ namespace ogl {
       if(onFocus) {
 
         if(firstMouse) {
-          lastX = xPos;
-          lastY = yPos;
+          lastX = (GLfloat)xPos;
+          lastY = (GLfloat)yPos;
           firstMouse = false;
         }
 
-        GLfloat xOffset = xPos - lastX;
-        GLfloat yOffset = lastY - yPos;  // Reversed since y-coordinates go from bottom to left
+        GLfloat xOffset = (GLfloat)xPos - lastX;
+        GLfloat yOffset = lastY - (GLfloat)yPos;  // Reversed since window y-coordinates go from top to bottom
 
-        lastX = xPos;
-        lastY = yPos;
+        lastX = (GLfloat)xPos;
+        lastY = (GLfloat)yPos;
 
         bool controlKey = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)  == GLFW_PRESS ||
                            glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL) == GLFW_PRESS);
@@ -530,7 +540,7 @@ namespace ogl {
   public:
 
     //****************************************************************************//
-    // Window Interface funtions
+    // Window Interface functions
     //****************************************************************************//
     inline void setPosition(int xPos, int yPos) {
       glfwSetWindowPos(window, xPos, yPos);
@@ -576,10 +586,6 @@ namespace ogl {
 
     // whether ESC closes the window (the default); see closeOnEscape
     void setCloseOnEscape(bool close) { closeOnEscape = close; }
-
-    // Deprecated misspelled aliases, kept for source compatibility.
-    void disableKeybord() { disableKeyboard(); }
-    void enableKeybord()  { enableKeyboard();  }
 
     //*****************************************************************************/
     // disable/enable mouseOnCamera()
@@ -869,6 +875,26 @@ namespace ogl {
     }
 
     return static_cast<glWindow*>(ptr)->id;
+
+  }
+
+  //*****************************************************************************/
+  // isCurrentWindow() - whether the GL context current now is the one of the
+  // glWindow with this id. Unlike currentWindowID() it never aborts: with no
+  // context at all (before create(), after the last window is gone) it is
+  // false. It is what decides whether a GPU handle can be deleted here: a GL
+  // name is only meaningful in the context that created it, and in another
+  // one the same number is somebody else's object.
+  //*****************************************************************************/
+  inline bool isCurrentWindow(uint32_t id) {
+
+    if(!glfw::inited) return false;
+
+    GLFWwindow * ctx = glfwGetCurrentContext();
+
+    void * ptr = (ctx != NULL) ? glfwGetWindowUserPointer(ctx) : NULL;
+
+    return (ptr != NULL && static_cast<glWindow*>(ptr)->id == id);
 
   }
 

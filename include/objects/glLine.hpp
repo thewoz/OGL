@@ -41,8 +41,6 @@ namespace ogl {
     
   private:
     
-    GLuint vao = 0;
-    GLuint vbo = 0;
 
     std::vector<glm::vec3> vertices;
     
@@ -65,7 +63,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glLine()
     //****************************************************************************/
-    ~glLine() { cleanInGpu(); }
+    ~glLine() { releaseInGpu(); }
 
     glLine(glLine &&) noexcept = default;
     glLine & operator = (glLine &&) noexcept = default;
@@ -91,7 +89,7 @@ namespace ogl {
     }
     
     //****************************************************************************/
-    // _render()
+    // render()
     //****************************************************************************/
     void render(const glCamera & camera) {
       
@@ -113,13 +111,13 @@ namespace ogl {
       shader.setUniform("viewport",   camera.getViewport());
       shader.setUniform("uniformColor", glm::vec4(color, 1.0f));
       
-      glBindVertexArray(vao);
+      buffers.bind();
 
       glDisable(GL_CULL_FACE);
       glDisableVertexAttribArray(1);
       glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
 
-      glDrawArrays(GL_LINE_STRIP, 0, (GLuint)vertices.size());
+      glDrawArrays(GL_LINE_STRIP, 0, (GLsizei)vertices.size());
      
       glBindVertexArray(0);
       
@@ -134,28 +132,11 @@ namespace ogl {
       
       DEBUG_LOG("glLine::setInGpu(" + name + ")");
 
-      if(!isInitedInGpu) {
+      prepareBuffers(1);
 
-      	glGenVertexArrays(1, &vao);
-      	glBindVertexArray(vao);
-      	
-      	glGenBuffers(1, &vbo);
-      	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      	        
-      } else {
-     
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      buffers.attribute(0, 0, 3, vertices.data(), vertices.size() * sizeof(glm::vec3));
 
-      }
-            
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-      glEnableVertexAttribArray(0);
-      
-      glBufferData(GL_ARRAY_BUFFER, vertices.size()*sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
-        
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
       
       glCheckError();
           
@@ -172,26 +153,6 @@ namespace ogl {
       else vertices = _vertices;
       
       isToUpdateInGpu = true;
-      
-    }
-    
-  private:
-    
-    //****************************************************************************/
-    // cleanInGpu() -
-    //****************************************************************************/
-    void cleanInGpu() override {
-      
-      DEBUG_LOG("glLine::cleanInGpu(" + name + ")");
-
-      if(isInitedInGpu) {
-
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-              
-        isInitedInGpu = false;
-
-      }
       
     }
     

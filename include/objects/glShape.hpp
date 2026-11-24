@@ -36,7 +36,7 @@ namespace ogl {
   // Class glShape
   //****************************************************************************/
   // Intermediate base for the lit objects (glSphere, glEllipse, glCuboid,
-  // glQuad and the glPoints impostors). On top of glObject (transform, shader,
+  // glQuad, glSheet and the glPoints impostors). On top of glObject (transform, shader,
   // style, lineWidth, color) it is the common type for Phong-shaded shapes.
   // Lighting is no longer owned per object: the scene light is supplied through
   // glScene at render time (render(camera, &scene)). Still abstract: subclasses

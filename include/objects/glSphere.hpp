@@ -37,7 +37,7 @@ namespace ogl {
   //****************************************************************************/
   // A UV-sphere is just an ellipsoid with three equal semi-axes, so glSphere is
   // a thin wrapper over glEllipse: it reuses the same geometry generation,
-  // shading, SOLID/WIREFRAME handling and setLight() instead of duplicating
+  // shading and SOLID/WIREFRAME handling instead of duplicating
   // them. Supports two rendering styles:
   //   SOLID     — filled triangles with Phong shading
   //   WIREFRAME — triangle edges drawn as thick lines

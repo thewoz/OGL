@@ -44,8 +44,8 @@ namespace ogl {
   //   - directional light: 'direction' is non-zero (e.g. the sun);
   //   - point light:       'direction' is zero and 'position' is used instead.
   // If both are zero the shaders fall back to a "head light" coming from the
-  // camera, so an object is always visibly shaded even without an explicit
-  // call to setLight().
+  // camera, so an object is always visibly shaded even when no position or
+  // direction has been set.
   //****************************************************************************//
   class glLight {
 

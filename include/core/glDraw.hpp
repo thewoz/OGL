@@ -85,7 +85,7 @@ namespace ogl::draw {
   //****************************************************************************//
   // rotatedText()
   //****************************************************************************//
-  inline void rotatedText(ImDrawList * drawList, const std::string & text, ImFont * font, float fontSizePx, ImU32 color, const ImVec2 & center, double angleDeg)  {
+  inline void rotatedText(ImDrawList * drawList, const std::string & text, ImFont * font, float fontSizePx, ImU32 color, const ImVec2 & center, double angleDeg) {
 
     ImVec2 textSize = font->CalcTextSizeA(fontSizePx, FLT_MAX, 0.0f, text.c_str());
 
@@ -188,7 +188,8 @@ namespace ogl::draw {
     ImVec2 mid((A.x + B.x) * 0.5f, (A.y + B.y) * 0.5f);
 
     // Il testo viene ruotato per allinearsi alla retta, quindi la sua altezza
-    // Aggiungo metà altezza del testo allo spostamento
+    // e' perpendicolare alla linea: allo spostamento si aggiunge meta' altezza,
+    // cosi' textOffsetPx e' la distanza del bordo del testo e non del suo centro
     ImVec2 textSize = font->CalcTextSizeA(fontSizePx, FLT_MAX, 0.0f, label.c_str());
 
     float off = textOffsetPx + textSize.y * 0.5f;

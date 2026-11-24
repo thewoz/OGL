@@ -108,7 +108,7 @@ namespace ogl::io {
 
     expandPath(path, buff);
 
-    strcpy(path, buff);
+    memcpy(path, buff, strlen(buff) + 1);
 
   }
 
@@ -160,7 +160,7 @@ namespace ogl::io {
 
     std::string str = basename(filename);
 
-    size_t lastindex = str.find_last_of(".");
+    size_t lastindex = str.find_last_of('.');
 
     return str.substr(0, lastindex);
 

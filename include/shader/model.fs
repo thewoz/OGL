@@ -69,7 +69,7 @@ in vec4 fragPosLightSpace; // fragment position in light clip space
 out vec4 outColor;
 
 /*****************************************************************************/
-// Constants
+// Color space
 /*****************************************************************************/
 //
 // srgbToLinear - exact sRGB electro-optical transfer function (the piecewise

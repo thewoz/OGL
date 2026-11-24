@@ -41,9 +41,6 @@ namespace ogl {
   class glQuad : public glShape {
 
     private:
-
-      GLuint vao = 0;
-      GLuint vbo[2] = {0, 0};
       glm::vec2 size;
       bool cullFaceEnabled = false;
 
@@ -70,7 +67,7 @@ namespace ogl {
       //****************************************************************************/
       // ~glQuad()
       //****************************************************************************/
-      ~glQuad() { cleanInGpu(); }
+      ~glQuad() { releaseInGpu(); }
 
       // The base glObject move neuters the moved-from object's destructor, so a
       // defaulted move safely transfers ownership of the GPU handles.
@@ -161,7 +158,7 @@ namespace ogl {
           shader.setUniform("unlit",            unlit);
         }
 
-        glBindVertexArray(vao);
+        buffers.bind();
 
         if(style == glShader::STYLE::WIREFRAME) {
           shader.setUniform("lineWidth", lineWidth);
@@ -211,7 +208,7 @@ namespace ogl {
         glEnable(GL_POLYGON_OFFSET_FILL);
         glPolygonOffset(2.0f, 4.0f);
 
-        glBindVertexArray(vao);
+        buffers.bind();
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
         // vedi sopra: l'offset non deve sopravvivere a questo oggetto
@@ -236,15 +233,11 @@ namespace ogl {
 
         DEBUG_LOG("glQuad::setInGpu(" + name + ")");
 
-        // Same-context re-upload: drop the old buffers first (no-op after a
-        // context change, where isInitedInGpu is already false).
-        cleanInGpu();
-
         GLfloat _vertices[18]; // 6 vertices * 3 coords
         
         if(vertices.size() != 0) {
           
-          for(int i=0; i<6; ++i) {
+          for(size_t i=0; i<6; ++i) {
             _vertices[i * 3 + 0] = vertices[i].x;
             _vertices[i * 3 + 1] = vertices[i].y;
             _vertices[i * 3 + 2] = vertices[i].z;
@@ -263,15 +256,9 @@ namespace ogl {
           
         }
         
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        
-        glGenBuffers(2, vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(_vertices), _vertices, GL_STATIC_DRAW);
-        
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
-        glEnableVertexAttribArray(0);
+        prepareBuffers(2);
+
+        buffers.attribute(0, 0, 3, _vertices, sizeof(_vertices));
 
         glm::vec3 normal(0.0f, 0.0f, 1.0f);
         if(vertices.size() == 6) {
@@ -288,30 +275,14 @@ namespace ogl {
 
         glm::vec3 normals[6] = { normal, normal, normal, normal, normal, normal };
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(1);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        buffers.attribute(1, 1, 3, normals, sizeof(normals));
+
+        glBuffers::unbind();
         
         glCheckError();
         
       }
-    
-      //****************************************************************************/
-      // cleanInGpu()
-      //****************************************************************************/
-      void cleanInGpu() override {
-        
-        if(isInitedInGpu) {
-          glDeleteBuffers(2, vbo);
-          glDeleteVertexArrays(1, &vao);
-          isInitedInGpu = false;
-        }
-        
-      }
+
     
   };
 

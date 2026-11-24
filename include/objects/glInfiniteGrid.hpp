@@ -67,10 +67,6 @@ namespace ogl {
 
   private:
 
-    // an empty vertex array: the quad is built in the vertex shader from
-    // gl_VertexID, but the core profile still needs one bound to draw
-    GLuint vao = 0;
-
     float cellSize     = 1.0f;
     float fadeDistance = 0.0f;   // 0 = automatic, from the camera far plane
 
@@ -89,13 +85,13 @@ namespace ogl {
     //****************************************************************************/
     // ~glInfiniteGrid()
     //****************************************************************************/
-    ~glInfiniteGrid() { cleanInGpu(); }
+    ~glInfiniteGrid() { releaseInGpu(); }
 
     glInfiniteGrid(glInfiniteGrid &&) noexcept = default;
     glInfiniteGrid & operator = (glInfiniteGrid &&) noexcept = default;
 
     //****************************************************************************/
-    // init() - compiles the shader, so it is done once. Everything else can be
+    // init() - loads the shader, so it is done once. Everything else can be
     // changed later at no cost
     //****************************************************************************/
     void init(float _cellSize = 1.0f, const glm::vec3 & _color = glm::vec3(0.5f)) {
@@ -192,7 +188,7 @@ namespace ogl {
       glDepthMask(GL_FALSE);
       glDisable(GL_CULL_FACE);
 
-      glBindVertexArray(vao);
+      buffers.bind();
 
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -215,28 +211,13 @@ namespace ogl {
 
       DEBUG_LOG("glInfiniteGrid::setInGpu(" + name + ")");
 
-      // Same-context re-upload: drop the old array first (no-op after a context
-      // change, where isInitedInGpu is already false).
-      cleanInGpu();
+      // no buffers: the quad is built in the vertex shader from gl_VertexID,
+      // but the core profile still needs a vertex array bound to draw
+      prepareBuffers(0);
 
-      glGenVertexArrays(1, &vao);
+      glBuffers::unbind();
 
       glCheckError();
-
-    }
-
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-
-      if(isInitedInGpu) {
-
-        glDeleteVertexArrays(1, &vao);
-
-        isInitedInGpu = false;
-
-      }
 
     }
 

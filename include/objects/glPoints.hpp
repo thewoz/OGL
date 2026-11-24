@@ -48,13 +48,11 @@ namespace ogl {
     
   private:
         
-    GLuint vao = 0;
-    GLuint vbo[2] = {0, 0};
     
     std::vector<glm::vec3> points;
     std::vector<glm::vec4> colors;
 
-    float radius;
+    float radius = 1.0f;
 
     // how the impostors are shaded (see points.fs); PHONG keeps the old look
     int shadingMode = PHONG;
@@ -84,7 +82,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glPoints()
     //****************************************************************************/
-    ~glPoints() { cleanInGpu(); }
+    ~glPoints() { releaseInGpu(); }
 
     glPoints(glPoints &&) noexcept = default;
     glPoints & operator = (glPoints &&) noexcept = default;
@@ -202,7 +200,7 @@ namespace ogl {
 
       glEnable(GL_PROGRAM_POINT_SIZE);
 
-      glBindVertexArray(vao);
+      buffers.bind();
 
       //glEnable(GL_CULL_FACE);
       //glCullFace(GL_BACK);
@@ -237,60 +235,17 @@ namespace ogl {
       
       DEBUG_LOG("glPoints::setInGpu(" + name + ")");
 
-      if(!isInitedInGpu) {
+      prepareBuffers(2);
 
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+      buffers.attribute(0, 0, 3, points.data(), points.size() * sizeof(glm::vec3));
+      buffers.attribute(1, 1, 4, colors.data(), colors.size() * sizeof(glm::vec4));
 
-        glGenBuffers(2, vbo);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(1);
-
-      } else {
-
-        // Same-context update: reuse the existing VAO/VBOs (same pattern as
-        // glLine) instead of deleting and regenerating them. After a context
-        // change isInitedInGpu is false, so fresh handles are generated above
-        // and the old-context ones are deliberately left alone.
-        glBindVertexArray(vao);
-
-      }
-
-      glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-      glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), points.data(), GL_STATIC_DRAW);
-
-      glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-      glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(glm::vec4), colors.data(), GL_STATIC_DRAW);
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
 
       glCheckError();
 
       isInitedInGpu = true;
 
-    }
-
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-      
-      if(isInitedInGpu) {
-        
-        glDeleteBuffers(2, vbo);
-        glDeleteVertexArrays(1, &vao);
-        
-        isInitedInGpu = false;
-
-      }
-      
     }
     
   };

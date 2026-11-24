@@ -28,6 +28,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cfloat>
+#include <cstddef>
 
 #include <string>
 #include <sstream>
@@ -68,8 +69,8 @@ namespace ogl {
     
     GLuint id = 0;
 
-    /* Render data */
-    GLuint vao = 0, vbo = 0, ebo = 0;
+    /* Render data: vertex array, vertex buffer (0) and index buffer (1) */
+    glBuffers buffers;
     
     /* Mesh Data */
     std::vector<glVertex> vertices;
@@ -201,7 +202,7 @@ namespace ogl {
 
       setInShader(shader);
               
-      glBindVertexArray(vao);
+      buffers.bind();
 
       glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, 0);
 
@@ -221,7 +222,7 @@ namespace ogl {
 
       if(!isInitedInGpu) setInGpu();
 
-      glBindVertexArray(vao);
+      buffers.bind();
       glDrawElements(GL_TRIANGLES, (int)indices.size(), GL_UNSIGNED_INT, 0);
       glBindVertexArray(0);
 
@@ -233,6 +234,14 @@ namespace ogl {
     // bounds
     //****************************************************************************//
     void bounds(glm::vec3 & center, glm::vec3 & size, float & radius) const {
+
+      // no vertices, no extent: the min/max below would be left at +-FLT_MAX
+      if(vertices.empty()) {
+        center = glm::vec3(0.0f);
+        size   = glm::vec3(0.0f);
+        radius = 0.0f;
+        return;
+      }
 
       float xMin =  FLT_MAX, xMax = -FLT_MAX;
       float yMin =  FLT_MAX, yMax = -FLT_MAX;
@@ -285,51 +294,23 @@ namespace ogl {
         abort();
       }
       
-      // Create buffers/arrays
-      glGenVertexArrays(1, &vao);
-      
-      glGenBuffers(1, &vbo);
-      glGenBuffers(1, &ebo);
-      
-      glBindVertexArray(vao);
-      
-      // Load data into vertex buffers
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      
+      // Fresh names: glModel uploads its meshes again after a context change,
+      // and the old ones are left to their own context.
+      buffers.create(2);
+      buffers.bind();
+
       // glVertex is a plain struct: sequential layout, safe to pass directly to the GPU.
-      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(ogl::glVertex), vertices.data(), GL_STATIC_DRAW);
+      buffers.data(0, vertices.data(), vertices.size() * sizeof(ogl::glVertex));
+      buffers.elements(1, indices.data(), indices.size() * sizeof(GLuint));
 
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-      
-      std::size_t offset = 0;
-      
-      // Position
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
-      glEnableVertexAttribArray(0);
-      offset += sizeof(float) * 3;
+      // position, normal, texture coordinates, tangent, bitangent
+      buffers.pointer(0, 3, sizeof(ogl::glVertex), offsetof(ogl::glVertex, Position));
+      buffers.pointer(1, 3, sizeof(ogl::glVertex), offsetof(ogl::glVertex, Normal));
+      buffers.pointer(2, 2, sizeof(ogl::glVertex), offsetof(ogl::glVertex, TexCoords));
+      buffers.pointer(3, 3, sizeof(ogl::glVertex), offsetof(ogl::glVertex, Tangent));
+      buffers.pointer(4, 3, sizeof(ogl::glVertex), offsetof(ogl::glVertex, Bitangent));
 
-      // Normal
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
-      glEnableVertexAttribArray(1);
-      offset += sizeof(float) * 3;
-      
-      // Vertex Texture Coords
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
-      glEnableVertexAttribArray(2);
-      offset += sizeof(float) * 2;
-
-      // Tangent
-      glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
-      glEnableVertexAttribArray(3);
-      offset += sizeof(float) * 3;
-
-      // Bitangent
-      glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(ogl::glVertex), reinterpret_cast<void *>(offset));
-      glEnableVertexAttribArray(4);
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
       
       glCheckError();
 
@@ -353,16 +334,27 @@ namespace ogl {
 
       if(isInitedInGpu) {
 
-        glDeleteBuffers(1, &vbo);
-        glDeleteBuffers(1, &ebo);
-
-        glDeleteVertexArrays(1, &vao);
+        buffers.destroy();
 
         material.cleanInGpu();
 
         isInitedInGpu = false;
 
       }
+
+    }
+
+    //****************************************************************************//
+    // forgetInGpu() - drop the GPU state without deleting the buffers, for
+    // when the context that owns them is not the current one (see glObject)
+    //****************************************************************************//
+    void forgetInGpu() {
+
+      buffers.forget();
+
+      material.cleanInGpu();
+
+      isInitedInGpu = false;
 
     }
 
@@ -374,9 +366,7 @@ namespace ogl {
     void moveFrom(glMesh && other) {
 
       id            = other.id;
-      vao           = other.vao;
-      vbo           = other.vbo;
-      ebo           = other.ebo;
+      buffers       = other.buffers;
       vertices      = std::move(other.vertices);
       indices       = std::move(other.indices);
       material      = std::move(other.material);
@@ -386,6 +376,7 @@ namespace ogl {
 
       // the moved-from object must not delete the GPU buffers we just took over
       other.isInitedInGpu = false;
+      other.buffers.forget();
 
     }
 

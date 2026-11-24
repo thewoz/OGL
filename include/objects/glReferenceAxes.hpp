@@ -52,8 +52,6 @@ namespace ogl {
 
   private:
 
-    GLuint vao = 0;
-    GLuint vbo = 0;
 
     // Axis colors: X=red, Y=green, Z=blue. Shared constant, not per-object state
     // (a const member would otherwise make the class non-move-assignable).
@@ -82,7 +80,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glReferenceAxes()
     //****************************************************************************/
-    ~glReferenceAxes() { cleanInGpu(); }
+    ~glReferenceAxes() { releaseInGpu(); }
 
     glReferenceAxes(glReferenceAxes &&) noexcept = default;
     glReferenceAxes & operator = (glReferenceAxes &&) noexcept = default;
@@ -160,7 +158,7 @@ namespace ogl {
       shader.setUniform("lineWidth",  lineWidth);
       shader.setUniform("viewport",   glm::vec2(overlaySize, overlaySize));
 
-      glBindVertexArray(vao);
+      buffers.bind();
       glDisableVertexAttribArray(1);
       glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -221,34 +219,13 @@ namespace ogl {
 
       DEBUG_LOG("glReferenceAxes::setInGpu(" + name + ")");
 
-      glGenVertexArrays(1, &vao);
-      glBindVertexArray(vao);
+      prepareBuffers(1);
 
-      glGenBuffers(1, &vbo);
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
+      buffers.attribute(0, 0, 3, vertices.data(), vertices.size() * sizeof(glm::vec3));
 
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-      glEnableVertexAttribArray(0);
-
-      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
 
       glCheckError();
-
-    }
-
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-
-      if(isInitedInGpu) {
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-        isInitedInGpu = false;
-      }
 
     }
 

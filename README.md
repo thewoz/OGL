@@ -1,200 +1,80 @@
 # OGL
 
-**OGL** is a **minimalistic, header-only C++ OpenGL engine**, designed to make it easier to create graphical applications across different platforms with a clean and lightweight setup.
+**OGL** is a minimalistic, header-only C++17 OpenGL engine for small graphical
+applications, teaching and prototyping, on macOS and Linux.
 
-OGL provides a simple API for:
-- Creating windows
-- Managing a camera with switchable modes (FLY, FIXED, ORBIT)
-- Drawing 2D/3D basic shapes
-- Handling basic input
-- Integrating (optionally) ImGui
+It gives you a window with a ready-made camera and a set of objects to draw:
 
----
+- lines, points, grids, an infinite ground grid
+- boxes, cuboids, spheres, ellipsoids, quads, curved sheets
+- 3D models (through Assimp)
+- 2D and 3D text
+- world axes, an orientation gizmo, and plot axes with ticks and labels
+- optionally, an [ImGui](https://github.com/ocornut/imgui) overlay
 
-## ✨ Features
-
-OGL allows you to render:
-
-- Lines
-- Spheres
-- Ellipses
-- Grids
-- Infinite ground grids (shader-based, with adjustable cell size and distance fade)
-- Boxes
-- Cuboids
-- Curved sheets (open half cylinders)
-- Points
-- Planes
-- 2D and 3D Text
-- 3D Models
-- 3D Plot
-
-The solid shapes and the models are Phong-lit by the light of a `glScene` and
-can cast and receive shadows (shadow mapping); most shapes also have a
-wireframe style.
-
-It also provides utilities like window management, camera control, and snapshot functionality.
+Solid shapes and models are Phong-lit by the light of a `glScene` and can cast
+and receive shadows; most shapes also have a wireframe style. Snapshots of the
+window can be saved as TIFF.
 
 ---
 
-## Color and lighting
-
-OGL renders through a **linear lighting pipeline**, which is worth knowing about
-because it defines what the colors you pass in mean.
-
-- Every color you give to an object (`setColor`, the `_color` arguments, material
-  colors) is a **sRGB value**: the color you would pick in a color picker.
-- The shaders linearize it before any lighting math, and the GPU encodes the
-  result back to sRGB on the framebuffer write (`GL_FRAMEBUFFER_SRGB`, enabled by
-  `glWindow`). Color textures are uploaded as `GL_SRGB8`, while specular, normal
-  and opacity maps stay linear because they carry data and not color.
-- A consequence to keep in mind: a lit surface renders **darker** than the color
-  you assigned it, because the light is not at full intensity. With the default
-  light (ambient 0.2, diffuse 0.5) an albedo of 0.45 lands at about 0.38 on
-  screen. Pick albedos, not screen values.
-- Colors written straight through — the unlit objects (lines, axes, grids, plots,
-  text, 2D quads) and the window background — come out on screen exactly as
-  given.
-
-If you write your own shader for a `glShape`, it must output **linear** color:
-the encoding is not its job.
-
-The specular response belongs to the object, not to the light: `setShininess()`
-is the Phong exponent and `setSpecularStrength()` scales the highlight, with 0
-giving a fully matte surface. The highlight is not tinted by the object color,
-which is correct for dielectrics; tinted highlights belong to metals, and those
-are handled by `glModel`, whose material carries a real specular color.
-`setUnlit(true)` skips the lighting altogether, so a solid shape shows exactly
-the color it was given.
-
----
-
-## Dependencies
-
-OGL requires the following libraries:
-
-| Library | Notes |
-|:--------|:------|
-| [GLFW](https://github.com/glfw/glfw) | window and input |
-| [GLM](https://github.com/g-truc/glm) | math |
-| [GLAD](https://glad.dav1d.de) | OpenGL loader — bundled in `external/glad/` |
-| [SOIL2](https://github.com/SpartanJ/soil2) | texture loading |
-| [Assimp](https://github.com/assimp/assimp) | 3D model import |
-| [Freetype2](https://gitlab.freedesktop.org/freetype/freetype) | text rendering |
-| [libtiff](http://www.simplesystems.org/libtiff/) | snapshot export |
-| [ImGui](https://github.com/ocornut/imgui) | GUI overlay — bundled in `external/imgui/`, optional |
-
-GLAD and ImGui are provided in the `external/` folder with their own Makefiles and
-do not need to be downloaded separately (see below).
-
----
-
-## Getting Started
-
-### 1. Clone the repository
+## Install
 
 ```bash
 git clone https://github.com/thewoz/OGL.git
 cd OGL
+(cd external && bash install.sh)   # dependencies
+make install                       # headers
 ```
 
-### 2. Install system dependencies
+`external/install.sh` installs the dependencies with Homebrew on macOS (which
+must already be there) or `sudo apt` on Linux, builds SOIL2 from source, and
+installs the bundled GLAD and ImGui.
 
-The `external/install.sh` script installs all required libraries. It handles
-both **macOS** (via Homebrew) and **Linux** (via apt), builds SOIL2 from source,
-and compiles and installs the bundled GLAD and ImGui:
+`make install` links `include/` to `/usr/local/include/ogl`. **It is required:**
+the headers include each other as `<ogl/...>` and the shaders, fonts and demo
+data are loaded at runtime from that location. For a different prefix, compile
+your project with `-DOGL_RESOURCE_DIR='"/your/prefix/ogl"'`.
 
-```bash
-cd external
-bash install.sh
-cd ..
-```
+| Dependency | Used for |
+|:-----------|:---------|
+| [GLFW](https://github.com/glfw/glfw) | window and input |
+| [GLM](https://github.com/g-truc/glm) | math |
+| [GLAD](https://glad.dav1d.de) | OpenGL loader (bundled in `external/glad/`) |
+| [SOIL2](https://github.com/SpartanJ/soil2) | texture loading |
+| [Assimp](https://github.com/assimp/assimp) | 3D model import |
+| [Freetype2](https://gitlab.freedesktop.org/freetype/freetype) | text rendering |
+| [libtiff](http://www.simplesystems.org/libtiff/) | snapshot export |
+| [ImGui](https://github.com/ocornut/imgui) | GUI overlay (bundled in `external/imgui/`, optional) |
 
-> On macOS, Homebrew must already be installed. On Linux, the script uses `sudo apt`.
-> On Apple-Silicon Macs, Homebrew installs under `/opt/homebrew`: the Xcode
-> project already searches both prefixes, but the Makefile assumes
-> `/usr/local` — pass the include/lib paths explicitly if your libraries live
-> in `/opt/homebrew`.
-
-The bundled libraries can also be installed individually:
-
-```bash
-# Install only GLAD
-cd external/glad && make install
-
-# Install only ImGui
-cd external/imgui && make install
-```
-
-### 3. Install the OGL headers
-
-```bash
-make install
-```
-
-This creates a symbolic link at `/usr/local/include/ogl` pointing to the
-`include/` directory, so you can `#include <ogl/ogl.hpp>` in any project.
-
-> **This step is required.** The library does not work from the bare
-> repository checkout: the internal headers include each other as
-> `<ogl/...>`, and the preset shaders, fonts and demo data are loaded at
-> runtime from the installed location. If you install to a different
-> prefix, compile your project with
-> `-DOGL_RESOURCE_DIR='"/your/prefix/ogl"'` so the library can find its
-> shaders, fonts and data.
-
-### 4. Build the example programs
-
-```bash
-# Basic example (no ImGui)
-make example
-
-# ImGui integration example
-make example_imgui
-```
-
-The executables are placed in `~/bin/ogl` and `~/bin/ogl_imgui`.
-
-### 5. Run the examples
-
-```bash
-~/bin/ogl
-~/bin/ogl_imgui
-```
-
-### 6. Run the tests
-
-A non-interactive smoke test ([test/smoke.cpp](test/smoke.cpp)) renders
-offscreen frames with every main object type (shapes, model, text, plot,
-shadow pass, dynamic buffer updates), takes a snapshot and verifies it. It also
-reads pixels back to check the sRGB color pipeline, the infinite grid and that
-the point rendering does not depend on the draw order:
-
-```bash
-# Normal build
-make test
-
-# Same test under AddressSanitizer + UndefinedBehaviorSanitizer
-make test_asan
-```
-
-Both print `SMOKE TEST OK` on success. The headers must be installed first
-(`make install`), since the test loads shaders, fonts and the demo model from
-the installed location.
-
-### 7. Uninstall (if needed)
-
-```bash
-make uninstall
-```
+> The Makefile looks for the libraries under `/usr/local`. On Apple-Silicon
+> Macs Homebrew installs under `/opt/homebrew`: the Xcode project searches both,
+> with the Makefile pass the include/lib paths yourself.
 
 ---
 
-## 🛠 Example Code
+## Build and test
 
-Here is a simplified version of [`src/main.cpp`](src/main.cpp) (built by
-`make example`): it renders two switchable demo scenes — the T-Rex model, or
-a cuboid + sphere + 3D text label — toggled at runtime by pressing **TAB**:
+| Command | What it does |
+|:--------|:-------------|
+| `make install` / `make uninstall` | create / remove the `/usr/local/include/ogl` link |
+| `make example` | build the example without ImGui to `~/bin/ogl` |
+| `make example_imgui` | build the same example with an ImGui panel to `~/bin/ogl_imgui` |
+| `make test` | build and run the offscreen smoke test |
+| `make test_asan` | the same test under AddressSanitizer + UBSan |
+| `make lint` | static analysis with `cppcheck` and `clang-tidy` (`brew install cppcheck llvm`) |
+
+The smoke test ([test/smoke.cpp](test/smoke.cpp)) renders offscreen frames with
+every main object type, takes a snapshot and reads pixels back to check the
+color pipeline. It prints `SMOKE TEST OK` on success and needs the headers
+installed.
+
+---
+
+## Example
+
+A minimal program: a lit, shadow-casting cuboid on a floor. The full example,
+with a model, text and two switchable scenes, is [`src/main.cpp`](src/main.cpp).
 
 ```cpp
 #define OGL_WITHOUT_IMGUI
@@ -203,16 +83,11 @@ a cuboid + sphere + 3D text label — toggled at runtime by pressing **TAB**:
 int main() {
 
   ogl::glWindow window;
-
   window.create(1024, 768);
-
   window.setCursorInputMode(GLFW_CURSOR_DISABLED);
 
-  // The default camera is a FLY (free-fly) camera.
   window.getCamera().setPosition(3, 1.5f, 0);
-  window.getCamera().setYaw(180);
-  window.getCamera().setPitch(-20);
-  // Push the far plane out so distant objects are not clipped.
+  window.getCamera().lookAt(0, 0.25f, 0);
   window.getCamera().setzNearFar(0.1f, 100.0f);
 
   // The scene owns the light and the shadow map shared by every lit object.
@@ -221,63 +96,31 @@ int main() {
   scene.enableShadows(true);
   scene.setBounds(glm::vec3(0.0f, 0.5f, 0.0f), 3.0f);
 
+  // A quad laid flat on the XZ plane, as the floor.
+  ogl::glQuad floor(glm::vec2(10.0f), glm::vec3(0.55f));
+  floor.rotate(glm::vec3(-1.57079633f, 0.0f, 0.0f));
+
+  ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::orange);
+  cuboid.translate(glm::vec3(0.0f, 0.25f, 0.0f));
+
   ogl::glAxes axes;
-  ogl::glGrid grid(10, 10, 0.5f, ogl::glColors::cyan);
-
-  // Solid floor that receives the shadows (a quad laid flat on the XZ plane).
-  ogl::glQuad floor(glm::vec2(10.0f), glm::vec3(0.55f), ogl::glShader::STYLE::SOLID);
-  floor.rotate(glm::vec3(-1.57079633f, 0.0f, 0.0f)); // -90° about X: normal up
-  floor.translate(glm::vec3(0.0f, -0.01f, 0.0f));
-
   ogl::glPrint2D text(10, 10, ogl::glColors::white, 0.5f);
-
-  ogl::glReferenceAxes referenceAxes;
-  referenceAxes.setLineWidth(2);
-
-  // Demo scene A: the T-Rex model.
-  ogl::glModel model(OGL_RESOURCE_DIR "/data/model/Trex/Trex.fbx");
-
-  // Demo scene B: primitive shapes + 3D text.
-  ogl::glCuboid cuboid(glm::vec3(0.5f), ogl::glShader::STYLE::SOLID, ogl::glColors::white);
-  cuboid.translate(glm::vec3(1.2f, 0.25f, 0.0f));
-  ogl::glSphere sphere(0.35f, 24, 24, ogl::glShader::STYLE::SOLID, ogl::glColors::orange);
-  sphere.translate(glm::vec3(-1.2f, 0.35f, 0.0f));
-  ogl::glPrint3D label3D("OGL", glm::vec3(0.0f, 1.3f, 0.0f), ogl::glColors::white, 0.6f, true);
-
-  bool showTrexScene = true;
-  bool tabWasDown = false;
 
   while(!window.shouldClose()) {
 
     window.renderBegin();
 
-      // TAB toggles between the two demo scenes (edge-triggered).
-      bool tabIsDown = (glfwGetKey(window.window, GLFW_KEY_TAB) == GLFW_PRESS);
-      if(tabIsDown && !tabWasDown) showTrexScene = !showTrexScene;
-      tabWasDown = tabIsDown;
+      // Shadow pass: the casters go into the shadow map of the scene.
+      scene.beginShadowPass();
+      floor.renderDepth(scene.getShadowShader());
+      cuboid.renderDepth(scene.getShadowShader());
+      scene.endShadowPass();
 
-      // Shadow pass: render the casters into the scene shadow map.
-      if(scene.areShadowsEnabled()) {
-        scene.beginShadowPass();
-        floor.renderDepth(scene.getShadowShader());
-        if(showTrexScene) model.renderDepth(scene.getShadowShader());
-        else { cuboid.renderDepth(scene.getShadowShader()); sphere.renderDepth(scene.getShadowShader()); }
-        scene.endShadowPass();
-      }
-
-      // Render pass: pass &scene so lit objects use its light and shadows.
+      // Render pass: lit objects take the light and the shadows from &scene.
       floor.render(window.getCamera(), &scene);
+      cuboid.render(window.getCamera(), &scene);
       axes.render(window.getCamera());
-      grid.render(window.getCamera());
-      if(showTrexScene) {
-        model.render(window.getCamera(), &scene);
-      } else {
-        cuboid.render(window.getCamera(), &scene);
-        sphere.render(window.getCamera(), &scene);
-        label3D.render(window.getCamera());
-      }
       text.render(window.getCamera(), "FPS: " + std::to_string(window.getFPS()));
-      referenceAxes.render(window.getCamera());
 
     window.renderEnd();
 
@@ -288,70 +131,49 @@ int main() {
 }
 ```
 
-### With ImGui
-
-OGL can also drive an [ImGui](https://github.com/ocornut/imgui) overlay. Simply
-**do not** define `OGL_WITHOUT_IMGUI`: `glWindow` then creates the ImGui context
-and runs the frame lifecycle for you (`renderBegin()` calls `ImGui::NewFrame()`,
-`renderEnd()` calls `ImGui::Render()`), so you just issue your `ImGui::` widgets
-in between:
-
-```cpp
-#include <ogl/ogl.hpp>   // OGL_WITHOUT_IMGUI NOT defined
-
-// ... create window and scene objects ...
-
-while(!window.shouldClose()) {
-
-  window.renderBegin();
-
-    ImGui::Begin("Scene Controls");
-    ImGui::Text("FPS: %d", window.getFPS());
-    ImGui::End();
-
-    // ... render your scene ...
-
-  window.renderEnd();
-
-}
-```
-
-The same [`src/main.cpp`](src/main.cpp) doubles as the ImGui example: built
-without `OGL_WITHOUT_IMGUI` (via `make example_imgui`) the `#ifndef`-guarded
-blocks add an ImGui control panel. Build and run it with:
-
-```bash
-make example_imgui
-~/bin/ogl_imgui
-```
+**ImGui.** Do not define `OGL_WITHOUT_IMGUI`: `glWindow` then creates the ImGui
+context and runs its frame for you, so you just issue `ImGui::` widgets between
+`renderBegin()` and `renderEnd()`.
 
 ---
 
-## Makefile Commands
+## Camera controls
 
-| Command               | Description |
-|:----------------------|:------------|
-| `make install`        | Symlink `include/` to `/usr/local/include/ogl` |
-| `make uninstall`      | Remove the symlink |
-| `make example`        | Build the basic example to `~/bin/ogl` |
-| `make example_imgui`  | Build the ImGui integration example to `~/bin/ogl_imgui` |
-| `make test`           | Build and run the offscreen smoke test |
-| `make test_asan`      | Run the smoke test under ASan + UBSan |
+The window drives its camera according to the camera mode
+(`window.getCamera().setMode()`, FLY by default):
 
-The Makefile automatically detects whether you are on **Linux** or **macOS**.
+| Input | FLY | ORBIT | FIXED |
+|:------|:----|:------|:------|
+| Mouse move | look around | orbit around the target | — |
+| Ctrl + mouse move | translate along the world X / Y axes | pan | — |
+| Arrow keys | move forward / back / left / right | pan, with Shift held | — |
+| Scroll wheel | — | dolly in / out | — |
 
----
-
-## TODO & Known Issues
-
-Open work items and documented limitations live in [TODO.md](TODO.md).
+**ESC** closes the window; turn that off with `window.setCloseOnEscape(false)`.
 
 ---
 
-## License
+## Colors
 
-This project is licensed under the **GNU General Public License v3.0** — see the [LICENSE](LICENSE) file for details.
+OGL renders through a linear lighting pipeline:
+
+- Every color you pass in is an **sRGB value**, the one you would pick in a
+  color picker. The shaders linearize it and the GPU encodes the result back.
+- A lit surface therefore renders **darker** than its color, because the light
+  is not at full intensity: with the default light an albedo of 0.45 lands at
+  about 0.38 on screen.
+- Unlit objects (lines, axes, grids, plots, text, 2D quads) and the window
+  background come out exactly as given; so does a solid shape after
+  `setUnlit(true)`.
+- `setShininess()` and `setSpecularStrength()` set the highlight of a shape;
+  0 strength gives a fully matte surface.
+- A custom shader for a `glShape` must output **linear** color.
 
 ---
 
-OGL was created to make OpenGL programming easier, cleaner, and faster for small to medium projects, educational purposes, and prototyping.
+## TODO, known issues and license
+
+Open work and documented limitations are in [TODO.md](TODO.md).
+
+OGL is licensed under the **GNU General Public License v3.0**, see
+[LICENSE](LICENSE).

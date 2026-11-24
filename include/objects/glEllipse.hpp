@@ -46,15 +46,13 @@ namespace ogl {
 
   private:
 
-    GLuint vao = 0;
-    GLuint vbo[4] = {0, 0, 0, 0};
 
-    int stacks;
-    int slices;
+    int stacks = 0;
+    int slices = 0;
 
-    float a;
-    float b;
-    float c;
+    float a = 1.0f;
+    float b = 1.0f;
+    float c = 1.0f;
 
   public:
         
@@ -75,7 +73,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glEllipse()
     //****************************************************************************/
-    ~glEllipse() { cleanInGpu(); }
+    ~glEllipse() { releaseInGpu(); }
 
     glEllipse(glEllipse &&) noexcept = default;
     glEllipse & operator = (glEllipse &&) noexcept = default;
@@ -139,7 +137,7 @@ namespace ogl {
         shader.setUniform("unlit",            unlit);
       }
 
-      glBindVertexArray(vao);
+      buffers.bind();
 
       if(style == glShader::STYLE::WIREFRAME) {
         shader.setUniform("lineWidth", lineWidth);
@@ -180,7 +178,7 @@ namespace ogl {
       glEnable(GL_CULL_FACE);
       glCullFace(GL_FRONT);
 
-      glBindVertexArray(vao);
+      buffers.bind();
       glDrawElements(GL_TRIANGLES, slices * stacks * 6, GL_UNSIGNED_INT, nullptr);
       glBindVertexArray(0);
 
@@ -197,10 +195,6 @@ namespace ogl {
       
       DEBUG_LOG("glEllipse::setInGpu(" + name + ")");
 
-      // Same-context re-upload: drop the old buffers first (no-op after a
-      // context change, where isInitedInGpu is already false).
-      cleanInGpu();
-
       {
 
         std::vector<glm::vec3> positions;
@@ -211,13 +205,13 @@ namespace ogl {
 
           // V texture coordinate
           float V   = i / (float)stacks;
-          float phi = V * M_PI - M_PI/2.0;
+          float phi = (float)(V * M_PI - M_PI/2.0);
 
           for(int j=0; j<=slices; ++j) {
             
             // U texture coordinate
             float U     = j / (float)slices;
-            float theta = U * 2.0f * M_PI;
+            float theta = (float)(U * 2.0f * M_PI);
             
             float X = a * cos(phi) * cos(theta);
             float Y = b * cos(phi) * sin(theta);
@@ -240,18 +234,19 @@ namespace ogl {
         std::vector<GLuint> indices;
         
         int noPerSlice = slices + 1;
+        GLuint perSlice = (GLuint)noPerSlice;
         
         for(int i=0; i < stacks; ++i) {
           
           for (int j=0; j < slices; ++j) {
             
-            int start_i = (i * noPerSlice) + j;
+            GLuint start_i = (GLuint)((i * noPerSlice) + j);
             
             indices.push_back( start_i );
-            indices.push_back( start_i + noPerSlice + 1 );
-            indices.push_back( start_i + noPerSlice );
+            indices.push_back( start_i + perSlice + 1 );
+            indices.push_back( start_i + perSlice );
             
-            indices.push_back( start_i + noPerSlice + 1 );
+            indices.push_back( start_i + perSlice + 1 );
             indices.push_back( start_i );
             indices.push_back( start_i + 1 );
             
@@ -259,61 +254,20 @@ namespace ogl {
           
         }
         
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        
-        glGenBuffers(4, vbo);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(0);
-        
-        glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_STATIC_DRAW);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-        
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(1);
-        
-        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);
+        prepareBuffers(4);
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-        
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(2);
-        
-        glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(glm::vec2), textureCoords.data(), GL_STATIC_DRAW);
-        
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-        
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        buffers.attribute(0, 0, 3, positions.data(),     positions.size()     * sizeof(glm::vec3));
+        buffers.attribute(1, 1, 3, normals.data(),       normals.size()       * sizeof(glm::vec3));
+        buffers.attribute(2, 2, 2, textureCoords.data(), textureCoords.size() * sizeof(glm::vec2));
+        buffers.elements(3, indices.data(), indices.size() * sizeof(GLuint));
+
+        glBuffers::unbind();
         
         glCheckError();
         
       }
       
       isInitedInGpu = true;
-      
-    }
-    
-  private:
-    
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-      
-      if(isInitedInGpu) {
-        
-        glDeleteBuffers(4, vbo);
-        glDeleteVertexArrays(1, &vao);
-        
-        isInitedInGpu = false;
-        
-      }
       
     }
     

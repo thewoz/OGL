@@ -34,14 +34,12 @@
 namespace ogl {
   
   //****************************************************************************/
-  // glQuad
+  // glQuad2D
   //****************************************************************************/
   class glQuad2D : public glObject {
     
   private:
     
-    GLuint vao = 0;
-    GLuint vbo = 0;
 
     glm::vec2 position;
 
@@ -63,7 +61,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glQuad2D
     //****************************************************************************/
-    ~glQuad2D() { cleanInGpu(); }
+    ~glQuad2D() { releaseInGpu(); }
 
     glQuad2D(glQuad2D &&) noexcept = default;
     glQuad2D & operator = (glQuad2D &&) noexcept = default;
@@ -129,7 +127,7 @@ namespace ogl {
 
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-      glBindVertexArray(vao);
+      buffers.bind();
       
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -159,41 +157,14 @@ namespace ogl {
 
       DEBUG_LOG("glQuad2D::setInGpu(" + name + ")");
 
-      // Same-context re-upload: drop the old buffers first (no-op after a
-      // context change, where isInitedInGpu is already false).
-      cleanInGpu();
+      prepareBuffers(1);
 
-      glGenVertexArrays(1, &vao);
-      glBindVertexArray(vao);
-      
-      glGenBuffers(1, &vbo);
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      
-      glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-      
-      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec2), vertices.data(), GL_STATIC_DRAW);
+      buffers.attribute(0, 0, 2, vertices.data(), vertices.size() * sizeof(glm::vec2));
 
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
       
       glCheckError();
       
-    }
-    
-    //****************************************************************************/
-    // cleanInGpu() -
-    //****************************************************************************/
-    void cleanInGpu() override {
-      
-      if(isInitedInGpu) {
-        
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-        isInitedInGpu = false;
-        
-      }
-
     }
     
   };

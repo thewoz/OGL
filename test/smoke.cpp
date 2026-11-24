@@ -339,7 +339,7 @@ static bool checkInfiniteGrid(ogl::glWindow & window, int width, int height) {
     grid.setHeight(-0.5f);
     grid.setCellSize(0.408f);
 
-    struct Pose { glm::vec3 position; float pitch; int halfH; const char * name; };
+    struct Pose { glm::vec3 position; float pitch = 0.0f; int halfH = 0; const char * name = ""; };
     // a 3.75 dal centro del quadrato in entrambe le pose; inclinato, il
     // quadrato si accorcia in verticale e il riquadro controllato con lui
     const Pose poses[2] = { { glm::vec3(0.0f, 3.25f,  0.0f),  -89.9f, 50, "from above" },

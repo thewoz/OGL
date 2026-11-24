@@ -4,7 +4,7 @@
 // Point-sprite sphere impostors: every GL_POINTS vertex is shaded as if it were
 // a little 3D sphere, reconstructing a view-space normal from gl_PointCoord.
 // Lighting uses the same model as solid.fs (scene light + head-light fallback),
-// so glPoints now reacts to setLight() instead of a hard-coded light.
+// so glPoints reacts to the light of the glScene passed to render().
 //
 // The disc edge is antialiased with ALPHA TO COVERAGE, not with blending: the
 // alpha computed below is turned by the hardware into a number of covered MSAA
@@ -32,7 +32,7 @@ uniform mat4  projection;   // to turn the spherical surface point into a depth 
 
 // Shading mode for the impostors:
 //   0 = FLAT    : uniform matte colour, no lighting, view independent
-//                 (the assigned colour is shown exactly, no gamma)
+//                 (the assigned colour is shown exactly)
 //   1 = DIFFUSE : matte sphere (ambient + Lambert diffuse, no specular)
 //   2 = PHONG   : full Phong with specular highlight (shiny, the old default)
 uniform int shadingMode;

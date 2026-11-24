@@ -122,9 +122,10 @@ namespace ogl {
     ~glMaterial() { cleanInGpu(); }
 
     //****************************************************************************//
-    // A material releases its textures in the destructor, so it must be movable
-    // and not copyable: when glMesh is moved the source material has to be
-    // neutralized, otherwise it would free textures the destination still uses.
+    // A material is movable and not copyable, like the glMesh that owns it:
+    // when the mesh is moved the source material is neutralized (its GPU state
+    // flag is reset). The textures themselves are never freed by a material,
+    // see cleanInGpu().
     //****************************************************************************//
     glMaterial(const glMaterial &) = delete;
     glMaterial & operator = (const glMaterial &) = delete;
@@ -167,7 +168,7 @@ namespace ogl {
       // Bind every texture to its own unit (the unit is also assigned to the
       // matching sampler uniform inside glTexture::setInShader).
       for(GLuint i=0; i<textures.size(); ++i)
-        glTextures::get(textures[i]).setInShader(shader, i);
+        glTextures::get((size_t)textures[i]).setInShader(shader, i);
 
       glCheckError();
 
@@ -184,7 +185,7 @@ namespace ogl {
       }
 
       for(size_t i=0; i<textures.size(); ++i)
-        glTextures::get(textures[i]).setInGpu();
+        glTextures::get((size_t)textures[i]).setInGpu();
 
       glCheckError();
 
@@ -249,7 +250,7 @@ namespace ogl {
       isInited            = other.isInited;
       isInitedInGpu       = other.isInitedInGpu;
 
-      // the moved-from material must not release the textures we just took over
+      // the moved-from material no longer counts as uploaded
       other.isInitedInGpu = false;
 
     }

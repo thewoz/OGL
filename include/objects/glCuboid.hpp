@@ -45,20 +45,18 @@ namespace ogl {
 
   private:
 
-      GLuint vao = 0; // 0 = not yet allocated
-      GLuint vbo[4] = {0, 0, 0, 0};
 
       glm::vec3 size;
 
   public:
 
     //****************************************************************************/
-    // Class glCuboid
+    // glCuboid()
     //****************************************************************************/
     glCuboid(const std::string & _name = "") { name = _name; }
 
     //****************************************************************************/
-    // Class glCuboid
+    // glCuboid()
     //****************************************************************************/
     glCuboid(const glm::vec3 & _size, int _style = glShader::STYLE::SOLID, const glm::vec3 & _color = glm::vec3(1.0f), const std::string & _name = "") {
       name = _name;
@@ -68,7 +66,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glCuboid
     //****************************************************************************/
-    ~glCuboid() { cleanInGpu(); }
+    ~glCuboid() { releaseInGpu(); }
 
     glCuboid(glCuboid &&) noexcept = default;
     glCuboid & operator = (glCuboid &&) noexcept = default;
@@ -124,7 +122,7 @@ namespace ogl {
         shader.setUniform("unlit",            unlit);
       }
 
-      glBindVertexArray(vao);
+      buffers.bind();
 
       if(style == glShader::STYLE::WIREFRAME) {
         shader.setUniform("lineWidth", lineWidth);
@@ -163,7 +161,7 @@ namespace ogl {
       glEnable(GL_CULL_FACE);
       glCullFace(GL_FRONT);
 
-      glBindVertexArray(vao);
+      buffers.bind();
       glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, nullptr);
       glBindVertexArray(0);
 
@@ -179,10 +177,6 @@ namespace ogl {
     void setInGpu() override {
 
       DEBUG_LOG("glCuboid::setInGpu(" + name + ")");
-
-      // Same-context re-upload: drop the old buffers first (no-op after a
-      // context change, where isInitedInGpu is already false).
-      cleanInGpu();
 
       glm::vec3 corners[8] = {
           {-0.5f,  0.5f,  0.5f},
@@ -230,51 +224,17 @@ namespace ogl {
         }
       }
 
-      glGenVertexArrays(1, &vao);
-      glBindVertexArray(vao);
+      prepareBuffers(3);
 
-      glGenBuffers(4, vbo);
+      // positions, one flat normal per face, indices
+      buffers.attribute(0, 0, 3, positions.data(), positions.size() * sizeof(glm::vec3));
+      buffers.attribute(1, 1, 3, normals.data(),   normals.size()   * sizeof(glm::vec3));
+      buffers.elements(2, indices.data(), indices.size() * sizeof(GLuint));
 
-      // Positions
-      glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-      glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_STATIC_DRAW);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-      glEnableVertexAttribArray(0);
-
-      // Normals (one flat normal per face)
-      glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-      glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-      glEnableVertexAttribArray(1);
-
-      // TexCoords (dummy for now, optional)
-      std::vector<glm::vec2> texcoords(positions.size(), glm::vec2(0.0f));
-      glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-      glBufferData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(glm::vec2), texcoords.data(), GL_STATIC_DRAW);
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-      glEnableVertexAttribArray(2);
-
-      // Indices
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[3]);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
 
       isInitedInGpu = true;
       
-    }
-
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-
-      if(isInitedInGpu) {
-        glDeleteBuffers(4, vbo);
-        glDeleteVertexArrays(1, &vao);
-        isInitedInGpu = false;
-      }
     }
     
   };

@@ -108,7 +108,7 @@ namespace ogl {
     //****************************************************************************/
     void init(const std::string & _type, const std::string & filename, const std::string & directory){
       
-      // Generate texture ID and load texture data
+      // Load the image from disk; the GL texture is created in setInGpu()
       
       name = filename;
       
@@ -121,7 +121,7 @@ namespace ogl {
         abort();
       }
             
-      image = std::vector<unsigned char>(tmpImage, tmpImage + (width*height*3));
+      image = std::vector<unsigned char>(tmpImage, tmpImage + ((size_t)width * (size_t)height * 3));
 
       SOIL_free_image_data(tmpImage);
       
@@ -249,7 +249,7 @@ namespace ogl {
     //****************************************************************************/
     // getType
     //****************************************************************************/
-    inline std::string getType() const { return type; }
+    inline const std::string & getType() const { return type; }
 
   private:
 
@@ -313,7 +313,16 @@ namespace ogl {
       //****************************************************************************/
       // get()
       //****************************************************************************/
-      static glTexture & get(size_t index) { return textures[index]; }
+      static glTexture & get(size_t index) {
+
+        if(index >= textures.size()) {
+          fprintf(stderr, "ERROR [glTextures]: texture index %zu out of range (%zu textures)\n", index, textures.size());
+          abort();
+        }
+
+        return textures[index];
+
+      }
     
   };
 

@@ -56,7 +56,7 @@ namespace ogl {
   public:
     
     //****************************************************************************//
-    // loadColors()
+    // loadPalette()
     //****************************************************************************//
     // https://htmlcolorcodes.com/color-names/
     static void loadPalette() {
@@ -313,7 +313,8 @@ namespace ogl {
       
       lowered.reserve(value.size());
       
-      for (unsigned char ch : value) {
+      for (char c : value) {
+        unsigned char ch = (unsigned char) c;
         lowered.push_back(static_cast<char>(std::tolower(ch)));
       }
       
@@ -324,7 +325,6 @@ namespace ogl {
   public:
     
     // https://htmlcolorcodes.com/color-names/
-    
     constexpr static const glm::vec4 aliceblue = glm::vec4(0.941f, 0.973f, 1.000f, 1.000f);
     constexpr static const glm::vec4 antiquewhite = glm::vec4(0.980f, 0.922f, 0.843f, 1.000f);
     constexpr static const glm::vec4 aqua = glm::vec4(0.000f, 1.000f, 1.000f, 1.000f);
@@ -479,14 +479,13 @@ namespace ogl {
 
   //****************************************************************************/
   // ogl::imgui::color() - pack a glm color (+ alpha) into an ImGui ImU32.
-  // Lives here, next to the rest of the color helpers. Only available when
-  // ImGui is enabled (i.e. OGL_WITHOUT_IMGUI is not defined).
+  // Only available when ImGui is enabled (i.e. OGL_WITHOUT_IMGUI is not defined).
   //****************************************************************************/
   #ifndef OGL_WITHOUT_IMGUI
   namespace imgui {
 
-    inline int color(const glm::vec4 & _color, double alpha) {
-      return ImGui::ColorConvertFloat4ToU32(ImVec4(_color[0], _color[1], _color[2], alpha));
+    inline ImU32 color(const glm::vec4 & _color, double alpha) {
+      return ImGui::ColorConvertFloat4ToU32(ImVec4(_color[0], _color[1], _color[2], (float) alpha));
     }
 
   } /* namespace imgui */

@@ -73,8 +73,6 @@ namespace ogl {
 
   private:
 
-    GLuint vao = 0;
-    GLuint vbo[3] = {0, 0, 0};   // positions, normals, indices
 
     float radius = 1.0f;   // semi-axis along X
     float depth  = 1.0f;   // semi-axis along Z
@@ -107,7 +105,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glSheet()
     //****************************************************************************/
-    ~glSheet() { cleanInGpu(); }
+    ~glSheet() { releaseInGpu(); }
 
     glSheet(glSheet &&) noexcept = default;
     glSheet & operator = (glSheet &&) noexcept = default;
@@ -180,7 +178,7 @@ namespace ogl {
         shader.setUniform("unlit",            unlit);
       }
 
-      glBindVertexArray(vao);
+      buffers.bind();
 
       if(style == glShader::STYLE::WIREFRAME) {
         shader.setUniform("lineWidth", lineWidth);
@@ -230,7 +228,7 @@ namespace ogl {
       glEnable(GL_POLYGON_OFFSET_FILL);
       glPolygonOffset(2.0f, 4.0f);
 
-      glBindVertexArray(vao);
+      buffers.bind();
       glDrawElements(GL_TRIANGLES, indicesNum, GL_UNSIGNED_INT, nullptr);
 
       // vedi sopra: l'offset non deve sopravvivere a questo oggetto
@@ -272,17 +270,13 @@ namespace ogl {
 
       DEBUG_LOG("glSheet::setInGpu(" + name + ")");
 
-      // Same-context re-upload: drop the old buffers first (no-op after a
-      // context change, where isInitedInGpu is already false).
-      cleanInGpu();
-
       {
 
         std::vector<glm::vec3> positions;
         std::vector<glm::vec3> normals;
 
-        positions.reserve((segments + 1) * 2);
-        normals.reserve((segments + 1) * 2);
+        positions.reserve((size_t)(segments + 1) * 2);
+        normals.reserve((size_t)(segments + 1) * 2);
 
         // Two rows of segments+1 vertices, interleaved per column: the vertex
         // 2k is the top one (y = 0) and 2k+1 the bottom one (y = -height).
@@ -319,7 +313,7 @@ namespace ogl {
         // triangles agrees with the inward normal assigned above.
         std::vector<GLuint> indices;
 
-        indices.reserve(segments * 6);
+        indices.reserve((size_t)segments * 6);
 
         for(int k=0; k<segments; ++k) {
 
@@ -335,48 +329,19 @@ namespace ogl {
 
         indicesNum = (GLsizei) indices.size();
 
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        prepareBuffers(3);
 
-        glGenBuffers(3, vbo);
+        buffers.attribute(0, 0, 3, positions.data(), positions.size() * sizeof(glm::vec3));
+        buffers.attribute(1, 1, 3, normals.data(),   normals.size()   * sizeof(glm::vec3));
+        buffers.elements(2, indices.data(), indices.size() * sizeof(GLuint));
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-        glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(glm::vec3), positions.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(0);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-        glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STATIC_DRAW);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(1);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[2]);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        glBuffers::unbind();
 
         glCheckError();
 
       }
 
       isInitedInGpu = true;
-
-    }
-
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-
-      if(isInitedInGpu) {
-
-        glDeleteBuffers(3, vbo);
-        glDeleteVertexArrays(1, &vao);
-
-        isInitedInGpu = false;
-
-      }
 
     }
 

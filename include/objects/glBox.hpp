@@ -40,8 +40,6 @@ namespace ogl {
     
   private:
     
-    GLuint vao = 0;
-    GLuint vbo[2] = {0, 0};
 
     constexpr static const GLfloat vertices[] = {
       -0.5,  0.5,  0.5,
@@ -72,7 +70,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glBox()
     //****************************************************************************/
-    ~glBox() { cleanInGpu(); }
+    ~glBox() { releaseInGpu(); }
 
     glBox(glBox &&) noexcept = default;
     glBox & operator = (glBox &&) noexcept = default;
@@ -122,7 +120,7 @@ namespace ogl {
       shader.setUniform("viewport",    camera.getViewport());
       shader.setUniform("uniformColor", glm::vec4(color, 1.0f));
 
-      glBindVertexArray(vao);
+      buffers.bind();
         
       glDisable(GL_CULL_FACE);
       glDisableVertexAttribArray(1);
@@ -145,7 +143,7 @@ namespace ogl {
       
       float radius = 0.0f;
       
-      for(int i=0; i<8; ++i) {
+      for(size_t i=0; i<8; ++i) {
         glm::vec3 v(vertices[i*3], vertices[i*3 + 1], vertices[i*3 + 2]);
         glm::vec3 worldV = glm::vec3(modelMatrix * glm::vec4(v, 1.0));
         float dist = glm::distance(worldV, center);
@@ -165,10 +163,6 @@ namespace ogl {
 
       DEBUG_LOG("glBox::setInGpu(" + name + ")");
 
-      // Same-context re-upload: drop the old buffers first (no-op after a
-      // context change, where isInitedInGpu is already false).
-      cleanInGpu();
-
       static const GLushort indices[] = {
         0, 1,
         1, 2,
@@ -184,43 +178,15 @@ namespace ogl {
         3, 7
       };
       
-      glGenVertexArrays(1, &vao);
-      glBindVertexArray(vao);
+      prepareBuffers(2);
 
-      glGenBuffers(2, vbo);
+      // vertex positions, and the edge indices (pairs, for GL_LINES)
+      buffers.attribute(0, 0, 3, vertices, sizeof(vertices));
+      buffers.elements(1, indices, sizeof(indices));
 
-      // Vertex positions.
-      glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-      glEnableVertexAttribArray(0);
-
-      // Edge index buffer (pairs of vertex indices for GL_LINES).
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
       
       glCheckError();
-      
-    }
-    
-  private:
-    
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-      
-      if(isInitedInGpu) {
-        
-        glDeleteBuffers(2, vbo);
-        glDeleteVertexArrays(1, &vao);
-        
-        isInitedInGpu = false;
-
-      }
       
     }
     

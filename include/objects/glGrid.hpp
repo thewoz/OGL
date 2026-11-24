@@ -44,14 +44,11 @@ namespace ogl {
     
   private:
         
-    GLuint vao = 0;
-    GLuint vbo = 0;
-    GLuint ibo = 0;
     
-    int rows;
-    int cols;
+    int rows = 0;
+    int cols = 0;
 
-    float cellSize;
+    float cellSize = 1.0f;
 
     std::vector<GLuint> indices;
 
@@ -84,7 +81,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glGrid()
     //****************************************************************************/
-    ~glGrid() { cleanInGpu(); }
+    ~glGrid() { releaseInGpu(); }
 
     glGrid(glGrid &&) noexcept = default;
     glGrid & operator = (glGrid &&) noexcept = default;
@@ -119,7 +116,7 @@ namespace ogl {
     //****************************************************************************/
     // initRange() - griglia sul piano XZ (a y = 0, si sposta con translate())
     // con le linee ai multipli di 'step' dentro [xMin, xMax] x [zMin, zMax] e il
-    // bordo del rettangolo. La init() compila lo shader, quindi va fatta una
+    // bordo del rettangolo. La init() carica lo shader, quindi va fatta una
     // volta sola: per cambiare l'area o il passo dopo si usa setRange()
     //****************************************************************************/
     void initRange(float _xMin, float _xMax, float _zMin, float _zMax, float _step, const glm::vec3 & _color = glm::vec3(0.0)) {
@@ -177,7 +174,7 @@ namespace ogl {
       shader.setUniform("viewport",     camera.getViewport());
       shader.setUniform("uniformColor", glm::vec4(color, 1.0f));
 
-      glBindVertexArray(vao);
+      buffers.bind();
           
       glDisable(GL_CULL_FACE);
       glDisableVertexAttribArray(1);
@@ -199,10 +196,6 @@ namespace ogl {
     void setInGpu() override {
 
       DEBUG_LOG("glGrid::setInGpu(" + name + ")");
-
-      // Same-context re-upload: drop the old buffers first (no-op after a
-      // context change, where isInitedInGpu is already false).
-      cleanInGpu();
 
       indices.clear();
 
@@ -275,44 +268,15 @@ namespace ogl {
 
       }
 
-      glGenVertexArrays(1, &vao);
-      glBindVertexArray(vao);
+      prepareBuffers(2);
 
-      glGenBuffers(1, &vbo);
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+      buffers.attribute(0, 0, 3, vertices.data(), vertices.size() * sizeof(glm::vec3));
+      buffers.elements(1, indices.data(), indices.size() * sizeof(GLuint));
 
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-      glEnableVertexAttribArray(0);
-
-      glGenBuffers(1, &ibo);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
       
       glCheckError();
             
-    }
-    
-  private:
-    
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-      
-      if(isInitedInGpu) {
-        
-        glDeleteBuffers(1, &vbo);
-        glDeleteBuffers(1, &ibo);
-        glDeleteVertexArrays(1, &vao);
-        
-        isInitedInGpu = false;
-
-      }
-      
     }
     
   };

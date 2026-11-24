@@ -56,16 +56,6 @@ namespace ogl {
 
   private:
 
-    GLuint vao = 0;
-    GLuint vbo = 0;
-    GLuint ibo = 0;
-
-    // Allocated GPU capacity in bytes: the buffers are created once and only
-    // re-allocated when the geometry grows; smaller updates reuse them via
-    // glBufferSubData (same pattern as glLine::setInGpu()).
-    size_t vboCapacity = 0;
-    size_t iboCapacity = 0;
-
     glm::vec3 axisColor = glm::vec3(1.0f);
     glm::vec3 majorTickColor = glm::vec3(0.9f);
     glm::vec3 minorTickColor = glm::vec3(0.6f);
@@ -154,7 +144,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glPlot()
     //****************************************************************************/
-    ~glPlot() { cleanInGpu(); }
+    ~glPlot() { releaseInGpu(); }
 
     glPlot(glPlot &&) noexcept = default;
     glPlot & operator = (glPlot &&) noexcept = default;
@@ -404,7 +394,7 @@ namespace ogl {
       shader.setUniform("lineWidth",  lineWidth);
       shader.setUniform("viewport",   camera.getViewport());
 
-      glBindVertexArray(vao);
+      buffers.bind();
 
       glDisable(GL_CULL_FACE);
       glEnableVertexAttribArray(1);
@@ -717,74 +707,17 @@ namespace ogl {
 
       buildGeometry();
 
-      // First upload in this context, or re-upload after a context change: the
-      // old handles belong to the previous context, so start from fresh ones
-      // instead of deleting them (see the context-change note in glObject).
-      if(!isInitedInGpu || vao == 0) {
-        glGenVertexArrays(1, &vao);
-        glGenBuffers(1, &vbo);
-        glGenBuffers(1, &ibo);
-        vboCapacity = 0;
-        iboCapacity = 0;
-      }
+      // positions, colors and indices; the geometry changes with the ranges and
+      // the tick steps, hence the dynamic usage
+      prepareBuffers(3);
 
-      glBindVertexArray(vao);
+      buffers.attribute(0, 0, 3, vertices.data(), vertices.size() * sizeof(glm::vec3), GL_DYNAMIC_DRAW);
+      buffers.attribute(1, 1, 4, colors.data(),   colors.size()   * sizeof(glm::vec4), GL_DYNAMIC_DRAW);
+      buffers.elements(2, indices.data(), indices.size() * sizeof(GLuint), GL_DYNAMIC_DRAW);
 
-      const size_t vertexBytes = vertices.size() * sizeof(glm::vec3);
-      const size_t colorBytes  = colors.size()   * sizeof(glm::vec4);
-      const size_t indexBytes  = indices.size()  * sizeof(GLuint);
-
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      if(vertexBytes + colorBytes > vboCapacity) {
-        glBufferData(GL_ARRAY_BUFFER, vertexBytes + colorBytes, nullptr, GL_DYNAMIC_DRAW);
-        vboCapacity = vertexBytes + colorBytes;
-      }
-      glBufferSubData(GL_ARRAY_BUFFER, 0, vertexBytes, vertices.data());
-      glBufferSubData(GL_ARRAY_BUFFER, vertexBytes, colorBytes, colors.data());
-
-      // The color offset depends on the vertex count, so the attribute
-      // pointers must be re-specified on every upload.
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), nullptr);
-      glEnableVertexAttribArray(0);
-
-      glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::vec4), (void*)vertexBytes);
-      glEnableVertexAttribArray(1);
-
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-      if(indexBytes > iboCapacity) {
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexBytes, nullptr, GL_DYNAMIC_DRAW);
-        iboCapacity = indexBytes;
-      }
-      glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexBytes, indices.data());
-
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
 
       glCheckError();
-
-    }
-
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-
-      if(isInitedInGpu) {
-
-        if(vbo != 0) glDeleteBuffers(1, &vbo);
-        if(ibo != 0) glDeleteBuffers(1, &ibo);
-        if(vao != 0) glDeleteVertexArrays(1, &vao);
-
-        vao = 0;
-        vbo = 0;
-        ibo = 0;
-
-        vboCapacity = 0;
-        iboCapacity = 0;
-
-        isInitedInGpu = false;
-
-      }
 
     }
 
@@ -847,7 +780,7 @@ namespace ogl {
     }
 
     //****************************************************************************/
-    // axisOriginByAxis()
+    // tickSign()
     //****************************************************************************/
     // Il segno con cui i tick "interni" si allontanano dalla retta dell'asse:
     // verso il centro del range dell'asse perpendicolare. I tick di X e di Z sono

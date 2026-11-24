@@ -39,20 +39,20 @@ namespace ogl {
   // Class glPrint2D
   //****************************************************************************/
   // Draws text in screen space. The glyph atlas is shared through glFont, so
-  // this object only owns the small dynamic quad buffer (vao/vbo). 'color' is
-  // inherited from glObject.
+  // this object only owns the dynamic buffer its string is uploaded into.
+  // 'color' is inherited from glObject.
   //****************************************************************************/
   class glPrint2D : public glObject {
 
   private:
 
-    GLuint vao = 0;
-    GLuint vbo = 0;
 
-    float x;
-    float y;
+    // initialized: an object built with the name-only constructor can be
+    // rendered without an init(), and must not read garbage
+    float x = 0.0f;
+    float y = 0.0f;
 
-    float textScale;
+    float textScale = 1.0f;
 
     std::string text;
 
@@ -82,7 +82,7 @@ namespace ogl {
     //****************************************************************************/
     // ~glPrint2D()
     //****************************************************************************/
-    ~glPrint2D() { cleanInGpu(); }
+    ~glPrint2D() { releaseInGpu(); }
 
     glPrint2D(glPrint2D &&) noexcept = default;
     glPrint2D & operator = (glPrint2D &&) noexcept = default;
@@ -193,67 +193,13 @@ namespace ogl {
       
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                   
-      glBindVertexArray(vao);
+      buffers.bind();
 
-      glActiveTexture(GL_TEXTURE0);
-      
       glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       
-      float tmpX = x;
-      float tmpY = y;
-
-      // iterate through all characters
-      for(std::string::const_iterator c = text.begin(); c != text.end(); c++) {
-        
-        if(*c == '\n') {
-          const glFont::Character_t * chA = glFont::instance().get('a');
-          float lineHeight = chA ? chA->Size.y * textScale : 0.0f;
-          tmpX  = x;
-          tmpY -= 2 * lineHeight;
-          continue;
-        }
-
-        // skip characters that were not loaded (e.g. non-ASCII)
-        const glFont::Character_t * chp = glFont::instance().get(*c);
-        if(chp == nullptr) continue;
-        const glFont::Character_t & ch = *chp;
-                
-        float xpos = tmpX + ch.Bearing.x * textScale;
-        float ypos = tmpY - (ch.Size.y - ch.Bearing.y) * textScale;
-        
-        float w = ch.Size.x * textScale;
-        float h = ch.Size.y * textScale;
-        
-        // update VBO for each character
-        float vertices[6][4] = {
-          { xpos,     ypos + h,   0.0f, 0.0f },
-          { xpos,     ypos,       0.0f, 1.0f },
-          { xpos + w, ypos,       1.0f, 1.0f },
-          
-          { xpos,     ypos + h,   0.0f, 0.0f },
-          { xpos + w, ypos,       1.0f, 1.0f },
-          { xpos + w, ypos + h,   1.0f, 0.0f }
-        };
-        
-        // render glyph texture over quad
-        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        
-        // update content of VBO memory
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
-                
-        // render quad
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        
-        // now advance cursors for next glyph (note that advance is number of 1/64 pixels
-        tmpX += (ch.Advance >> 6) * textScale; // bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
-        
-        glCheckError();
-        
-      }
+      // the whole string in one draw call, see glFont::draw()
+      glFont::instance().draw(buffers.buffer(0), text, x, y, textScale);
       
-      glBindTexture(GL_TEXTURE_2D, 0);
-
       glBindVertexArray(0);
 
       // Don't leak blending to whatever is drawn next.
@@ -274,40 +220,15 @@ namespace ogl {
       glFont::instance().load();
 
       // configure VAO/VBO for texture quads
-      glGenVertexArrays(1, &vao);
-      glBindVertexArray(vao);
+      prepareBuffers(1);
 
-      glGenBuffers(1, &vbo);
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      
-      glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-      glEnableVertexAttribArray(0);
+      // one vec4 per vertex, <position, texture coordinate>: filled at every draw
+      buffers.attribute(0, 0, 4, nullptr, 0, GL_DYNAMIC_DRAW);
 
-      glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-            
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
-      glBindVertexArray(0);
+      glBuffers::unbind();
       
       glCheckError();
       
-    }
-    
-    //****************************************************************************/
-    // cleanInGpu()
-    //****************************************************************************/
-    void cleanInGpu() override {
-      
-      if(isInitedInGpu) {
-
-        // Only the per-instance quad buffer is freed here; the glyph textures
-        // belong to the shared glFont atlas and must outlive this object.
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-
-        isInitedInGpu = false;
-
-      }
-
     }
 
 
